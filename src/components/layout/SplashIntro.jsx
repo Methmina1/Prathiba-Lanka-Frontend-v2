@@ -20,8 +20,8 @@ import { useEffect, useState } from 'react'
 let introStarted = false
 let timelineStarted = false
 
-const FLY_MS = 1100
-const HOLD_MS = 1750 // painting finishes about here, then the lockup flies home
+const FLY_MS = 1450
+const HOLD_MS = 2200 // painting finishes about here, then the lockup flies home
 const TAIL_MS = 200
 const FONT_WAIT_MS = 800 // never hang the intro waiting for a webfont
 const MAX_SCALE = 2.4

@@ -273,7 +273,7 @@
   inset: 0;
   background: rgba(6, 9, 8, 0.72);
   backdrop-filter: blur(18px) saturate(115%);
-  transition: opacity 0.9s var(--ease-out-soft) 0.4s, backdrop-filter 0.9s var(--ease-out-soft) 0.4s;
+  transition: opacity 1.1s var(--ease-out-soft) 0.5s, backdrop-filter 1.1s var(--ease-out-soft) 0.5s;
 }
 
 .splash.is-flying .splash__backdrop {
@@ -359,15 +359,15 @@
 }
 
 .splash__brand.is-painting .brand__text strong {
-  animation: paint-on 1.2s var(--ease-out-soft) 0.15s forwards;
+  animation: paint-on 1.55s var(--ease-out-soft) 0.2s forwards;
 }
 
 .splash__brand.is-painting .brand__text::after {
-  animation: brush-streak 1.2s var(--ease-out-soft) 0.15s forwards;
+  animation: brush-streak 1.55s var(--ease-out-soft) 0.2s forwards;
 }
 
 .splash__brand.is-painting .brand__text small {
-  animation: fade-up 0.7s var(--ease-out-soft) 1.05s forwards;
+  animation: fade-up 0.85s var(--ease-out-soft) 1.35s forwards;
 }
 
 @keyframes paint-on {
