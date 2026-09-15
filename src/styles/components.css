@@ -128,13 +128,13 @@
   flex: 0 0 auto;
 }
 
-/* The PNG is already background-free, so the mark sits directly on the bar. It is sized generously
- * and lifts off the ink with a faint emerald glow rather than a plate. */
+/* logo-mark.png is cropped to its artwork (the original had ~47% transparent padding), so the mark
+ * now fills its box. It sits directly on the bar with a faint emerald glow instead of a plate. */
 .brand__mark {
-  width: 56px;
-  height: 56px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
-  filter: drop-shadow(0 0 16px rgba(52, 164, 114, 0.35));
+  filter: drop-shadow(0 0 18px rgba(52, 164, 114, 0.35));
   transition: opacity var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
 }
 
@@ -1415,8 +1415,8 @@
 /* Large phone */
 @media (max-width: 780px) {
   .brand__mark {
-    width: 52px;
-    height: 52px;
+    width: 58px;
+    height: 58px;
   }
   .topbar__inner {
     gap: var(--space-4);
@@ -1471,8 +1471,8 @@
 /* Small phone */
 @media (max-width: 560px) {
   .brand__mark {
-    width: 46px;
-    height: 46px;
+    width: 52px;
+    height: 52px;
   }
   .brand__text strong {
     font-size: 1.2rem;

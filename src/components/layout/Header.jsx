@@ -67,7 +67,7 @@ export default function Header() {
         <div className="navbar">
         <div className="container navbar__inner">
           <Link className="brand" to="/" aria-label="PrathibaLanka home">
-            <img src="/logo.png" alt="" className="brand__mark" />
+            <img src="/logo-mark.png" alt="" className="brand__mark" />
             <span className="brand__text">
               <strong>PrathibaLanka</strong>
               <small>Journeys through the emerald isle</small>

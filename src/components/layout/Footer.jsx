@@ -22,7 +22,7 @@ export default function Footer() {
       <div className="container footer__grid">
         <div className="footer__brand">
           <Link className="brand brand--footer" to="/">
-            <img src="/logo.png" alt="" className="brand__mark" />
+            <img src="/logo-mark.png" alt="" className="brand__mark" />
             <span className="brand__text">
               <strong>PrathibaLanka</strong>
               <small>Sri Lanka, arranged with care</small>

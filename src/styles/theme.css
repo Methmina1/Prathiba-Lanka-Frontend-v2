@@ -112,20 +112,20 @@
   --dur: 0.45s;
   --dur-slow: 0.9s;
 
-  --header-height: 88px;
+  --header-height: 100px;
   --container: 1240px;
   color-scheme: dark;
 }
 
 @media (max-width: 900px) {
   :root {
-    --header-height: 76px;
+    --header-height: 88px;
   }
 }
 
 @media (max-width: 560px) {
   :root {
-    --header-height: 68px;
+    --header-height: 78px;
     --container: 100%;
   }
 }

@@ -19,7 +19,7 @@ const HOLD_MS = 420
 const TAIL_MS = 250
 
 /** Centred size: generous on a desktop, never wider than the phone it is drawn on. */
-const CENTRED_MAX_PX = 380
+const CENTRED_MAX_PX = 420
 const CENTRED_VIEWPORT_RATIO = 0.58
 
 export default function SplashIntro() {
@@ -73,7 +73,7 @@ export default function SplashIntro() {
       <div className="splash__backdrop" />
       <img
         className="splash__logo"
-        src="/logo.png"
+        src="/logo-mark.png"
         alt=""
         style={{
           top: `${geometry.top}px`,
