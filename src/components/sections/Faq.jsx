@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { faqs } from '../../data/fallback'
+import Reveal from '../ui/Reveal'
 import { ChevronDown } from '../ui/Icons'
 
 export default function Faq() {
@@ -8,16 +9,16 @@ export default function Faq() {
   return (
     <section className="section" id="faq">
       <div className="container faq">
-        <div className="faq__intro">
+        <Reveal className="faq__intro">
           <span className="eyebrow">Common questions</span>
           <h2>Before you write to us</h2>
           <p className="lede">
-            The four things people ask most often. Anything else, the enquiry form above reaches a
-            person, not a queue.
+            The four things people ask most often. Anything else, the enquiry form reaches a person,
+            not a queue.
           </p>
-        </div>
+        </Reveal>
 
-        <div className="faq__list">
+        <Reveal className="faq__list" delay={120}>
           {faqs.map((item, index) => {
             const isOpen = open === index
             return (
@@ -35,7 +36,7 @@ export default function Faq() {
               </div>
             )
           })}
-        </div>
+        </Reveal>
       </div>
     </section>
   )

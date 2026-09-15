@@ -1,6 +1,7 @@
 import { api } from '../../api/client'
 import { fallbackReviews } from '../../data/fallback'
 import { useApi } from '../../hooks/useApi'
+import Reveal from '../ui/Reveal'
 import { Star } from '../ui/Icons'
 
 export default function Reviews() {
@@ -21,8 +22,9 @@ export default function Reviews() {
         </div>
 
         <div className="grid grid--3">
-          {reviews.slice(0, 3).map((review) => (
-            <figure className="card review-card" key={review.reviewId}>
+          {reviews.slice(0, 3).map((review, index) => (
+            <Reveal key={review.reviewId} delay={index * 110}>
+              <figure className="card review-card">
               <div className="review-card__stars" aria-label={`${review.rating} out of 5`}>
                 {[1, 2, 3, 4, 5].map((value) => (
                   <Star key={value} filled={value <= review.rating} width={16} height={16} />
@@ -33,7 +35,8 @@ export default function Reviews() {
                 <strong>{review.customerName}</strong>
                 {review.packageTitle && <span>{review.packageTitle}</span>}
               </figcaption>
-            </figure>
+              </figure>
+            </Reveal>
           ))}
         </div>
       </div>

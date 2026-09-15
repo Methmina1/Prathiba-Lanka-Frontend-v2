@@ -1,6 +1,7 @@
 import { api } from '../../api/client'
 import { fallbackJournal } from '../../data/fallback'
 import { useApi } from '../../hooks/useApi'
+import Reveal from '../ui/Reveal'
 import Scenery from '../ui/Scenery'
 import { ArrowRight } from '../ui/Icons'
 
@@ -29,7 +30,8 @@ export default function Journal() {
 
         <div className="grid grid--3">
           {posts.slice(0, 3).map((post, index) => (
-            <article className="card journal-card" key={post.journalId}>
+            <Reveal key={post.journalId} delay={index * 110}>
+              <article className="card journal-card">
               <div className="journal-card__media">
                 <Scenery variant={post.scenery ?? FALLBACK_SCENERY[index % 6]} ratio="16 / 10" />
               </div>
@@ -43,6 +45,7 @@ export default function Journal() {
                 </a>
               </div>
             </article>
+            </Reveal>
           ))}
         </div>
 
