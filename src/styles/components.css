@@ -296,9 +296,15 @@
 }
 
 .splash__brand .brand__text {
+  /* the compensation for the enlarged mark is a transform, not a margin: a margin would narrow the
+   * column the tagline lives in and make it wrap. */
+  transform: translateX(var(--mark-shift, 0px));
   transition: none;
-  /* keeps the visual gap to the enlarged mark equal to the navbar's */
-  margin-left: var(--mark-shift, 0px);
+}
+
+.splash.is-flying .splash__brand .brand__text {
+  transform: none;
+  transition: transform var(--fly-ms, 1450ms) cubic-bezier(0.16, 0.84, 0.44, 1);
 }
 
 /*
@@ -356,8 +362,13 @@
   pointer-events: none;
 }
 
+/* Smaller and un-wrapped while loading: the tagline has to share a column with the name, and the
+ * navbar has no room for it at all on phones. */
 .splash__brand .brand__text small {
   opacity: 0;
+  white-space: nowrap;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
 }
 
 .splash__brand.is-painting .brand__text strong {
@@ -1611,6 +1622,8 @@ html.intro-landing .site-header .brand__text {
   /* the tagline is hidden in the navbar on phones, but the intro still shows the full lockup */
   .splash__brand .brand__text small {
     display: block;
+    font-size: 0.42rem;
+    letter-spacing: 0.06em;
   }
 }
 

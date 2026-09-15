@@ -1,16 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 /**
  * Page-load intro.
  *
  * The navbar's own brand lockup (logo + name + tagline) is drawn over the page on its way in: the
- * page sits blurred behind a frosted overlay while the lockup appears enlarged from the left, the
- * name is painted on in white and the tagline settles in beneath it, and then the whole thing
- * scales back into its exact place in the navbar.
+ * page sits blurred behind a frosted overlay while the lockup appears enlarged in the middle of the
+ * screen, the name is painted on in white and the tagline settles in beneath it, and then the whole
+ * thing scales back into its exact place in the navbar.
  *
- * The clone reuses the .brand markup, so it is pixel-identical to the navbar's - the hand-off is a
- * single frame (see .intro-landing). It is positioned over the navbar's rect and transformed back
- * out to the enlarged, vertically-centred start, which is a FLIP in both axes.
+ * The clone reuses the .brand markup, so it is identical to the navbar's - the hand-off is a single
+ * frame (see .intro-landing). It is anchored at the navbar's own position and transformed out to
+ * the middle of the screen, so it lands pixel-perfect however it is sized.
  *
  * Plays once per page load (never on client-side route changes) and is skipped for reduced-motion
  * users or when the page opens already scrolled - the brand is hidden once you scroll, so there
@@ -30,10 +30,25 @@ const WIDTH_RATIO_NARROW = 0.92 // phones get a little more, so the mark can sti
 const NARROW_PX = 560
 const MARK_BUMP = 1.5 // how much larger the logo reads while loading, versus the navbar
 
+/** Centre and scale on the clone's own box, so the visible lockup is what ends up centred. */
+function computePlacement(node, anchor) {
+  const width = node.offsetWidth
+  const height = node.offsetHeight
+  const ratio = window.innerWidth < NARROW_PX ? WIDTH_RATIO_NARROW : WIDTH_RATIO
+
+  return {
+    scale: Math.min(MAX_SCALE, (window.innerWidth * ratio) / (width + anchor.markExtra)),
+    dx: window.innerWidth / 2 - (anchor.left + width / 2),
+    dy: window.innerHeight / 2 - (anchor.top + height / 2),
+  }
+}
+
 export default function SplashIntro() {
   const [phase, setPhase] = useState('idle')
-  const [geometry, setGeometry] = useState(null)
+  const [anchor, setAnchor] = useState(null) // where the navbar keeps its brand
+  const [placement, setPlacement] = useState(null) // how the clone is centred and scaled
   const [painting, setPainting] = useState(false)
+  const brandRef = useRef(null)
 
   useEffect(() => {
     if (introStarted) return
@@ -49,25 +64,12 @@ export default function SplashIntro() {
     }
 
     const rect = brand.getBoundingClientRect()
-    // the mark is scaled up on its own, so it sticks out past its box: account for that extra
-    // width when deciding how far the lockup may grow, and push the text clear of it
+    // the mark is scaled up on its own, so it sticks out past its box; the text is shifted clear
+    // of it by the same amount so the visual gap matches the navbar's
     const markWidth = mark?.getBoundingClientRect().width ?? 0
     const extra = markWidth * (MARK_BUMP - 1)
-    const ratio = window.innerWidth < NARROW_PX ? WIDTH_RATIO_NARROW : WIDTH_RATIO
 
-    setGeometry({
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-      // The lockup is drawn at the navbar's rect and transformed back out to the middle of the
-      // screen, scaled up, never taking more than a sensible share of the viewport width.
-      scale: Math.min(MAX_SCALE, (window.innerWidth * ratio) / (rect.width + extra)),
-      dx: window.innerWidth / 2 - (rect.left + rect.width / 2),
-      dy: window.innerHeight / 2 - (rect.top + rect.height / 2),
-      markExtra: extra / 2,
-    })
-
+    setAnchor({ top: rect.top, left: rect.left, markExtra: extra / 2 })
     document.documentElement.classList.add('intro-playing')
     setPhase('centered')
 
@@ -75,13 +77,30 @@ export default function SplashIntro() {
     // timers must survive that, since the overlay only goes away once the flight has finished.
   }, [])
 
-  // Start painting once the lockup is on screen and the webfont has settled.
+  /*
+   * Centre and scale on the clone's OWN measured box, not the navbar's: the clone can be wider than
+   * the navbar lockup (the tagline shares a column with the name), and centring the navbar's rect
+   * would leave the visible lockup off-centre.
+   */
+  useLayoutEffect(() => {
+    if (!anchor || placement) return
+    const node = brandRef.current
+    if (!node) return
+    setPlacement(computePlacement(node, anchor))
+  }, [anchor, placement])
+
+  // Start painting once the lockup is in place and the webfont has settled.
   useEffect(() => {
-    if (!geometry) return undefined
+    if (!placement) return undefined
 
     const start = () => {
       if (timelineStarted) return
       timelineStarted = true
+
+      // the font may have swapped since the first measurement, which changes the lockup's width
+      const node = brandRef.current
+      if (node) setPlacement(computePlacement(node, anchor))
+
       setPainting(true)
 
       window.setTimeout(() => setPhase('flying'), HOLD_MS)
@@ -101,11 +120,12 @@ export default function SplashIntro() {
     }) ?? start()
 
     return () => window.clearTimeout(fallback)
-  }, [geometry])
+  }, [placement])
 
-  if (phase === 'done' || !geometry) return null
+  if (phase === 'done' || !anchor) return null
 
   const flying = phase === 'flying'
+  const ready = Boolean(placement)
 
   return (
     <div
@@ -114,22 +134,25 @@ export default function SplashIntro() {
       style={{
         '--fly-ms': `${FLY_MS}ms`,
         '--mark-bump': MARK_BUMP,
-        '--mark-shift': `${geometry.markExtra}px`,
+        '--mark-shift': `${anchor.markExtra}px`,
       }}
     >
       <div className="splash__backdrop" />
 
       <div
+        ref={brandRef}
         className={`brand splash__brand ${painting ? 'is-painting' : ''}`}
         style={{
-          top: `${geometry.top}px`,
-          left: `${geometry.left}px`,
-          width: `${geometry.width}px`,
-          height: `${geometry.height}px`,
-          transform: flying
-            ? 'none'
-            : `translate(${geometry.dx}px, ${geometry.dy}px) scale(${geometry.scale})`,
-          transition: flying ? `transform ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1)` : 'none',
+          top: `${anchor.top}px`,
+          left: `${anchor.left}px`,
+          visibility: ready ? 'visible' : 'hidden',
+          transform:
+            flying || !ready
+              ? 'none'
+              : `translate(${placement.dx}px, ${placement.dy}px) scale(${placement.scale})`,
+          transition: flying
+            ? `transform ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1)`
+            : 'none',
         }}
       >
         <img src="/logo-mark.png" alt="" className="brand__mark" />
