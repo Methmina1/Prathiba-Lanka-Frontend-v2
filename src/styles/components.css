@@ -1511,6 +1511,11 @@ html.intro-landing .site-header .brand__text {
   .nav {
     display: none;
   }
+  /* The hidden nav takes its margin-left:auto with it, so the actions claim that space instead -
+   * the menu button and CTA stay pinned to the right edge at every width. */
+  .navbar__actions {
+    margin-left: auto;
+  }
   .navbar__toggle {
     display: inline-flex;
   }
