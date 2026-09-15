@@ -128,15 +128,13 @@
   flex: 0 0 auto;
 }
 
-/* The mark is dark green, so it sits on a small ivory chip with a gold ring. */
+/* The PNG is already background-free, so the mark sits directly on the bar. A faint emerald glow
+ * lifts the dark-green artwork off the ink without putting a plate behind it. */
 .brand__mark {
   width: 46px;
   height: 46px;
-  padding: 6px;
-  border-radius: 50%;
-  background: var(--surface-chip);
-  box-shadow: 0 0 0 1px var(--border-gold), 0 6px 18px rgba(0, 0, 0, 0.45);
   object-fit: contain;
+  filter: drop-shadow(0 0 14px rgba(52, 164, 114, 0.28));
   transition: opacity var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
 }
 
@@ -302,8 +300,8 @@
 
 /* ================================================================ page-load intro
  * The page sits blurred behind a frosted overlay; the logo appears centred and flies into the
- * navbar (see SplashIntro.jsx). The splash logo matches .brand__mark geometry exactly - same size,
- * padding and chip - so the hand-off is invisible.
+ * navbar (see SplashIntro.jsx). The splash logo matches .brand__mark geometry exactly - same box,
+ * same artwork, no plate - so the hand-off is invisible.
  */
 
 .splash {
@@ -328,11 +326,8 @@
 
 .splash__logo {
   position: absolute;
-  padding: 6px;
-  border-radius: 50%;
-  background: var(--surface-chip);
-  box-shadow: 0 0 0 1px var(--border-gold), 0 24px 60px rgba(0, 0, 0, 0.55);
   object-fit: contain;
+  filter: drop-shadow(0 0 40px rgba(52, 164, 114, 0.4));
 }
 
 /* While the intro runs the navbar mark stays hidden, so only one logo is ever on screen. */
@@ -1474,7 +1469,6 @@
   .brand__mark {
     width: 40px;
     height: 40px;
-    padding: 5px;
   }
   .brand__text strong {
     font-size: 1.15rem;
