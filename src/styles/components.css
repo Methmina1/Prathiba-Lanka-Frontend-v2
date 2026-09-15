@@ -330,6 +330,60 @@
   filter: drop-shadow(0 0 60px rgba(52, 164, 114, 0.45));
 }
 
+/*
+ * The name, painted under the logo. The glyph outlines are stroked with a broad white "brush" that
+ * draws itself (stroke-dashoffset over a length measured at runtime), then the fill settles in
+ * behind it, so the word ends up as solid white letters.
+ */
+.splash__word {
+  position: absolute;
+  left: 50%;
+  width: min(620px, 78vw);
+  height: auto;
+  overflow: visible;
+  transform: translateX(-50%);
+  transition: opacity 0.3s var(--ease-out-soft);
+}
+
+.splash.is-flying .splash__word {
+  opacity: 0;
+}
+
+.splash__word-text {
+  font-family: var(--font-display);
+  font-size: 84px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  fill: transparent;
+  stroke: #fff;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: var(--word-length, 4000);
+  stroke-dashoffset: var(--word-length, 4000);
+  paint-order: stroke fill;
+  opacity: 0;
+  filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.22));
+}
+
+.splash__word-text.is-painting {
+  opacity: 1;
+  animation: brush-draw 0.95s var(--ease-out-soft) 0.18s forwards,
+    brush-fill 0.8s ease 0.95s forwards;
+}
+
+@keyframes brush-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes brush-fill {
+  to {
+    fill: #fff;
+  }
+}
+
 /* While the intro runs the navbar mark stays hidden, so only one logo is ever on screen. */
 .intro-playing .brand__mark,
 .intro-playing .brand__text {
