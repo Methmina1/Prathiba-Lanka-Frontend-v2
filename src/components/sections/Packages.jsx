@@ -1,7 +1,9 @@
+import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
 import { fallbackPackages } from '../../data/fallback'
 import { useApi } from '../../hooks/useApi'
 import PackageCard from '../ui/PackageCard'
+import Reveal from '../ui/Reveal'
 
 export default function Packages() {
   const { data: packages, status } = useApi(() => api.getPackages(), fallbackPackages)
@@ -9,14 +11,14 @@ export default function Packages() {
   return (
     <section className="section section--muted" id="journeys">
       <div className="container">
-        <div className="section-head section-head--center">
+        <Reveal className="section-head section-head--center">
           <span className="eyebrow">Curated journeys</span>
           <h2>Signature journeys</h2>
           <p className="lede">
             Starting points, not fixed departures. Every itinerary below can be stretched, shortened
             or rebuilt around your dates.
           </p>
-        </div>
+        </Reveal>
 
         {status === 'fallback' && (
           <p className="notice">
@@ -34,14 +36,16 @@ export default function Packages() {
 
         <div className="grid grid--4">
           {packages.map((pkg, index) => (
-            <PackageCard key={pkg.packageId} pkg={pkg} index={index} />
+            <Reveal key={pkg.packageId} delay={index * 110} variant="reveal--zoom">
+              <PackageCard pkg={pkg} index={index} />
+            </Reveal>
           ))}
         </div>
 
         <div className="section-cta">
-          <a className="btn btn--ghost" href="#plan">
+          <Link className="btn btn--ghost" to="/plan">
             Request a custom itinerary
-          </a>
+          </Link>
         </div>
       </div>
     </section>
