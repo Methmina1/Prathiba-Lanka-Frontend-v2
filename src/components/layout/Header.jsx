@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronDown, Close, Mail, Menu, Phone } from '../ui/Icons'
+import { ChevronDown, Close, Menu } from '../ui/Icons'
 
 const NAV = [
   { label: 'Home', to: '/' },
@@ -47,22 +47,6 @@ export default function Header() {
 
   return (
     <>
-      <div className="topbar">
-        <div className="container topbar__inner">
-          <a className="topbar__item" href="tel:+94770000000">
-            <Phone width={15} height={15} />
-            <span>+94 77 000 0000</span>
-          </a>
-          <a className="topbar__item" href="mailto:hello@prathibalanka.lk">
-            <Mail width={15} height={15} />
-            <span>hello@prathibalanka.lk</span>
-          </a>
-          <Link className="topbar__track" to="/plan#track">
-            Track your booking with a PIN
-          </Link>
-        </div>
-      </div>
-
       <header className={`site-header ${atTop ? 'is-top' : 'is-scrolled'}`}>
         <div className="navbar">
         <div className="container navbar__inner">

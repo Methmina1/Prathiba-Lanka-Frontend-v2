@@ -1,66 +1,59 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
- * Page-load intro: the page sits blurred behind a frosted overlay while the logo appears in the
- * middle of the screen, the name is painted underneath it in broad white strokes, and then the logo
- * flies into its place in the navbar and the blur clears.
+ * Page-load intro.
  *
- * The flight is a FLIP: the logo is positioned exactly where the navbar logo will be, transformed
- * back to the centre of the viewport and released, so it lands pixel-perfect. The word is drawn by
- * animating stroke-dashoffset over the glyph outlines (measured with getTotalLength, so the timing
- * is right whatever font ends up being used), then the fill fades in behind the stroke.
+ * The navbar's own brand lockup (logo + name + tagline) is drawn over the page on its way in: the
+ * page sits blurred behind a frosted overlay while the lockup appears enlarged from the left, the
+ * name is painted on in white and the tagline settles in beneath it, and then the whole thing
+ * scales back into its exact place in the navbar.
  *
- * Plays once per page load (never on client-side route changes) and is skipped entirely for
- * reduced-motion users or when the page opens already scrolled - the navbar logo is hidden once
- * you scroll, so there would be nothing to fly into.
+ * The clone reuses the .brand markup, so it is pixel-identical to the navbar's - the hand-off is a
+ * single frame (see .intro-landing). It is positioned over the navbar's rect and transformed back
+ * out to the enlarged, vertically-centred start, which is a FLIP in both axes.
+ *
+ * Plays once per page load (never on client-side route changes) and is skipped for reduced-motion
+ * users or when the page opens already scrolled - the brand is hidden once you scroll, so there
+ * would be nothing to fly into.
  */
 
 let introStarted = false
 let timelineStarted = false
 
 const FLY_MS = 1100
-const WORD_HOLD_MS = 1750 // the logo and the painted word sit together this long, then it flies
+const HOLD_MS = 1750 // painting finishes about here, then the lockup flies home
 const TAIL_MS = 200
-const FONT_WAIT_MS = 700 // never hang the intro waiting for a webfont
-const FALLBACK_PATH_LENGTH = 4000
-
-/** Centred size: generous on a desktop, never wider than the phone it is drawn on. */
-const CENTRED_MAX_PX = 420
-const CENTRED_VIEWPORT_RATIO = 0.58
+const FONT_WAIT_MS = 800 // never hang the intro waiting for a webfont
+const MAX_SCALE = 2.4
+const WIDTH_RATIO = 0.86 // the enlarged lockup never takes more than this much of the width
 
 export default function SplashIntro() {
   const [phase, setPhase] = useState('idle')
   const [geometry, setGeometry] = useState(null)
-  const [wordLength, setWordLength] = useState(FALLBACK_PATH_LENGTH)
   const [painting, setPainting] = useState(false)
-  const textRef = useRef(null)
 
   useEffect(() => {
     if (introStarted) return
     introStarted = true
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    const mark = document.querySelector('.brand__mark')
+    const brand = document.querySelector('.site-header .brand')
 
-    if (reduced || !mark || window.scrollY > 4) {
+    if (reduced || !brand || window.scrollY > 4) {
       setPhase('done')
       return
     }
 
-    const rect = mark.getBoundingClientRect()
-    const viewport = Math.min(window.innerWidth, window.innerHeight)
-    const centredSize = Math.min(CENTRED_MAX_PX, viewport * CENTRED_VIEWPORT_RATIO)
+    const rect = brand.getBoundingClientRect()
 
     setGeometry({
       top: rect.top,
       left: rect.left,
       width: rect.width,
       height: rect.height,
-      scale: Math.max(3, centredSize / rect.width),
-      dx: window.innerWidth / 2 - (rect.left + rect.width / 2),
+      // grow from the left edge, up to a sensible share of the viewport
+      scale: Math.min(MAX_SCALE, (window.innerWidth * WIDTH_RATIO) / rect.width),
       dy: window.innerHeight / 2 - (rect.top + rect.height / 2),
-      // the word sits just under the centred logo
-      wordTop: window.innerHeight / 2 + centredSize / 2 + 8,
     })
 
     document.documentElement.classList.add('intro-playing')
@@ -70,23 +63,23 @@ export default function SplashIntro() {
     // timers must survive that, since the overlay only goes away once the flight has finished.
   }, [])
 
-  // Kick off the painting and the flight once the logo geometry exists and the font is ready.
+  // Start painting once the lockup is on screen and the webfont has settled.
   useEffect(() => {
     if (!geometry) return undefined
 
     const start = () => {
       if (timelineStarted) return
       timelineStarted = true
-
-      const length = textRef.current?.getTotalLength?.()
-      if (length) setWordLength(length)
       setPainting(true)
 
-      window.setTimeout(() => setPhase('flying'), WORD_HOLD_MS)
+      window.setTimeout(() => setPhase('flying'), HOLD_MS)
       window.setTimeout(() => {
-        document.documentElement.classList.remove('intro-playing')
+        const root = document.documentElement
+        root.classList.add('intro-landing')
+        root.classList.remove('intro-playing')
         setPhase('done')
-      }, WORD_HOLD_MS + FLY_MS + TAIL_MS)
+        window.requestAnimationFrame(() => root.classList.remove('intro-landing'))
+      }, HOLD_MS + FLY_MS + TAIL_MS)
     }
 
     const fallback = window.setTimeout(start, FONT_WAIT_MS)
@@ -106,39 +99,23 @@ export default function SplashIntro() {
     <div className={`splash ${flying ? 'is-flying' : ''}`} aria-hidden="true">
       <div className="splash__backdrop" />
 
-      <img
-        className="splash__logo"
-        src="/logo-mark.png"
-        alt=""
+      <div
+        className={`brand splash__brand ${painting ? 'is-painting' : ''}`}
         style={{
           top: `${geometry.top}px`,
           left: `${geometry.left}px`,
           width: `${geometry.width}px`,
           height: `${geometry.height}px`,
-          transform: flying
-            ? 'none'
-            : `translate(${geometry.dx}px, ${geometry.dy}px) scale(${geometry.scale})`,
+          transform: flying ? 'none' : `translateY(${geometry.dy}px) scale(${geometry.scale})`,
           transition: flying ? `transform ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1)` : 'none',
         }}
-      />
-
-      <svg
-        className="splash__word"
-        viewBox="0 0 620 150"
-        style={{ top: `${geometry.wordTop}px` }}
-        focusable="false"
       >
-        <text
-          ref={textRef}
-          x="310"
-          y="100"
-          textAnchor="middle"
-          className={`splash__word-text ${painting ? 'is-painting' : ''}`}
-          style={{ '--word-length': wordLength }}
-        >
-          PrathibaLanka
-        </text>
-      </svg>
+        <img src="/logo-mark.png" alt="" className="brand__mark" />
+        <span className="brand__text">
+          <strong>PrathibaLanka</strong>
+          <small>Journeys through the emerald isle</small>
+        </span>
+      </div>
     </div>
   )
 }

@@ -31,57 +31,14 @@
 }
 
 /* ================================================================ header
- * The topbar lives outside <header> and simply scrolls away with the page; the header itself is
- * sticky. Nothing is removed from the layout mid-scroll, which is what used to make it jump.
+ * The navbar is the topmost element and sticks to the top of the viewport. Past a few pixels of
+ * scroll it drops its background and the brand fades out, so the logo belongs to the very top only.
  */
 
 .site-header {
   position: sticky;
   top: 0;
   z-index: 50;
-}
-
-.topbar {
-  background: var(--ink-950);
-  color: var(--text-invert-faint);
-  font-size: 0.74rem;
-  letter-spacing: 0.06em;
-  border-bottom: 1px solid var(--border-dark);
-}
-
-.topbar__inner {
-  display: flex;
-  align-items: center;
-  gap: var(--space-5);
-  min-height: 40px;
-}
-
-.topbar__item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  transition: color var(--dur) var(--ease-out-soft);
-}
-
-.topbar__item:hover {
-  color: var(--gold-300);
-}
-
-.topbar__track {
-  margin-left: auto;
-  padding: 0.4rem 0;
-  border: 0;
-  background: none;
-  color: var(--gold-300);
-  font-size: 0.74rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: color var(--dur) var(--ease-out-soft);
-}
-
-.topbar__track:hover {
-  color: var(--gold-100);
 }
 
 .navbar {
@@ -324,70 +281,113 @@
   backdrop-filter: blur(0) saturate(100%);
 }
 
-.splash__logo {
-  position: absolute;
-  object-fit: contain;
-  filter: drop-shadow(0 0 60px rgba(52, 164, 114, 0.45));
-}
-
 /*
- * The name, painted under the logo. The glyph outlines are stroked with a broad white "brush" that
- * draws itself (stroke-dashoffset over a length measured at runtime), then the fill settles in
- * behind it, so the word ends up as solid white letters.
+ * The intro shows the real brand lockup - same .brand markup as the navbar, so it inherits the same
+ * logo, name and tagline - laid over the navbar's own rect and scaled up from its left edge. The
+ * name is painted on by a sweeping mask with a soft white brush streak running ahead of the paint
+ * edge, the tagline settles in after, and then the whole lockup scales back into the navbar.
  */
-.splash__word {
+.splash__brand {
+  position: fixed;
+  z-index: 1;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.splash__brand .brand__mark,
+.splash__brand .brand__text {
+  transition: none;
+}
+
+.splash__brand .brand__text strong {
+  position: relative;
+  display: block;
+  color: #fff;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    #000 0%,
+    #000 58%,
+    rgba(0, 0, 0, 0.55) 82%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(90deg, #000 0%, #000 58%, rgba(0, 0, 0, 0.55) 82%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: left center;
+  mask-position: left center;
+  -webkit-mask-size: 0% 100%;
+  mask-size: 0% 100%;
+}
+
+/* the brush itself: a soft white streak that travels ahead of the paint edge. It lives on the
+ * wrapper, not on the masked name - a mask clips its own pseudo-elements too. */
+.splash__brand .brand__text {
+  position: relative;
+}
+
+.splash__brand .brand__text::after {
+  content: '';
   position: absolute;
-  left: 50%;
-  width: min(620px, 78vw);
-  height: auto;
-  overflow: visible;
-  transform: translateX(-50%);
-  transition: opacity 0.3s var(--ease-out-soft);
+  top: 0;
+  left: 0;
+  width: 34%;
+  height: 62%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+  filter: blur(7px);
+  opacity: 0;
+  pointer-events: none;
 }
 
-.splash.is-flying .splash__word {
+.splash__brand .brand__text small {
   opacity: 0;
 }
 
-.splash__word-text {
-  font-family: var(--font-display);
-  font-size: 84px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  fill: transparent;
-  stroke: #fff;
-  stroke-width: 4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: var(--word-length, 4000);
-  stroke-dashoffset: var(--word-length, 4000);
-  paint-order: stroke fill;
-  opacity: 0;
-  filter: drop-shadow(0 0 26px rgba(255, 255, 255, 0.22));
+.splash__brand.is-painting .brand__text strong {
+  animation: paint-on 1.2s var(--ease-out-soft) 0.15s forwards;
 }
 
-.splash__word-text.is-painting {
-  opacity: 1;
-  animation: brush-draw 0.95s var(--ease-out-soft) 0.18s forwards,
-    brush-fill 0.8s ease 0.95s forwards;
+.splash__brand.is-painting .brand__text::after {
+  animation: brush-streak 1.2s var(--ease-out-soft) 0.15s forwards;
 }
 
-@keyframes brush-draw {
+.splash__brand.is-painting .brand__text small {
+  animation: fade-up 0.7s var(--ease-out-soft) 1.05s forwards;
+}
+
+@keyframes paint-on {
   to {
-    stroke-dashoffset: 0;
+    -webkit-mask-size: 114% 100%;
+    mask-size: 114% 100%;
   }
 }
 
-@keyframes brush-fill {
-  to {
-    fill: #fff;
+@keyframes brush-streak {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(300%);
+    opacity: 0;
   }
 }
 
-/* While the intro runs the navbar mark stays hidden, so only one logo is ever on screen. */
-.intro-playing .brand__mark,
-.intro-playing .brand__text {
+/* While the intro runs, the navbar's own brand stays hidden so only one lockup is on screen. */
+html.intro-playing .site-header .brand__mark,
+html.intro-playing .site-header .brand__text {
   opacity: 0;
+}
+
+/* The hand-off happens in a single frame, so kill the fade-in transition for that frame. */
+html.intro-landing .site-header .brand__mark,
+html.intro-landing .site-header .brand__text {
+  transition: none !important;
 }
 
 /* ================================================================ hero */
@@ -1472,12 +1472,6 @@
     width: 58px;
     height: 58px;
   }
-  .topbar__inner {
-    gap: var(--space-4);
-  }
-  .topbar__item:last-of-type {
-    display: none;
-  }
   .hero {
     min-height: 78vh;
     padding: var(--space-8) 0 var(--space-7);
@@ -1593,11 +1587,12 @@
   .hero__actions .btn {
     width: 100%;
   }
-  .topbar {
-    font-size: 0.68rem;
-  }
   .eyebrow {
     letter-spacing: 0.24em;
+  }
+  /* the tagline is hidden in the navbar on phones, but the intro still shows the full lockup */
+  .splash__brand .brand__text small {
+    display: block;
   }
 }
 
