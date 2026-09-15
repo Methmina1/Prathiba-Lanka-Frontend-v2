@@ -98,7 +98,7 @@ export default function SplashIntro() {
   const flying = phase === 'flying'
 
   return (
-    <div className={`splash ${flying ? 'is-flying' : ''}`} aria-hidden="true">
+    <div className={`splash ${flying ? 'is-flying' : ''}`} aria-hidden="true" style={{ '--fly-ms': `${FLY_MS}ms` }}>
       <div className="splash__backdrop" />
 
       <div

@@ -295,9 +295,24 @@
   will-change: transform;
 }
 
-.splash__brand .brand__mark,
 .splash__brand .brand__text {
   transition: none;
+}
+
+/*
+ * The mark reads a touch larger while the page is loading. It is a transform, not a size change,
+ * so the text to its right does not shift - and it eases back to its navbar size during the flight
+ * so the hand-off stays pixel-exact.
+ */
+.splash__brand .brand__mark {
+  transform: scale(1.18);
+  transform-origin: center center;
+  transition: none;
+}
+
+.splash.is-flying .splash__brand .brand__mark {
+  transform: none;
+  transition: transform var(--fly-ms, 1100ms) cubic-bezier(0.16, 0.84, 0.44, 1);
 }
 
 .splash__brand .brand__text strong {
