@@ -1,12 +1,23 @@
 # PrathibaLanka - frontend
 
-React home page for the PrathibaLanka travel agency backend. Built with Vite, plain CSS and no UI
+React front end for the PrathibaLanka travel agency backend. Vite, React Router, plain CSS - no UI
 framework, so the palette and layout stay easy to change.
+
+## Pages
+
+| Route | Contents |
+|---|---|
+| `/` | Hero carousel, trust badges, philosophy, signature journeys, sustainability, gallery, journal, reviews, FAQ, CTA band |
+| `/plan` | **Plan your journey**: enquiry form (`POST /api/contact`), PIN tracker (`GET /api/bookings/track`), how-it-works steps |
+| `*` | 404 |
+
+Planning and booking-tracking live only on `/plan`; every "Plan your trip" / "Request" button routes
+there. The header link `/plan#track` lands with the cursor already in the PIN field.
 
 ## Requirements
 
-- Node 20+ (developed on Node 24)
-- The backend running on `http://localhost:8080` for live data (optional - see below)
+- Node 20.19+ or 22.12+ (developed on Node 24)
+- The backend on `http://localhost:8080` for live data (optional - see Fallbacks)
 
 ## Run
 
@@ -16,37 +27,71 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-The backend already whitelists `http://localhost:5173` in its CORS configuration, so no proxy is
-needed. Point the frontend somewhere else with an env file:
+The backend whitelists `http://localhost:5173` in CORS, so no proxy is needed. Point the front end
+elsewhere with an env file:
 
 ```bash
 # .env.local
 VITE_API_BASE_URL=https://api.example.com
 ```
 
-## Build
+## Checks
 
 ```bash
-npm run build        # -> dist/
-npm run preview      # serve the production build on http://localhost:4173
-npm run check:render # renders the page in Node and asserts the sections exist
+npm run build         # production build -> dist/
+npm run preview       # serve the build on http://localhost:4173
+npm run check:render  # renders /, /plan and the 404 route in Node and asserts their content
 ```
 
-## How it talks to the API
+`check:render` is the useful one: it fails on undefined components or broken props, and it enforces
+that the planning/tracking panels have not leaked back onto the home page.
 
-| Section | Endpoint | Notes |
+## API usage
+
+| Where | Endpoint |
+|---|---|
+| Signature journeys | `GET /api/packages` (active only) |
+| Gallery | `GET /api/gallery` |
+| Journal | `GET /api/journal/published` |
+| Reviews | `GET /api/reviews` |
+| Enquiry form (`/plan`) | `POST /api/contact` - public |
+| PIN tracker (`/plan`) | `GET /api/bookings/track?pin=` - public |
+
+**Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
+and a small notice explains why, so the page never looks broken. Booking/review submission is *not*
+done here: those endpoints need a customer token and belong to the booking flow.
+
+## Design system
+
+`src/styles/theme.css` holds every token. The palette is deep ink + metallic gold with the logo's
+emerald as a secondary note:
+
+- `--ink-950 … --ink-500` page and section backgrounds
+- `--gold-500` (CTA and accents), `--gold-300` (on dark), `--gold-700` (text on light)
+- `--ivory-50/100` light surfaces, `--sand-*` warm grey text
+- `--emerald-600` brand note, plus `--success/--warning/--error/--info`
+
+Contrast: gold is 7.5:1 on ink and 8.6:1 with ink text on it, but only ~2:1 as text on ivory - so
+gold text is never placed on light backgrounds (buttons use ink text on gold). Change the palette in
+this one file and the whole site follows.
+
+**Motion.** `--dur*` and `--ease-out-soft` in the same file drive every transition. On top of that:
+a scroll-progress bar, `<Reveal>` (IntersectionObserver fade/lift with stagger), a slow drift on the
+active hero slide, hover zooms on card imagery, a gold sweep on CTA buttons, and animated nav
+underlines. Everything collapses under `prefers-reduced-motion: reduce`.
+
+## Continuous integration
+
+`.github/workflows/ci.yml`:
+
+| Job | When | What |
 |---|---|---|
-| Signature journeys | `GET /api/packages` | active packages only |
-| Gallery | `GET /api/gallery` | falls back to illustrations when empty |
-| Journal | `GET /api/journal/published` | published posts only |
-| Reviews | `GET /api/reviews` | - |
-| Enquiry form | `POST /api/contact` | public; name, email, subject, message |
-| PIN tracker | `GET /api/bookings/track?pin=` | public; shows status, travellers, dates |
+| `Build & render check` | PRs into `main`, pushes to `main`/`user-updates` | `npm ci`, `npm run build`, `npm run check:render`, uploads `dist` |
+| `Deploy to GitHub Pages` | push to `main`, opt-in | builds with the Pages base path and publishes |
 
-Every section degrades gracefully: if the backend is down or a table is empty, sample content from
-`src/data/fallback.js` is rendered instead and a small notice explains why. Bookings and reviews are
-never sent from the home page - submission requires a customer token (`POST /api/bookings/request`
-and `POST /api/reviews` are authenticated), which belongs to the booking flow, not the landing page.
+The deploy job only runs when the repository variable `DEPLOY_PAGES` is `true` and Pages is enabled
+(Settings → Pages → Source: GitHub Actions). Until then it is skipped, so the pipeline cannot fail
+because of it.
 
 ## Structure
 
@@ -55,32 +100,24 @@ src/
   api/client.js            fetch wrapper (base URL, timeouts, typed errors)
   hooks/useApi.js          loader with loading / live / fallback states
   data/fallback.js         sample packages, journal posts, reviews, FAQ copy
-  styles/theme.css         design tokens (colour, type, spacing, shadows)
-  styles/base.css          reset, typography, buttons, grid, utilities
+  styles/theme.css         design tokens
+  styles/base.css          reset, type, buttons, grid, reveal/motion utilities
   styles/components.css    section styles
   components/layout/       Header (topbar, sticky nav, mobile menu), Footer
+  components/plan/         EnquiryForm, TrackBooking  (used by /plan)
   components/sections/     Hero, TrustBar, Philosophy, Packages, Sustainability,
-                           Gallery, Journal, Reviews, Plan, Faq, CtaBand
-  components/ui/           Icons, Scenery (illustrations), PackageCard
+                           Gallery, Journal, Reviews, Faq, CtaBand
+  components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress
+  pages/                   Home, PlanPage, NotFound
 ```
-
-## Design tokens
-
-`src/styles/theme.css` holds the palette, taken from the logo: `primary-600` is the logo's emerald
-and `accent-500` its gold, with sage neutrals and status colours (success/warning/error/info).
-Contrast pairs used in the UI are AA or better - note that gold is only ever paired with dark ink
-(8.6:1), never white (2.05:1).
-
-Change the palette in one place and the whole page follows.
 
 ## Images
 
-There are no external image dependencies. Scenes are drawn as SVG by `components/ui/Scenery.jsx`
-(six variants: temple, safari, tea, coast, train, hills). To use photography instead, drop files in
-`public/images/` and replace a `<Scenery />` with an `<img />`; the gallery already renders live
-`imageUrl` values from the API when the gallery table has rows.
+No external image dependencies: scenes are drawn as SVG by `components/ui/Scenery.jsx` (temple,
+safari, tea, coast, train, hills). Drop photography into `public/images/` and swap a `<Scenery />`
+for an `<img />` when you have it - the gallery already renders live `imageUrl` values from the API.
 
 ## Not built yet
 
-Package detail page, booking flow (customer login -> request -> PIN), admin dashboard, and routing
-(the home page is a single scroll with anchor navigation).
+Package detail pages, the booking flow (customer login → request), the admin dashboard, and forms
+for reviews/contact beyond the enquiry form.
