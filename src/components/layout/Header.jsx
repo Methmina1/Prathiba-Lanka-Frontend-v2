@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { ChevronDown, Close, Mail, Menu, Phone } from '../ui/Icons'
+import { ChevronDown, Close, Menu } from '../ui/Icons'
 
 const NAV = [
   { label: 'Home', to: '/' },
@@ -21,12 +21,14 @@ const NAV = [
 ]
 
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false)
+  // The logo and the navbar background belong to the very top of the page only: past a few pixels
+  // the bar goes transparent and the mark fades out.
+  const [atTop, setAtTop] = useState(true)
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
+    const onScroll = () => setAtTop(window.scrollY <= 4)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -44,27 +46,12 @@ export default function Header() {
   }, [pathname])
 
   return (
-    <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
-      <div className="topbar">
-        <div className="container topbar__inner">
-          <a className="topbar__item" href="tel:+94770000000">
-            <Phone width={15} height={15} />
-            <span>+94 77 000 0000</span>
-          </a>
-          <a className="topbar__item" href="mailto:hello@prathibalanka.lk">
-            <Mail width={15} height={15} />
-            <span>hello@prathibalanka.lk</span>
-          </a>
-          <Link className="topbar__track" to="/plan#track">
-            Track your booking with a PIN
-          </Link>
-        </div>
-      </div>
-
-      <div className="navbar">
+    <>
+      <header className={`site-header ${atTop ? 'is-top' : 'is-scrolled'}`}>
+        <div className="navbar">
         <div className="container navbar__inner">
           <Link className="brand" to="/" aria-label="PrathibaLanka home">
-            <img src="/logo.png" alt="" className="brand__mark" />
+            <img src="/logo-mark.png" alt="" className="brand__mark" />
             <span className="brand__text">
               <strong>PrathibaLanka</strong>
               <small>Journeys through the emerald isle</small>
@@ -122,7 +109,8 @@ export default function Header() {
             Plan your trip
           </Link>
         </nav>
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   )
 }

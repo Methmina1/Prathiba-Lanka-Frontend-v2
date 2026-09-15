@@ -3,17 +3,20 @@ import { useId } from 'react'
 /**
  * Illustrated scene placeholders drawn in the brand palette.
  *
+ * Dusky, low-key gradients so they sit inside a dark page instead of punching bright holes in it:
+ * deep teal-emerald skies, a gold sun, layers falling to near-black ink.
+ *
  * These stand in for photography so the site has no external image dependencies: drop real photos
  * into /public/images and swap a <Scenery /> for an <img /> when you have them.
  */
 
 const VARIANTS = {
-  temple: { sky: ['#fdf4e6', '#f7e2bd'], sun: '#eaa939', layers: ['#b3e6ce', '#39c684', '#0b7443'] },
-  safari: { sky: ['#fdf0dc', '#f7d9a8'], sun: '#d5911a', layers: ['#dcd0a4', '#a8b678', '#4f645a'] },
-  tea: { sky: ['#eef7f1', '#d7f4e6'], sun: '#f2c069', layers: ['#9ad9c0', '#1da565', '#085933'] },
-  coast: { sky: ['#fdf6e7', '#fbe8c5'], sun: '#eaa939', layers: ['#a9e2cd', '#1da565', '#054226'] },
-  train: { sky: ['#eef7f1', '#b3e6ce'], sun: '#f2c069', layers: ['#81cfab', '#1da565', '#054226'] },
-  hills: { sky: ['#eef7f1', '#d7f4e6'], sun: '#eaa939', layers: ['#b3e6ce', '#39c684', '#0b7443'] },
+  temple: { sky: ['#0d1a18', '#16302b'], sun: '#e0b04a', layers: ['#1f5142', '#123a2d', '#081d17'] },
+  safari: { sky: ['#1a1410', '#2f2317'], sun: '#d99a3c', layers: ['#3a3223', '#26231a', '#100e0a'] },
+  tea: { sky: ['#0b1a16', '#173a2d'], sun: '#c9a227', layers: ['#1f5340', '#123a2c', '#071c16'] },
+  coast: { sky: ['#081620', '#123240'], sun: '#e0b04a', layers: ['#12455a', '#0c2f3f', '#05161f'] },
+  train: { sky: ['#0c1a16', '#1b3529'], sun: '#d2ac4e', layers: ['#1d4a38', '#113225', '#071710'] },
+  hills: { sky: ['#0a1a15', '#16342a'], sun: '#dfc178', layers: ['#1c4a39', '#113226', '#07180f'] },
 }
 
 const HILLS = [
