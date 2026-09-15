@@ -51,8 +51,10 @@ export default function SplashIntro() {
       left: rect.left,
       width: rect.width,
       height: rect.height,
-      // grow from the left edge, up to a sensible share of the viewport
+      // The lockup is drawn at the navbar's rect and transformed back out to the middle of the
+      // screen, scaled up, never taking more than a sensible share of the viewport width.
       scale: Math.min(MAX_SCALE, (window.innerWidth * WIDTH_RATIO) / rect.width),
+      dx: window.innerWidth / 2 - (rect.left + rect.width / 2),
       dy: window.innerHeight / 2 - (rect.top + rect.height / 2),
     })
 
@@ -106,7 +108,9 @@ export default function SplashIntro() {
           left: `${geometry.left}px`,
           width: `${geometry.width}px`,
           height: `${geometry.height}px`,
-          transform: flying ? 'none' : `translateY(${geometry.dy}px) scale(${geometry.scale})`,
+          transform: flying
+            ? 'none'
+            : `translate(${geometry.dx}px, ${geometry.dy}px) scale(${geometry.scale})`,
           transition: flying ? `transform ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1)` : 'none',
         }}
       >
