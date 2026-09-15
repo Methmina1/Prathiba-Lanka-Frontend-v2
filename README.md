@@ -71,9 +71,9 @@ emerald as a secondary note:
 - `--ivory-50/100` light surfaces, `--sand-*` warm grey text
 - `--emerald-600` brand note, plus `--success/--warning/--error/--info`
 
-Contrast: gold is 7.5:1 on ink and 8.6:1 with ink text on it, but only ~2:1 as text on ivory - so
-gold text is never placed on light backgrounds (buttons use ink text on gold). Change the palette in
-this one file and the whole site follows.
+Contrast: gold is 7.56:1 on ink and 7.29:1 with ink text on it, but only 2.48:1 as text on ivory -
+so gold text is never placed on light backgrounds (buttons use ink text on gold). Change the palette
+in this one file and the whole site follows.
 
 **Motion.** `--dur*` and `--ease-out-soft` in the same file drive every transition. On top of that:
 a scroll-progress bar, `<Reveal>` (IntersectionObserver fade/lift with stagger), a slow drift on the

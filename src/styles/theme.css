@@ -6,7 +6,7 @@
  * sage/emerald scheme, while the emerald still ties back to the logo mark.
  *
  * Every colour pair used in the UI is checked for WCAG contrast - see the notes on buttons in
- * base.css. Gold is 7.5:1 on ink and 8.6:1 with ink text on it, but only 2:1 as text on ivory,
+ * base.css. Gold is 7.56:1 on ink and 7.29:1 with ink text on it, but only 2.48:1 as text on ivory,
  * so gold text is never used on light backgrounds.
  */
 
