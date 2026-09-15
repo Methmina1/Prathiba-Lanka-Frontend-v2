@@ -1,25 +1,27 @@
 /*
  * PrathibaLanka design tokens.
  *
- * Palette direction: deep ink surfaces with metallic gold, ivory text and the logo's emerald kept
- * as a secondary brand note. It reads closer to a luxury travel house than the earlier light
- * sage/emerald scheme, while the emerald still ties back to the logo mark.
+ * The site is dark by default: deep ink surfaces, metallic gold for actions and accents, warm ivory
+ * type. The logo's emerald is kept as a secondary brand note, and the logo itself sits on a small
+ * ivory chip so the dark-green mark stays legible against ink.
  *
- * Every colour pair used in the UI is checked for WCAG contrast - see the notes on buttons in
- * base.css. Gold is 7.56:1 on ink and 7.29:1 with ink text on it, but only 2.48:1 as text on ivory,
- * so gold text is never used on light backgrounds.
+ * Contrast, measured (WCAG): gold-500 on ink-950 7.56:1 | ink on gold-500 7.29:1 |
+ * gold-300 on ink-900 11.0:1 | body text on ink-800 10.4:1 | muted text on ink-800 6.3:1.
+ * Gold is 7.56:1 on ink but only 2.48:1 on ivory, so gold is never used as text on a light surface.
  */
 
 :root {
-  /* Ink - page and section backgrounds */
-  --ink-950: #070a09;
-  --ink-900: #0b100e;
-  --ink-800: #111815;
-  --ink-700: #18211d;
-  --ink-600: #202b26;
-  --ink-500: #2c3933;
+  /* Ink - the surface the whole site sits on */
+  --ink-950: #060908;
+  --ink-900: #0a0f0d;
+  --ink-850: #0e1412;
+  --ink-800: #121917;
+  --ink-750: #161f1c;
+  --ink-700: #1b2521;
+  --ink-600: #242f2a;
+  --ink-500: #2f3c36;
 
-  /* Gold - the accent that carries CTAs, rules and eyebrows */
+  /* Gold - actions, rules, eyebrows */
   --gold-100: #f7eed6;
   --gold-200: #eddcaf;
   --gold-300: #dfc178;
@@ -28,55 +30,55 @@
   --gold-600: #a47f1f;
   --gold-700: #7e6116;
 
-  /* Emerald - from the logo, used sparingly */
+  /* Emerald - from the logo */
   --emerald-300: #55c08d;
   --emerald-400: #34a472;
   --emerald-500: #1c8055;
   --emerald-600: #0f6440;
   --emerald-700: #0a4a31;
 
-  /* Ivory and sand - light surfaces and warm grey text */
-  --ivory-50: #fbf8f1;
-  --ivory-100: #f5efe3;
-  --ivory-200: #e8dfcc;
-  --ivory-300: #d6cab1;
-  --sand-400: #b3a88f;
-  --sand-500: #8a8071;
-  --sand-600: #5f584c;
-  --sand-700: #3a362e;
+  /* Warm light type */
+  --ivory-100: #f4efe4;
+  --ivory-200: #e2dccd;
+  --ivory-300: #cfc9bd;
+  --sand-300: #cfc9bd;
+  --sand-400: #a7a196;
+  --sand-500: #918b80;
 
   /* Semantic */
-  --success: #1c8055;
-  --warning: #a47f1f;
-  --error: #b3261e;
-  --info: #14657c;
+  --success: #34a472;
+  --warning: #d2ac4e;
+  --error: #e0705f;
+  --info: #58a9c4;
 
   /* Aliases used by components */
-  --bg-page: var(--ivory-50);
-  --bg-muted: var(--ivory-100);
-  --bg-deep: var(--ink-900);
-  --bg-deep-alt: var(--ink-800);
-  --surface: #ffffff;
-  --surface-dark: var(--ink-700);
-  --surface-tint: #f8f3e8;
+  --bg-page: var(--ink-900);
+  --bg-muted: var(--ink-800);
+  --bg-deep: var(--ink-950);
+  --bg-deep-alt: var(--ink-850);
+  --surface: var(--ink-800);
+  --surface-alt: var(--ink-750);
+  --surface-tint: var(--ink-700);
+  --surface-chip: var(--ivory-100);
 
-  --border: var(--ivory-200);
-  --border-strong: var(--ivory-300);
-  --border-dark: rgba(210, 172, 78, 0.18);
-  --border-gold: rgba(195, 154, 46, 0.45);
+  --border: rgba(244, 239, 228, 0.1);
+  --border-strong: rgba(244, 239, 228, 0.2);
+  --border-dark: rgba(210, 172, 78, 0.2);
+  --border-gold: rgba(210, 172, 78, 0.45);
 
-  --text-heading: #1a1f1c;
-  --text-body: #55503f;
-  --text-muted: var(--sand-500);
+  --text-heading: var(--ivory-100);
+  --text-body: var(--ivory-300);
+  --text-muted: var(--sand-400);
+  --text-faint: var(--sand-500);
   --text-invert: var(--ivory-100);
-  --text-invert-muted: rgba(245, 239, 227, 0.72);
-  --text-invert-faint: rgba(245, 239, 227, 0.5);
+  --text-invert-muted: rgba(244, 239, 228, 0.72);
+  --text-invert-faint: rgba(244, 239, 228, 0.5);
 
   --accent: var(--gold-500);
   --accent-strong: var(--gold-400);
-  --accent-soft: var(--gold-100);
-  --accent-ink: var(--ink-900);
-  --brand: var(--emerald-600);
+  --accent-soft: rgba(195, 154, 46, 0.14);
+  --accent-ink: var(--ink-950);
+  --brand: var(--emerald-400);
 
   /* Type */
   --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
@@ -99,12 +101,12 @@
   --radius-lg: 18px;
   --radius-pill: 999px;
 
-  --shadow-sm: 0 1px 2px rgba(11, 16, 14, 0.06), 0 2px 6px rgba(11, 16, 14, 0.05);
-  --shadow-md: 0 10px 30px rgba(11, 16, 14, 0.1);
-  --shadow-lg: 0 24px 60px rgba(11, 16, 14, 0.16);
-  --shadow-gold: 0 16px 40px rgba(195, 154, 46, 0.28);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 26px 60px rgba(0, 0, 0, 0.55);
+  --shadow-gold: 0 16px 40px rgba(195, 154, 46, 0.22);
 
-  /* Motion - shared by every transition so the site moves as one */
+  /* Motion */
   --ease-out-soft: cubic-bezier(0.16, 0.84, 0.44, 1);
   --ease-in-out-soft: cubic-bezier(0.65, 0.05, 0.36, 1);
   --dur-fast: 0.25s;
@@ -113,4 +115,18 @@
 
   --header-height: 84px;
   --container: 1240px;
+  color-scheme: dark;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --header-height: 72px;
+  }
+}
+
+@media (max-width: 560px) {
+  :root {
+    --header-height: 64px;
+    --container: 100%;
+  }
 }

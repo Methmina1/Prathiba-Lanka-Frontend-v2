@@ -44,7 +44,7 @@ export default function Header() {
   }, [pathname])
 
   return (
-    <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
+    <>
       <div className="topbar">
         <div className="container topbar__inner">
           <a className="topbar__item" href="tel:+94770000000">
@@ -61,7 +61,8 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="navbar">
+      <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
+        <div className="navbar">
         <div className="container navbar__inner">
           <Link className="brand" to="/" aria-label="PrathibaLanka home">
             <img src="/logo.png" alt="" className="brand__mark" />
@@ -122,7 +123,8 @@ export default function Header() {
             Plan your trip
           </Link>
         </nav>
-      </div>
-    </header>
+        </div>
+      </header>
+    </>
   )
 }
