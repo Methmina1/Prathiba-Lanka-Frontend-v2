@@ -14,10 +14,13 @@ import { useEffect, useState } from 'react'
 
 let introStarted = false
 
-const CENTER_SCALE = 4.6
 const FLY_MS = 1150
 const HOLD_MS = 420
 const TAIL_MS = 250
+
+/** Centred size: generous on a desktop, never wider than the phone it is drawn on. */
+const CENTRED_MAX_PX = 380
+const CENTRED_VIEWPORT_RATIO = 0.58
 
 export default function SplashIntro() {
   const [phase, setPhase] = useState('idle')
@@ -36,11 +39,15 @@ export default function SplashIntro() {
     }
 
     const rect = mark.getBoundingClientRect()
+    const viewport = Math.min(window.innerWidth, window.innerHeight)
+    const centredSize = Math.min(CENTRED_MAX_PX, viewport * CENTRED_VIEWPORT_RATIO)
+
     setGeometry({
       top: rect.top,
       left: rect.left,
       width: rect.width,
       height: rect.height,
+      scale: Math.max(3, centredSize / rect.width),
       dx: window.innerWidth / 2 - (rect.left + rect.width / 2),
       dy: window.innerHeight / 2 - (rect.top + rect.height / 2),
     })
@@ -75,7 +82,7 @@ export default function SplashIntro() {
           height: `${geometry.height}px`,
           transform: flying
             ? 'none'
-            : `translate(${geometry.dx}px, ${geometry.dy}px) scale(${CENTER_SCALE})`,
+            : `translate(${geometry.dx}px, ${geometry.dy}px) scale(${geometry.scale})`,
           transition: flying ? `transform ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1)` : 'none',
         }}
       />

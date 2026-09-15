@@ -128,13 +128,13 @@
   flex: 0 0 auto;
 }
 
-/* The PNG is already background-free, so the mark sits directly on the bar. A faint emerald glow
- * lifts the dark-green artwork off the ink without putting a plate behind it. */
+/* The PNG is already background-free, so the mark sits directly on the bar. It is sized generously
+ * and lifts off the ink with a faint emerald glow rather than a plate. */
 .brand__mark {
-  width: 46px;
-  height: 46px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
-  filter: drop-shadow(0 0 14px rgba(52, 164, 114, 0.28));
+  filter: drop-shadow(0 0 16px rgba(52, 164, 114, 0.35));
   transition: opacity var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
 }
 
@@ -148,7 +148,7 @@
 .brand__text strong {
   color: var(--ivory-100);
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -327,7 +327,7 @@
 .splash__logo {
   position: absolute;
   object-fit: contain;
-  filter: drop-shadow(0 0 40px rgba(52, 164, 114, 0.4));
+  filter: drop-shadow(0 0 60px rgba(52, 164, 114, 0.45));
 }
 
 /* While the intro runs the navbar mark stays hidden, so only one logo is ever on screen. */
@@ -1414,6 +1414,10 @@
 
 /* Large phone */
 @media (max-width: 780px) {
+  .brand__mark {
+    width: 52px;
+    height: 52px;
+  }
   .topbar__inner {
     gap: var(--space-4);
   }
@@ -1467,11 +1471,11 @@
 /* Small phone */
 @media (max-width: 560px) {
   .brand__mark {
-    width: 40px;
-    height: 40px;
+    width: 46px;
+    height: 46px;
   }
   .brand__text strong {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
   }
   .brand__text small {
     display: none;
