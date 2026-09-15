@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router-dom'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
+import SplashIntro from './components/layout/SplashIntro'
 import ScrollToTop from './components/ScrollToTop'
 import ScrollProgress from './components/ui/ScrollProgress'
 import Home from './pages/Home'
@@ -12,6 +13,7 @@ export default function App() {
     <>
       <ScrollProgress />
       <ScrollToTop />
+      <SplashIntro />
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />

@@ -21,12 +21,14 @@ const NAV = [
 ]
 
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false)
+  // The logo and the navbar background belong to the very top of the page only: past a few pixels
+  // the bar goes transparent and the mark fades out.
+  const [atTop, setAtTop] = useState(true)
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
+    const onScroll = () => setAtTop(window.scrollY <= 4)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -61,7 +63,7 @@ export default function Header() {
         </div>
       </div>
 
-      <header className={`site-header ${scrolled ? 'is-scrolled' : ''}`}>
+      <header className={`site-header ${atTop ? 'is-top' : 'is-scrolled'}`}>
         <div className="navbar">
         <div className="container navbar__inner">
           <Link className="brand" to="/" aria-label="PrathibaLanka home">

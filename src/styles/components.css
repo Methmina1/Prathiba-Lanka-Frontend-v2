@@ -89,12 +89,29 @@
   background: rgba(10, 15, 13, 0.92);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border-dark);
-  transition: background var(--dur) var(--ease-out-soft), box-shadow var(--dur) var(--ease-out-soft);
+  transition: background var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft),
+    backdrop-filter var(--dur) var(--ease-out-soft);
 }
 
+/* Past the very top the bar drops its background and the mark fades out: the logo and the bar's
+ * backing belong to the top of the page only. */
 .site-header.is-scrolled .navbar {
-  background: rgba(6, 9, 8, 0.97);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  background: transparent;
+  border-bottom-color: transparent;
+  backdrop-filter: none;
+}
+
+.site-header.is-scrolled .brand__mark,
+.site-header.is-scrolled .brand__text {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.9);
+  pointer-events: none;
+}
+
+/* Links travel over page content once the bar is transparent, so give them a soft shadow. */
+.site-header.is-scrolled .nav__link,
+.site-header.is-scrolled .navbar__toggle {
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.75);
 }
 
 .navbar__inner {
@@ -120,12 +137,14 @@
   background: var(--surface-chip);
   box-shadow: 0 0 0 1px var(--border-gold), 0 6px 18px rgba(0, 0, 0, 0.45);
   object-fit: contain;
+  transition: opacity var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
 }
 
 .brand__text {
   display: flex;
   flex-direction: column;
   line-height: 1.2;
+  transition: opacity var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
 }
 
 .brand__text strong {
@@ -279,6 +298,47 @@
   margin-top: var(--space-5);
   border-bottom: 0;
   text-align: center;
+}
+
+/* ================================================================ page-load intro
+ * The page sits blurred behind a frosted overlay; the logo appears centred and flies into the
+ * navbar (see SplashIntro.jsx). The splash logo matches .brand__mark geometry exactly - same size,
+ * padding and chip - so the hand-off is invisible.
+ */
+
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+}
+
+.splash__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 9, 8, 0.72);
+  backdrop-filter: blur(18px) saturate(115%);
+  transition: opacity 0.9s var(--ease-out-soft) 0.4s, backdrop-filter 0.9s var(--ease-out-soft) 0.4s;
+}
+
+.splash.is-flying .splash__backdrop {
+  opacity: 0;
+  backdrop-filter: blur(0) saturate(100%);
+}
+
+.splash__logo {
+  position: absolute;
+  padding: 6px;
+  border-radius: 50%;
+  background: var(--surface-chip);
+  box-shadow: 0 0 0 1px var(--border-gold), 0 24px 60px rgba(0, 0, 0, 0.55);
+  object-fit: contain;
+}
+
+/* While the intro runs the navbar mark stays hidden, so only one logo is ever on screen. */
+.intro-playing .brand__mark,
+.intro-playing .brand__text {
+  opacity: 0;
 }
 
 /* ================================================================ hero */
