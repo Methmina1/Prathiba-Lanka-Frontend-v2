@@ -28,6 +28,7 @@ const MAX_SCALE = 2.4
 const WIDTH_RATIO = 0.86 // the enlarged lockup never takes more than this much of the width
 const WIDTH_RATIO_NARROW = 0.92 // phones get a little more, so the mark can still grow
 const NARROW_PX = 560
+const STACKED_PX = 560 // matches the stacking media query in components.css
 const MARK_BUMP = 1.5 // how much larger the logo reads while loading, versus the navbar
 
 /** Centre and scale on the clone's own box, so the visible lockup is what ends up centred. */
@@ -48,7 +49,9 @@ export default function SplashIntro() {
   const [anchor, setAnchor] = useState(null) // where the navbar keeps its brand
   const [placement, setPlacement] = useState(null) // how the clone is centred and scaled
   const [painting, setPainting] = useState(false)
+  const [flyer, setFlyer] = useState(null) // phone hand-over: one mark travelling to the navbar
   const brandRef = useRef(null)
+  const markRef = useRef(null)
 
   useEffect(() => {
     if (introStarted) return
@@ -66,10 +69,19 @@ export default function SplashIntro() {
     const rect = brand.getBoundingClientRect()
     // the mark is scaled up on its own, so it sticks out past its box; the text is shifted clear
     // of it by the same amount so the visual gap matches the navbar's
-    const markWidth = mark?.getBoundingClientRect().width ?? 0
+    const markBox = mark?.getBoundingClientRect()
+    const markWidth = markBox?.width ?? 0
     const extra = markWidth * (MARK_BUMP - 1)
 
-    setAnchor({ top: rect.top, left: rect.left, markExtra: extra / 2 })
+    setAnchor({
+      top: rect.top,
+      left: rect.left,
+      markExtra: extra / 2,
+      stacked: window.innerWidth <= STACKED_PX,
+      markRect: markBox
+        ? { top: markBox.top, left: markBox.left, width: markBox.width, height: markBox.height }
+        : null,
+    })
     document.documentElement.classList.add('intro-playing')
     setPhase('centered')
 
@@ -103,7 +115,23 @@ export default function SplashIntro() {
 
       setPainting(true)
 
-      window.setTimeout(() => setPhase('flying'), HOLD_MS)
+      window.setTimeout(() => {
+        // Phones stack the lockup, and a column cannot morph into the navbar's row - so the mark is
+        // handed over to a free-flying copy that travels from where it is now to its navbar slot,
+        // while the stacked lockup fades out.
+        if (anchor.stacked && markRef.current && anchor.markRect) {
+          const from = markRef.current.getBoundingClientRect()
+          setFlyer({
+            from: { top: from.top, left: from.left, width: from.width, height: from.height },
+            to: anchor.markRect,
+            moving: false,
+          })
+          window.requestAnimationFrame(() =>
+            setFlyer((value) => (value ? { ...value, moving: true } : value))
+          )
+        }
+        setPhase('flying')
+      }, HOLD_MS)
       window.setTimeout(() => {
         const root = document.documentElement
         root.classList.add('intro-landing')
@@ -120,7 +148,7 @@ export default function SplashIntro() {
     }) ?? start()
 
     return () => window.clearTimeout(fallback)
-  }, [placement])
+  }, [placement, anchor])
 
   if (phase === 'done' || !anchor) return null
 
@@ -129,7 +157,7 @@ export default function SplashIntro() {
 
   return (
     <div
-      className={`splash ${flying ? 'is-flying' : ''}`}
+      className={`splash ${flying ? 'is-flying' : ''} ${anchor.stacked ? 'splash--stacked' : ''}`}
       aria-hidden="true"
       style={{
         '--fly-ms': `${FLY_MS}ms`,
@@ -146,21 +174,42 @@ export default function SplashIntro() {
           top: `${anchor.top}px`,
           left: `${anchor.left}px`,
           visibility: ready ? 'visible' : 'hidden',
+          // in stacked mode the lockup stays put and fades, while the flyer below does the travelling
           transform:
-            flying || !ready
+            flying && !anchor.stacked
               ? 'none'
-              : `translate(${placement.dx}px, ${placement.dy}px) scale(${placement.scale})`,
-          transition: flying
-            ? `transform ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1)`
-            : 'none',
+              : ready
+                ? `translate(${placement.dx}px, ${placement.dy}px) scale(${placement.scale})`
+                : 'none',
+          transition:
+            flying && !anchor.stacked
+              ? `transform ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1)`
+              : 'none',
         }}
       >
-        <img src="/logo-mark.png" alt="" className="brand__mark" />
+        <img ref={markRef} src="/logo-mark.png" alt="" className="brand__mark" />
         <span className="brand__text">
           <strong>PrathibaLanka</strong>
           <small>Journeys through the emerald isle</small>
         </span>
       </div>
+
+      {flyer && (
+        <img
+          src="/logo-mark.png"
+          alt=""
+          className="splash__flyer"
+          style={{
+            top: `${(flyer.moving ? flyer.to : flyer.from).top}px`,
+            left: `${(flyer.moving ? flyer.to : flyer.from).left}px`,
+            width: `${(flyer.moving ? flyer.to : flyer.from).width}px`,
+            height: `${(flyer.moving ? flyer.to : flyer.from).height}px`,
+            transition: flyer.moving
+              ? `top ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1), left ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1), width ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1), height ${FLY_MS}ms cubic-bezier(0.16, 0.84, 0.44, 1)`
+              : 'none',
+          }}
+        />
+      )}
     </div>
   )
 }

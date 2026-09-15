@@ -206,6 +206,19 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
+  flex: 0 0 auto;
+}
+
+.navbar__actions .btn {
+  white-space: nowrap;
+}
+
+.brand__text {
+  min-width: 0;
+}
+
+.brand__text strong {
+  white-space: nowrap;
 }
 
 .navbar__toggle {
@@ -320,7 +333,38 @@
 
 .splash.is-flying .splash__brand .brand__mark {
   transform: none;
-  transition: transform var(--fly-ms, 1100ms) cubic-bezier(0.16, 0.84, 0.44, 1);
+  transition: transform var(--fly-ms, 1450ms) cubic-bezier(0.16, 0.84, 0.44, 1);
+}
+
+/*
+ * Phones: the intro stacks instead of running a row - logo on top, name and tagline centred
+ * underneath it. A column cannot morph back into the navbar's row, so on phones the lockup fades
+ * and a single flying mark carries the eye into the navbar instead (see .splash__flyer).
+ */
+@media (max-width: 560px) {
+  .splash__brand {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    text-align: center;
+  }
+
+  .splash__brand .brand__text {
+    align-items: center;
+    transform: none;
+  }
+}
+
+.splash--stacked.is-flying .splash__brand {
+  opacity: 0;
+  transition: opacity 0.45s var(--ease-out-soft);
+}
+
+.splash__flyer {
+  position: fixed;
+  z-index: 2;
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px rgba(52, 164, 114, 0.4));
 }
 
 .splash__brand .brand__text strong {
@@ -1547,6 +1591,14 @@ html.intro-landing .site-header .brand__text {
 
 /* Small phone */
 @media (max-width: 560px) {
+  /* Below this width the navbar CTA and the brand start competing for the same row, so the CTA
+   * steps aside - it is in the drawer, full width, where a thumb can actually reach it. */
+  .navbar__actions .btn {
+    display: none;
+  }
+  .navbar__inner {
+    gap: var(--space-3);
+  }
   .brand__mark {
     width: 52px;
     height: 52px;
