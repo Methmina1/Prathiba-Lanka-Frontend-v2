@@ -1,5 +1,6 @@
 import { api } from '../../api/client'
 import { useApi } from '../../hooks/useApi'
+import Reveal from '../ui/Reveal'
 import Scenery from '../ui/Scenery'
 
 const TILES = [
@@ -28,7 +29,8 @@ export default function Gallery() {
           </p>
         </div>
 
-        <div className="mosaic">
+        <Reveal delay={100}>
+          <div className="mosaic">
           {hasLive
             ? images.slice(0, 6).map((image) => (
                 <figure className={`mosaic__tile ${image.caption?.length > 30 ? 'wide' : ''}`} key={image.imageId}>
@@ -42,7 +44,8 @@ export default function Gallery() {
                   <figcaption>{tile.caption}</figcaption>
                 </figure>
               ))}
-        </div>
+          </div>
+        </Reveal>
       </div>
     </section>
   )

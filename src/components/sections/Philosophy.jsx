@@ -1,4 +1,5 @@
 import Scenery from '../ui/Scenery'
+import Reveal from '../ui/Reveal'
 import { ArrowRight, Check } from '../ui/Icons'
 
 const POINTS = [
@@ -16,7 +17,7 @@ export default function Philosophy() {
   return (
     <section className="section" id="philosophy">
       <div className="container philosophy">
-        <div className="philosophy__media">
+        <Reveal className="philosophy__media" variant="reveal--right">
           <div className="philosophy__frame">
             <Scenery variant="train" ratio="4 / 5" />
           </div>
@@ -24,9 +25,9 @@ export default function Philosophy() {
             <strong>Since 2014</strong>
             <span>Arranging journeys from Colombo</span>
           </div>
-        </div>
+        </Reveal>
 
-        <div className="philosophy__copy">
+        <Reveal className="philosophy__copy" delay={120}>
           <span className="eyebrow">Our philosophy</span>
           <h2>Fewer places. Longer looks.</h2>
           <p className="lede">
@@ -53,7 +54,7 @@ export default function Philosophy() {
             See the journeys
             <ArrowRight width={16} height={16} />
           </a>
-        </div>
+        </Reveal>
       </div>
     </section>
   )

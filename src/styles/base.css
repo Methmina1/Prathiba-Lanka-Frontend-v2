@@ -15,7 +15,7 @@ body {
   color: var(--text-body);
   font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.65;
+  line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -27,20 +27,26 @@ h4 {
   color: var(--text-heading);
   font-family: var(--font-display);
   font-weight: 600;
-  line-height: 1.12;
+  line-height: 1.1;
 }
 
 h1 {
-  font-size: clamp(2.6rem, 6vw, 4.6rem);
-  letter-spacing: 0.01em;
+  font-size: clamp(2.8rem, 6.4vw, 5rem);
+  letter-spacing: 0.005em;
 }
 
 h2 {
-  font-size: clamp(2rem, 4vw, 3.1rem);
+  font-size: clamp(2.1rem, 4.2vw, 3.3rem);
 }
 
 h3 {
-  font-size: clamp(1.25rem, 2vw, 1.6rem);
+  font-size: clamp(1.25rem, 2vw, 1.65rem);
+}
+
+/* Uppercase display treatment used by the hero and the big CTA bands */
+.display {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 p {
@@ -67,9 +73,14 @@ textarea {
 }
 
 :focus-visible {
-  outline: 2px solid var(--primary-500);
+  outline: 2px solid var(--gold-500);
   outline-offset: 3px;
-  border-radius: 4px;
+  border-radius: 3px;
+}
+
+::selection {
+  background: var(--gold-300);
+  color: var(--ink-900);
 }
 
 /* ---------------------------------------------------------------- layout */
@@ -82,6 +93,7 @@ textarea {
 }
 
 .section {
+  position: relative;
   padding: var(--space-9) 0;
 }
 
@@ -94,7 +106,7 @@ textarea {
 }
 
 .section--tint {
-  background: var(--surface-alt);
+  background: var(--surface-tint);
 }
 
 .section--deep {
@@ -108,7 +120,7 @@ textarea {
 }
 
 .section-head {
-  max-width: 720px;
+  max-width: 740px;
   margin-bottom: var(--space-7);
 }
 
@@ -121,77 +133,114 @@ textarea {
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
   margin-bottom: var(--space-4);
-  color: var(--primary-600);
-  font-size: 0.72rem;
+  color: var(--gold-700);
+  font-size: 0.68rem;
   font-weight: 600;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.32em;
   text-transform: uppercase;
 }
 
 .eyebrow::before {
   content: '';
-  width: 28px;
+  width: 34px;
   height: 1px;
-  background: var(--accent-500);
+  background: currentColor;
+  transform-origin: left center;
+  animation: line-in 1s var(--ease-out-soft) both;
 }
 
 .section-head--center .eyebrow::before {
   display: none;
 }
 
+@keyframes line-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.eyebrow--onDark {
+  color: var(--gold-300);
+}
+
 .lede {
   margin-top: var(--space-4);
   font-size: 1.06rem;
+  color: inherit;
+}
+
+.section--deep .lede {
+  color: var(--text-invert-muted);
 }
 
 /* ---------------------------------------------------------------- buttons */
 
 .btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: 0.85rem 1.6rem;
+  padding: 0.9rem 1.7rem;
+  overflow: hidden;
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
   background: transparent;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: transform 0.2s var(--ease), background 0.2s var(--ease), color 0.2s var(--ease),
-    box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
+  transition: transform var(--dur) var(--ease-out-soft), background var(--dur) var(--ease-out-soft),
+    color var(--dur) var(--ease-out-soft), box-shadow var(--dur) var(--ease-out-soft),
+    border-color var(--dur) var(--ease-out-soft);
+}
+
+.btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn svg {
+  transition: transform var(--dur) var(--ease-out-soft);
 }
 
 .btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+}
+
+.btn:hover svg {
+  transform: translateX(4px);
 }
 
 .btn:active {
   transform: translateY(0);
 }
 
-.btn--primary {
-  background: var(--btn-primary-bg);
-  color: #fff;
-}
-
-.btn--primary:hover {
-  background: var(--btn-primary-bg-hover);
-  box-shadow: var(--shadow-md);
-}
-
+/* Ink on gold is 8.6:1 - gold is never used with white text. */
 .btn--cta {
-  background: var(--btn-cta-bg);
-  color: var(--btn-cta-text);
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 
 .btn--cta:hover {
-  background: var(--btn-cta-bg-hover);
+  background: var(--accent-strong);
   box-shadow: var(--shadow-gold);
+}
+
+.btn--primary {
+  background: var(--ink-900);
+  color: var(--ivory-100);
+}
+
+.btn--primary:hover {
+  background: var(--ink-700);
+  box-shadow: var(--shadow-md);
 }
 
 .btn--ghost {
@@ -200,23 +249,39 @@ textarea {
 }
 
 .btn--ghost:hover {
-  border-color: var(--primary-600);
-  color: var(--primary-700);
+  border-color: var(--gold-500);
+  color: var(--gold-700);
 }
 
 .btn--onDark {
-  border-color: rgba(255, 255, 255, 0.45);
-  color: #fff;
+  border-color: rgba(245, 239, 227, 0.35);
+  color: var(--ivory-100);
 }
 
 .btn--onDark:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: #fff;
+  border-color: var(--gold-400);
+  background: rgba(210, 172, 78, 0.12);
+  color: var(--gold-200);
+}
+
+/* Gold sweep that travels across the button on hover */
+.btn--sweep::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 -60%;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: skewX(-18deg);
+  transition: left 0.7s var(--ease-out-soft);
+}
+
+.btn--sweep:hover::after {
+  left: 115%;
 }
 
 .btn--sm {
-  padding: 0.6rem 1.1rem;
-  font-size: 0.7rem;
+  padding: 0.62rem 1.15rem;
+  font-size: 0.66rem;
 }
 
 .btn--block {
@@ -227,19 +292,23 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--primary-700);
-  font-size: 0.76rem;
+  color: var(--gold-700);
+  font-size: 0.7rem;
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
+.section--deep .link-arrow {
+  color: var(--gold-300);
+}
+
 .link-arrow svg {
-  transition: transform 0.2s var(--ease);
+  transition: transform var(--dur) var(--ease-out-soft);
 }
 
 .link-arrow:hover svg {
-  transform: translateX(4px);
+  transform: translateX(5px);
 }
 
 /* ---------------------------------------------------------------- bits */
@@ -248,51 +317,71 @@ textarea {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 0.3rem 0.75rem;
+  padding: 0.32rem 0.8rem;
   border-radius: var(--radius-pill);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .pill--gold {
-  background: var(--accent-100);
-  color: var(--accent-800);
+  background: var(--gold-100);
+  color: var(--gold-700);
 }
 
 .pill--green {
-  background: var(--primary-100);
-  color: var(--primary-800);
+  background: rgba(28, 128, 85, 0.12);
+  color: var(--emerald-700);
 }
 
 .pill--pending {
-  background: var(--accent-50);
-  color: var(--accent-800);
+  background: var(--gold-100);
+  color: var(--gold-700);
 }
 
 .pill--confirmed {
-  background: var(--primary-50);
-  color: var(--primary-700);
+  background: rgba(28, 128, 85, 0.12);
+  color: var(--emerald-700);
 }
 
 .pill--rejected {
-  background: #fdecea;
+  background: #fbe9e7;
   color: var(--error);
 }
 
 .card {
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
+  transition: transform var(--dur) var(--ease-out-soft), box-shadow var(--dur) var(--ease-out-soft),
+    border-color var(--dur) var(--ease-out-soft);
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition: box-shadow var(--dur) var(--ease-out-soft);
+  pointer-events: none;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  border-color: var(--primary-200);
+  transform: translateY(-6px);
   box-shadow: var(--shadow-lg);
+}
+
+.card:hover::after {
+  box-shadow: inset 0 0 0 1px var(--border-gold);
+}
+
+/* Cards wrapped in a reveal should still fill the grid cell they sit in */
+.grid > .reveal > .card {
+  height: 100%;
 }
 
 .grid {
@@ -317,7 +406,7 @@ textarea {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--neutral-100) 25%, var(--neutral-200) 37%, var(--neutral-100) 63%);
+  background: linear-gradient(90deg, var(--ivory-100) 25%, var(--ivory-200) 37%, var(--ivory-100) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
   border-radius: var(--radius);
@@ -342,6 +431,58 @@ textarea {
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---------------------------------------------------------------- motion */
+
+/*
+ * Scroll reveals: elements start slightly low and faded, and settle when they enter the viewport
+ * (see useReveal). Stagger with style={{ '--reveal-delay': '120ms' }}.
+ */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 0.85s var(--ease-out-soft), transform 0.85s var(--ease-out-soft);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.reveal--zoom {
+  transform: translateY(26px) scale(0.97);
+}
+
+.reveal--right {
+  transform: translateX(34px);
+}
+
+/* Slow drift used behind hero and CTA bands */
+@keyframes drift {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.08) translate3d(0, -1.5%, 0);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.9s var(--ease-out-soft) both;
 }
 
 @media (max-width: 960px) {

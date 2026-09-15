@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import Scenery from '../ui/Scenery'
 import { ArrowRight } from '../ui/Icons'
 
@@ -8,28 +9,28 @@ const SLIDES = [
     eyebrow: 'Sri Lanka',
     title: 'The emerald isle, unhurried',
     text: 'Private journeys for travellers who would rather see four places properly than fourteen badly.',
-    cta: { label: 'Explore journeys', href: '#journeys' },
+    cta: { label: 'Explore journeys', to: '/#journeys' },
   },
   {
     scenery: 'temple',
     eyebrow: 'Cultural Triangle',
     title: 'Sacred summits, stone cities',
     text: 'Sigiriya before the heat, Dambulla at noon, Polonnaruwa by bicycle and Kandy as the light goes.',
-    cta: { label: 'Cultural journeys', href: '#journeys' },
+    cta: { label: 'Cultural journeys', to: '/#journeys' },
   },
   {
     scenery: 'safari',
     eyebrow: 'Wildlife',
     title: 'Leopards at first light',
     text: 'Dawn drives in Yala, the great elephant gathering at Minneriya, whales off the south coast in season.',
-    cta: { label: 'Safari journeys', href: '#journeys' },
+    cta: { label: 'Safari journeys', to: '/#journeys' },
   },
   {
     scenery: 'tea',
     eyebrow: 'Hill Country',
     title: 'Mist, tea and slow trains',
     text: 'The Kandy to Ella line, planter bungalows, and mornings that smell of eucalyptus and rain.',
-    cta: { label: 'Hill country journeys', href: '#journeys' },
+    cta: { label: 'Hill country journeys', to: '/#journeys' },
   },
 ]
 
@@ -68,13 +69,13 @@ export default function Hero() {
           <h1>{slide.title}</h1>
           <p className="hero__text">{slide.text}</p>
           <div className="hero__actions">
-            <a className="btn btn--cta" href={slide.cta.href}>
+            <Link className="btn btn--cta btn--sweep" to={slide.cta.to}>
               {slide.cta.label}
               <ArrowRight width={16} height={16} />
-            </a>
-            <a className="btn btn--onDark" href="#plan">
+            </Link>
+            <Link className="btn btn--onDark" to="/plan">
               Plan a custom trip
-            </a>
+            </Link>
           </div>
         </div>
 

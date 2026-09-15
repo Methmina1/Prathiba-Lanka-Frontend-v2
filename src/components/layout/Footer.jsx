@@ -1,17 +1,19 @@
+import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Mail, MapPin, Phone, WhatsApp } from '../ui/Icons'
 
 const DISCOVER = [
-  { label: 'Home', href: '#top' },
-  { label: 'Our philosophy', href: '#philosophy' },
-  { label: 'The journal', href: '#journal' },
-  { label: 'Track a booking', href: '#plan' },
+  { label: 'Home', to: '/' },
+  { label: 'Our philosophy', to: '/#philosophy' },
+  { label: 'The journal', to: '/#journal' },
+  { label: 'Plan your journey', to: '/plan' },
+  { label: 'Track a booking', to: '/plan#track' },
 ]
 
 const JOURNEYS = [
-  { label: 'Cultural Triangle', href: '#journeys' },
-  { label: 'Wildlife & Safari', href: '#journeys' },
-  { label: 'Hill Country', href: '#journeys' },
-  { label: 'Southern Coast', href: '#journeys' },
+  { label: 'Cultural Triangle', to: '/#journeys' },
+  { label: 'Wildlife & Safari', to: '/#journeys' },
+  { label: 'Hill Country', to: '/#journeys' },
+  { label: 'Southern Coast', to: '/#journeys' },
 ]
 
 export default function Footer() {
@@ -19,25 +21,25 @@ export default function Footer() {
     <footer className="site-footer" id="contact">
       <div className="container footer__grid">
         <div className="footer__brand">
-          <a className="brand brand--footer" href="#top">
+          <Link className="brand brand--footer" to="/">
             <img src="/logo.png" alt="" className="brand__mark" />
             <span className="brand__text">
               <strong>PrathibaLanka</strong>
               <small>Sri Lanka, arranged with care</small>
             </span>
-          </a>
+          </Link>
           <p>
             Private, tailor-made journeys across Sri Lanka - built by people who live here and
             driven by guides who know the back roads.
           </p>
           <div className="footer__social">
-            <a href="#top" aria-label="Facebook">
+            <a href="/#" aria-label="Facebook">
               <Facebook />
             </a>
-            <a href="#top" aria-label="Instagram">
+            <a href="/#" aria-label="Instagram">
               <Instagram />
             </a>
-            <a href="#top" aria-label="WhatsApp">
+            <a href="/#" aria-label="WhatsApp">
               <WhatsApp />
             </a>
           </div>
@@ -48,7 +50,7 @@ export default function Footer() {
           <ul>
             {DISCOVER.map((link) => (
               <li key={link.label}>
-                <a href={link.href}>{link.label}</a>
+                <Link to={link.to}>{link.label}</Link>
               </li>
             ))}
           </ul>
@@ -59,7 +61,7 @@ export default function Footer() {
           <ul>
             {JOURNEYS.map((link) => (
               <li key={link.label}>
-                <a href={link.href}>{link.label}</a>
+                <Link to={link.to}>{link.label}</Link>
               </li>
             ))}
           </ul>

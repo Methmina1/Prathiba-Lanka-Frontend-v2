@@ -1,73 +1,82 @@
 /*
  * PrathibaLanka design tokens.
- * The brand colours are taken from the logo: primary-600 is the logo's emerald and
- * accent-500 is its gold. Neutral steps carry the same green hue at low saturation so
- * surfaces sit quietly next to the brand mark.
+ *
+ * Palette direction: deep ink surfaces with metallic gold, ivory text and the logo's emerald kept
+ * as a secondary brand note. It reads closer to a luxury travel house than the earlier light
+ * sage/emerald scheme, while the emerald still ties back to the logo mark.
+ *
+ * Every colour pair used in the UI is checked for WCAG contrast - see the notes on buttons in
+ * base.css. Gold is 7.56:1 on ink and 7.29:1 with ink text on it, but only 2.48:1 as text on ivory,
+ * so gold text is never used on light backgrounds.
  */
 
 :root {
-  /* Brand green - emerald from the logo */
-  --primary-50: #effbf5;
-  --primary-100: #d7f4e6;
-  --primary-200: #b3e6ce;
-  --primary-300: #81cfab;
-  --primary-400: #39c684;
-  --primary-500: #1da565;
-  --primary-600: #0b7443;
-  --primary-700: #085933;
-  --primary-800: #054226;
-  --primary-900: #032b18;
+  /* Ink - page and section backgrounds */
+  --ink-950: #070a09;
+  --ink-900: #0b100e;
+  --ink-800: #111815;
+  --ink-700: #18211d;
+  --ink-600: #202b26;
+  --ink-500: #2c3933;
 
-  /* Brand gold - accent from the logo */
-  --accent-50: #fef7ec;
-  --accent-100: #fbe8c5;
-  --accent-200: #f7d497;
-  --accent-300: #f2c069;
-  --accent-400: #eeb34f;
-  --accent-500: #eaa939;
-  --accent-600: #d5911a;
-  --accent-700: #ae7613;
-  --accent-800: #855a0f;
-  --accent-900: #60410b;
+  /* Gold - the accent that carries CTAs, rules and eyebrows */
+  --gold-100: #f7eed6;
+  --gold-200: #eddcaf;
+  --gold-300: #dfc178;
+  --gold-400: #d2ac4e;
+  --gold-500: #c39a2e;
+  --gold-600: #a47f1f;
+  --gold-700: #7e6116;
 
-  /* Sage neutrals */
-  --neutral-50: #f6f9f7;
-  --neutral-100: #edf2f0;
-  --neutral-200: #dfe7e3;
-  --neutral-300: #c9d4cf;
-  --neutral-400: #97aaa1;
-  --neutral-500: #688276;
-  --neutral-600: #4f645a;
-  --neutral-700: #3a4b43;
-  --neutral-800: #28332e;
-  --neutral-900: #141a17;
+  /* Emerald - from the logo, used sparingly */
+  --emerald-300: #55c08d;
+  --emerald-400: #34a472;
+  --emerald-500: #1c8055;
+  --emerald-600: #0f6440;
+  --emerald-700: #0a4a31;
 
-  /* Status */
-  --success: #158450;
-  --warning: #c37113;
-  --error: #c12d1f;
-  --info: #11748d;
+  /* Ivory and sand - light surfaces and warm grey text */
+  --ivory-50: #fbf8f1;
+  --ivory-100: #f5efe3;
+  --ivory-200: #e8dfcc;
+  --ivory-300: #d6cab1;
+  --sand-400: #b3a88f;
+  --sand-500: #8a8071;
+  --sand-600: #5f584c;
+  --sand-700: #3a362e;
 
-  /* Semantic aliases - use these in components */
-  --bg-page: #ffffff;
-  --bg-muted: var(--neutral-50);
-  --bg-deep: var(--primary-900);
+  /* Semantic */
+  --success: #1c8055;
+  --warning: #a47f1f;
+  --error: #b3261e;
+  --info: #14657c;
+
+  /* Aliases used by components */
+  --bg-page: var(--ivory-50);
+  --bg-muted: var(--ivory-100);
+  --bg-deep: var(--ink-900);
+  --bg-deep-alt: var(--ink-800);
   --surface: #ffffff;
-  --surface-alt: var(--primary-50);
-  --border: var(--neutral-200);
-  --border-strong: var(--neutral-300);
-  --text-heading: var(--neutral-900);
-  --text-body: var(--neutral-600);
-  --text-muted: var(--neutral-500);
-  --text-invert: #ffffff;
-  --text-invert-muted: rgba(255, 255, 255, 0.78);
+  --surface-dark: var(--ink-700);
+  --surface-tint: #f8f3e8;
 
-  --btn-primary-bg: var(--primary-600);
-  --btn-primary-bg-hover: var(--primary-500);
-  --btn-cta-bg: var(--accent-500);
-  --btn-cta-bg-hover: var(--accent-600);
-  /* Gold is far too light for white text (2.05:1) - CTA buttons use dark ink (8.6:1). */
-  --btn-cta-text: var(--neutral-900);
+  --border: var(--ivory-200);
+  --border-strong: var(--ivory-300);
+  --border-dark: rgba(210, 172, 78, 0.18);
+  --border-gold: rgba(195, 154, 46, 0.45);
+
+  --text-heading: #1a1f1c;
+  --text-body: #55503f;
+  --text-muted: var(--sand-500);
+  --text-invert: var(--ivory-100);
+  --text-invert-muted: rgba(245, 239, 227, 0.72);
+  --text-invert-faint: rgba(245, 239, 227, 0.5);
+
+  --accent: var(--gold-500);
+  --accent-strong: var(--gold-400);
+  --accent-soft: var(--gold-100);
+  --accent-ink: var(--ink-900);
+  --brand: var(--emerald-600);
 
   /* Type */
   --font-display: 'Cormorant Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
@@ -85,17 +94,23 @@
   --space-9: 6rem;
 
   /* Shape */
-  --radius-sm: 6px;
-  --radius: 12px;
-  --radius-lg: 20px;
+  --radius-sm: 4px;
+  --radius: 10px;
+  --radius-lg: 18px;
   --radius-pill: 999px;
 
-  --shadow-sm: 0 1px 2px rgba(20, 26, 23, 0.06), 0 1px 3px rgba(20, 26, 23, 0.04);
-  --shadow-md: 0 8px 24px rgba(20, 26, 23, 0.08);
-  --shadow-lg: 0 18px 48px rgba(20, 26, 23, 0.14);
-  --shadow-gold: 0 12px 28px rgba(234, 169, 57, 0.32);
+  --shadow-sm: 0 1px 2px rgba(11, 16, 14, 0.06), 0 2px 6px rgba(11, 16, 14, 0.05);
+  --shadow-md: 0 10px 30px rgba(11, 16, 14, 0.1);
+  --shadow-lg: 0 24px 60px rgba(11, 16, 14, 0.16);
+  --shadow-gold: 0 16px 40px rgba(195, 154, 46, 0.28);
 
-  --header-height: 82px;
-  --container: 1200px;
-  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  /* Motion - shared by every transition so the site moves as one */
+  --ease-out-soft: cubic-bezier(0.16, 0.84, 0.44, 1);
+  --ease-in-out-soft: cubic-bezier(0.65, 0.05, 0.36, 1);
+  --dur-fast: 0.25s;
+  --dur: 0.45s;
+  --dur-slow: 0.9s;
+
+  --header-height: 84px;
+  --container: 1240px;
 }

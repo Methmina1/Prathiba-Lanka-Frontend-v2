@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import Scenery from '../ui/Scenery'
 import { ArrowRight, Users } from '../ui/Icons'
 
@@ -55,10 +56,10 @@ export default function PackageCard({ pkg, index = 0 }) {
                 {pkg.maxCapacity} max
               </span>
             ) : null}
-            <a className="link-arrow" href="#plan">
+            <Link className="link-arrow" to="/plan">
               Request
               <ArrowRight width={15} height={15} />
-            </a>
+            </Link>
           </div>
         </div>
       </div>
