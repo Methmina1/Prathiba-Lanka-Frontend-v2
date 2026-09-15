@@ -26,6 +26,9 @@ const TAIL_MS = 200
 const FONT_WAIT_MS = 800 // never hang the intro waiting for a webfont
 const MAX_SCALE = 2.4
 const WIDTH_RATIO = 0.86 // the enlarged lockup never takes more than this much of the width
+const WIDTH_RATIO_NARROW = 0.92 // phones get a little more, so the mark can still grow
+const NARROW_PX = 560
+const MARK_BUMP = 1.5 // how much larger the logo reads while loading, versus the navbar
 
 export default function SplashIntro() {
   const [phase, setPhase] = useState('idle')
@@ -38,6 +41,7 @@ export default function SplashIntro() {
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
     const brand = document.querySelector('.site-header .brand')
+    const mark = document.querySelector('.site-header .brand__mark')
 
     if (reduced || !brand || window.scrollY > 4) {
       setPhase('done')
@@ -45,6 +49,11 @@ export default function SplashIntro() {
     }
 
     const rect = brand.getBoundingClientRect()
+    // the mark is scaled up on its own, so it sticks out past its box: account for that extra
+    // width when deciding how far the lockup may grow, and push the text clear of it
+    const markWidth = mark?.getBoundingClientRect().width ?? 0
+    const extra = markWidth * (MARK_BUMP - 1)
+    const ratio = window.innerWidth < NARROW_PX ? WIDTH_RATIO_NARROW : WIDTH_RATIO
 
     setGeometry({
       top: rect.top,
@@ -53,9 +62,10 @@ export default function SplashIntro() {
       height: rect.height,
       // The lockup is drawn at the navbar's rect and transformed back out to the middle of the
       // screen, scaled up, never taking more than a sensible share of the viewport width.
-      scale: Math.min(MAX_SCALE, (window.innerWidth * WIDTH_RATIO) / rect.width),
+      scale: Math.min(MAX_SCALE, (window.innerWidth * ratio) / (rect.width + extra)),
       dx: window.innerWidth / 2 - (rect.left + rect.width / 2),
       dy: window.innerHeight / 2 - (rect.top + rect.height / 2),
+      markExtra: extra / 2,
     })
 
     document.documentElement.classList.add('intro-playing')
@@ -98,7 +108,15 @@ export default function SplashIntro() {
   const flying = phase === 'flying'
 
   return (
-    <div className={`splash ${flying ? 'is-flying' : ''}`} aria-hidden="true" style={{ '--fly-ms': `${FLY_MS}ms` }}>
+    <div
+      className={`splash ${flying ? 'is-flying' : ''}`}
+      aria-hidden="true"
+      style={{
+        '--fly-ms': `${FLY_MS}ms`,
+        '--mark-bump': MARK_BUMP,
+        '--mark-shift': `${geometry.markExtra}px`,
+      }}
+    >
       <div className="splash__backdrop" />
 
       <div
