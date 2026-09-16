@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
 import { fallbackReviews } from '../../data/fallback'
 import { useApi } from '../../hooks/useApi'
@@ -38,6 +39,12 @@ export default function Reviews() {
               </figure>
             </Reveal>
           ))}
+        </div>
+
+        <div className="section-cta">
+          <Link className="btn btn--ghost" to="/reviews">
+            Read all reviews
+          </Link>
         </div>
       </div>
     </section>

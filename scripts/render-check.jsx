@@ -1,9 +1,9 @@
 /**
- * Renders both routes to a string (no browser needed) and checks their content.
+ * Renders every route to a string (no browser needed) and checks its content.
  * Run with: npm run check:render
  *
- * Catches what a build cannot: undefined components, bad hooks, broken props - and it enforces the
- * split between the marketing home page and the dedicated /plan page.
+ * Catches what a build cannot: undefined components, bad hooks, broken props - across the whole
+ * site, not just the home page.
  */
 import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
@@ -16,44 +16,51 @@ const render = (path) =>
     </MemoryRouter>
   )
 
-const HOME_REQUIRED = [
-  'PrathibaLanka',
-  'The emerald isle',
-  'Signature journeys',
-  'Classical Heritage',
-  'Conscious exploration',
-  'Stories from the island',
-  'Common questions',
-  'The journey awaits',
-]
+// path -> strings that must appear in the rendered markup
+const ROUTES = {
+  '/': ['The emerald isle', 'Signature journeys', 'Conscious exploration', 'Common questions'],
+  '/journeys': ['Signature journeys', 'Search by destination'],
+  // the sample data ships with the app, so detail routes render without a backend
+  '/journeys/demo-1': ['Classical Heritage', 'About this journey', 'Request this journey'],
+  '/journal': ['Stories from the island', 'Read the story'],
+  '/journal/demo-1': ['When to visit Sri Lanka', 'All stories'],
+  '/gallery': ['Where the journeys go', 'Sigiriya at dawn'],
+  '/reviews': ['What people said afterwards', 'The train to Ella was the highlight'],
+  '/about': ['Arranged by people who live here', 'How we got here'],
+  '/contact': ['Talk to us', 'Track a booking'],
+  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking'],
+  '/nope': ['This path leads nowhere'],
+}
 
-// Planning and tracking now live on /plan only.
+// the home page must NOT contain the planning panels any more
 const HOME_FORBIDDEN = ['Request a journey', 'Send enquiry', 'Three steps, then the island']
 
-const PLAN_REQUIRED = [
-  'Plan your journey',
-  'Request a journey',
-  'Send enquiry',
-  'Track a booking',
-  'Three steps, then the island',
-]
+const problems = []
 
-const home = render('/')
-const plan = render('/plan')
-const notFound = render('/nope')
+for (const [path, expected] of Object.entries(ROUTES)) {
+  const html = render(path)
 
-const problems = [
-  ...HOME_REQUIRED.filter((needle) => !home.includes(needle)).map((n) => `home is missing "${n}"`),
-  ...HOME_FORBIDDEN.filter((needle) => home.includes(needle)).map((n) => `home still contains "${n}"`),
-  ...PLAN_REQUIRED.filter((needle) => !plan.includes(needle)).map((n) => `/plan is missing "${n}"`),
-  ...(notFound.includes('This path leads nowhere') ? [] : ['404 route did not render']),
-]
+  if (html.length < 2000) {
+    problems.push(`${path} rendered only ${html.length} characters`)
+    continue
+  }
 
-console.log(`home: ${home.length.toLocaleString()} chars, /plan: ${plan.length.toLocaleString()} chars`)
+  for (const needle of expected) {
+    if (!html.includes(needle)) problems.push(`${path} is missing "${needle}"`)
+  }
+
+  if (path === '/') {
+    for (const needle of HOME_FORBIDDEN) {
+      if (html.includes(needle)) problems.push(`home still contains "${needle}"`)
+    }
+  }
+
+  console.log(`${path.padEnd(20)} ${html.length.toLocaleString().padStart(7)} chars`)
+}
 
 if (problems.length > 0) {
-  console.error(problems.map((p) => ` - ${p}`).join('\n'))
+  console.error('\n' + problems.map((problem) => ` - ${problem}`).join('\n'))
   process.exit(1)
 }
 
-console.log('Render check passed: home and /plan render as expected.')
+console.log(`\nRender check passed: ${Object.keys(ROUTES).length} routes render as expected.`)

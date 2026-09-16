@@ -26,14 +26,16 @@ export default function PackageCard({ pkg, index = 0 }) {
 
   return (
     <article className="card package-card">
-      <div className="package-card__media">
+      <Link className="package-card__media" to={`/journeys/${pkg.packageId}`} aria-label={pkg.title}>
         <Scenery variant={scenery} ratio="3 / 2" />
         {days && <span className="package-card__days">{days}</span>}
-      </div>
+      </Link>
 
       <div className="package-card__body">
         {pkg.destination && <span className="pill pill--green">{pkg.destination}</span>}
-        <h3>{pkg.title}</h3>
+        <h3>
+          <Link to={`/journeys/${pkg.packageId}`}>{pkg.title}</Link>
+        </h3>
         {pkg.description && <p className="package-card__text">{pkg.description}</p>}
 
         <div className="package-card__foot">
@@ -56,6 +58,10 @@ export default function PackageCard({ pkg, index = 0 }) {
                 {pkg.maxCapacity} max
               </span>
             ) : null}
+            <Link className="link-arrow" to={`/journeys/${pkg.packageId}`}>
+              Details
+              <ArrowRight width={15} height={15} />
+            </Link>
             <Link className="link-arrow" to="/plan">
               Request
               <ArrowRight width={15} height={15} />
