@@ -32,15 +32,37 @@ async function request(path, { timeoutMs = 6000, ...options } = {}) {
 
 export const api = {
   baseUrl: BASE_URL,
+
+  // catalogue
   getPackages: () => request('/api/packages'),
-  getGallery: () => request('/api/gallery'),
+  getPackage: (id) => request(`/api/packages/${id}`),
+  searchPackages: (destination) =>
+    request(`/api/packages/search?destination=${encodeURIComponent(destination)}`),
+
+  // journal, gallery, reviews
   getPublishedJournal: () => request('/api/journal/published'),
+  getJournalPost: (id) => request(`/api/journal/published/${id}`),
+  getGallery: () => request('/api/gallery'),
+  getGalleryByPackage: (packageId) => request(`/api/gallery/package/${packageId}`),
   getReviews: () => request('/api/reviews'),
+  getReviewsByPackage: (packageId) => request(`/api/reviews/package/${packageId}`),
+
+  // public actions
+  submitQuery: (payload) => request('/api/contact', { method: 'POST', body: JSON.stringify(payload) }),
   trackBooking: (pin) => request(`/api/bookings/track?pin=${encodeURIComponent(pin)}`),
+
+  // customer actions (need a bearer token)
   login: (email, password) =>
     request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
   register: (payload) => request('/api/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
-  submitQuery: (payload) => request('/api/contact', { method: 'POST', body: JSON.stringify(payload) }),
+  getMyBookings: (token) =>
+    request('/api/customer/bookings', { headers: { Authorization: `Bearer ${token}` } }),
+  submitReview: (payload, token) =>
+    request('/api/reviews', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }),
   requestBooking: (payload, token) =>
     request('/api/bookings/request', {
       method: 'POST',

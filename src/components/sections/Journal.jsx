@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
 import { fallbackJournal } from '../../data/fallback'
 import { useApi } from '../../hooks/useApi'
@@ -31,7 +32,7 @@ export default function Journal() {
         <div className="grid grid--3">
           {posts.slice(0, 3).map((post, index) => (
             <Reveal key={post.journalId} delay={index * 110}>
-              <article className="card journal-card">
+              <Link className="card journal-card" to={`/journal/${post.journalId}`}>
               <div className="journal-card__media">
                 <Scenery variant={post.scenery ?? FALLBACK_SCENERY[index % 6]} ratio="16 / 10" />
               </div>
@@ -39,20 +40,20 @@ export default function Journal() {
                 <span className="journal-card__date">{formatDate(post.publishedAt) ?? 'Draft'}</span>
                 <h3>{post.title}</h3>
                 {post.description && <p className="journal-card__text">{post.description}</p>}
-                <a className="link-arrow" href="#journal">
+                <span className="link-arrow">
                   Read the story
                   <ArrowRight width={15} height={15} />
-                </a>
+                </span>
               </div>
-            </article>
+            </Link>
             </Reveal>
           ))}
         </div>
 
         <div className="section-cta">
-          <a className="btn btn--ghost" href="#journal">
+          <Link className="btn btn--ghost" to="/journal">
             All stories
-          </a>
+          </Link>
         </div>
       </div>
     </section>

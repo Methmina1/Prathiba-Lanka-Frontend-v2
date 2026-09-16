@@ -3,17 +3,18 @@ import { Facebook, Instagram, Mail, MapPin, Phone, WhatsApp } from '../ui/Icons'
 
 const DISCOVER = [
   { label: 'Home', to: '/' },
-  { label: 'Our philosophy', to: '/#philosophy' },
-  { label: 'The journal', to: '/#journal' },
-  { label: 'Plan your journey', to: '/plan' },
-  { label: 'Track a booking', to: '/plan#track' },
+  { label: 'Our story', to: '/about' },
+  { label: 'The journal', to: '/journal' },
+  { label: 'Gallery', to: '/gallery' },
+  { label: 'Reviews', to: '/reviews' },
 ]
 
 const JOURNEYS = [
-  { label: 'Cultural Triangle', to: '/#journeys' },
-  { label: 'Wildlife & Safari', to: '/#journeys' },
-  { label: 'Hill Country', to: '/#journeys' },
-  { label: 'Southern Coast', to: '/#journeys' },
+  { label: 'All journeys', to: '/journeys' },
+  { label: 'Cultural Triangle', to: '/journeys?destination=cultural' },
+  { label: 'Wildlife & Safari', to: '/journeys?destination=yala' },
+  { label: 'Hill Country', to: '/journeys?destination=ella' },
+  { label: 'Southern Coast', to: '/journeys?destination=galle' },
 ]
 
 export default function Footer() {
@@ -81,6 +82,17 @@ export default function Footer() {
             <li>
               <MapPin width={16} height={16} />
               <span>Colombo, Sri Lanka</span>
+            </li>
+          </ul>
+          <ul className="footer__links">
+            <li>
+              <Link to="/contact">Contact</Link>
+            </li>
+            <li>
+              <Link to="/plan">Plan your journey</Link>
+            </li>
+            <li>
+              <Link to="/plan#track">Track a booking</Link>
             </li>
           </ul>
         </div>

@@ -1,23 +1,26 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown, Close, Menu } from '../ui/Icons'
+import { useAuth } from '../../auth/AuthContext'
 
 const NAV = [
   { label: 'Home', to: '/' },
   {
     label: 'Journeys',
-    to: '/#journeys',
+    to: '/journeys',
     children: [
-      { label: 'Cultural Triangle', to: '/#journeys' },
-      { label: 'Wildlife & Safari', to: '/#journeys' },
-      { label: 'Hill Country', to: '/#journeys' },
-      { label: 'Southern Coast', to: '/#journeys' },
+      { label: 'All journeys', to: '/journeys' },
+      { label: 'Cultural Triangle', to: '/journeys?destination=cultural' },
+      { label: 'Wildlife & Safari', to: '/journeys?destination=yala' },
+      { label: 'Hill Country', to: '/journeys?destination=ella' },
+      { label: 'Southern Coast', to: '/journeys?destination=galle' },
     ],
   },
-  { label: 'Journal', to: '/#journal' },
-  { label: 'Gallery', to: '/#gallery' },
-  { label: 'Reviews', to: '/#reviews' },
-  { label: 'Contact', to: '/#contact' },
+  { label: 'Journal', to: '/journal' },
+  { label: 'Gallery', to: '/gallery' },
+  { label: 'Reviews', to: '/reviews' },
+  { label: 'About', to: '/about' },
+  { label: 'Contact', to: '/contact' },
 ]
 
 export default function Header() {
@@ -26,6 +29,8 @@ export default function Header() {
   const [atTop, setAtTop] = useState(true)
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const { session, email, signOut } = useAuth()
 
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY <= 4)
@@ -45,10 +50,11 @@ export default function Header() {
     setOpen(false)
   }, [pathname])
 
+  const isActive = (to) => (to === '/' ? pathname === '/' : pathname.startsWith(to.split('?')[0]))
+
   return (
-    <>
-      <header className={`site-header ${atTop ? 'is-top' : 'is-scrolled'}`}>
-        <div className="navbar">
+    <header className={`site-header ${atTop ? 'is-top' : 'is-scrolled'}`}>
+      <div className="navbar">
         <div className="container navbar__inner">
           <Link className="brand" to="/" aria-label="PrathibaLanka home">
             <img src="/logo-mark.png" alt="" className="brand__mark" />
@@ -61,7 +67,7 @@ export default function Header() {
           <nav className="nav" aria-label="Main">
             {NAV.map((item) => (
               <div className={`nav__item ${item.children ? 'has-menu' : ''}`} key={item.label}>
-                <Link className={`nav__link ${pathname === item.to ? 'is-active' : ''}`} to={item.to}>
+                <Link className={`nav__link ${isActive(item.to) ? 'is-active' : ''}`} to={item.to}>
                   {item.label}
                   {item.children && <ChevronDown width={14} height={14} />}
                 </Link>
@@ -79,6 +85,15 @@ export default function Header() {
           </nav>
 
           <div className="navbar__actions">
+            {session ? (
+              <Link className="navbar__auth" to="/account">
+                {email ? email.split('@')[0] : 'Account'}
+              </Link>
+            ) : (
+              <Link className="navbar__auth" to="/login">
+                Sign in
+              </Link>
+            )}
             <Link className="btn btn--cta btn--sweep btn--sm" to="/plan">
               Plan your trip
             </Link>
@@ -105,12 +120,33 @@ export default function Header() {
           <Link className="mobile-menu__track" to="/plan#track" onClick={() => setOpen(false)}>
             Track your booking
           </Link>
+          {session ? (
+            <>
+              <Link to="/account" onClick={() => setOpen(false)}>
+                My account
+              </Link>
+              <button
+                type="button"
+                className="mobile-menu__track"
+                onClick={() => {
+                  setOpen(false)
+                  signOut()
+                  navigate('/', { replace: true })
+                }}
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link to="/login" onClick={() => setOpen(false)}>
+              Sign in
+            </Link>
+          )}
           <Link className="btn btn--cta btn--block" to="/plan" onClick={() => setOpen(false)}>
             Plan your trip
           </Link>
         </nav>
-        </div>
-      </header>
-    </>
+      </div>
+    </header>
   )
 }

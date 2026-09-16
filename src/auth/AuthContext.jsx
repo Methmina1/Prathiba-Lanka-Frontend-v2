@@ -1,0 +1,73 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { api } from '../api/client'
+
+const STORAGE_KEY = 'prathibalanka.session'
+
+const AuthContext = createContext(null)
+
+/**
+ * Customer session: the JWT issued by /api/auth/login or /register, kept in localStorage so a
+ * refresh does not sign you out. Reads happen in an effect, never during render, so the app still
+ * renders on the server.
+ */
+export function AuthProvider({ children }) {
+  const [session, setSession] = useState(null)
+  const [ready, setReady] = useState(false)
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (raw) setSession(JSON.parse(raw))
+    } catch {
+      // a corrupt entry just means "signed out"
+    }
+    setReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!ready) return
+    try {
+      if (session) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
+      else window.localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // storage can be blocked; the session then lives for this tab only
+    }
+  }, [session, ready])
+
+  const adopt = useCallback((data) => {
+    setSession({ token: data.token, email: data.email, role: data.role, userId: data.userId })
+    return data
+  }, [])
+
+  const signIn = useCallback(
+    async (email, password) => adopt(await api.login(email, password)),
+    [adopt]
+  )
+
+  const signUp = useCallback(async (payload) => adopt(await api.register(payload)), [adopt])
+
+  const signOut = useCallback(() => setSession(null), [])
+
+  const value = useMemo(
+    () => ({
+      session,
+      ready,
+      token: session?.token ?? null,
+      email: session?.email ?? null,
+      userId: session?.userId ?? null,
+      isCustomer: session?.role === 'ROLE_CUSTOMER',
+      signIn,
+      signUp,
+      signOut,
+    }),
+    [session, ready, signIn, signUp, signOut]
+  )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext)
+  if (!context) throw new Error('useAuth must be used inside <AuthProvider>')
+  return context
+}

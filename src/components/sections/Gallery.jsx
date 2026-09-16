@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
 import { useApi } from '../../hooks/useApi'
 import Reveal from '../ui/Reveal'
@@ -46,6 +47,12 @@ export default function Gallery() {
               ))}
           </div>
         </Reveal>
+
+        <div className="section-cta">
+          <Link className="btn btn--ghost" to="/gallery">
+            Open the gallery
+          </Link>
+        </div>
       </div>
     </section>
   )

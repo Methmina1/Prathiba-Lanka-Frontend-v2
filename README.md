@@ -8,11 +8,24 @@ framework, so the palette and layout stay easy to change.
 | Route | Contents |
 |---|---|
 | `/` | Hero carousel, trust badges, philosophy, signature journeys, sustainability, gallery, journal, reviews, FAQ, CTA band |
+| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala` |
+| `/journeys/:id` | One journey: overview, day-by-day itinerary, gallery strip, reviews for that package, sticky quote card |
+| `/journal` | Featured story plus the rest of the published posts |
+| `/journal/:id` | Full story, then more from the journal |
+| `/gallery` | Large mosaic of live gallery images, or the illustrated placeholders while it is empty |
+| `/reviews` | Average score, rating distribution and every review |
+| `/about` | Our story, the four things we hold to, milestones timeline |
+| `/contact` | Phone/email/office cards, the enquiry form, a link to the PIN tracker |
 | `/plan` | **Plan your journey**: enquiry form (`POST /api/contact`), PIN tracker (`GET /api/bookings/track`), how-it-works steps |
+| `/login`, `/register` | Customer sign in and sign up (`POST /api/auth/login`, `POST /api/auth/register`); the JWT is kept in localStorage |
+| `/account` | Signed-in customers: their bookings (`GET /api/customer/bookings`), a new booking request (`POST /api/bookings/request`) and a review form (`POST /api/reviews`) |
 | `*` | 404 |
 
 Planning and booking-tracking live only on `/plan`; every "Plan your trip" / "Request" button routes
 there. The header link `/plan#track` lands with the cursor already in the PIN field.
+
+Every page works without the backend: detail routes fall back to the matching sample record and the
+lists fall back to `src/data/fallback.js`, with a notice explaining which one you are seeing.
 
 ## Requirements
 
@@ -50,16 +63,18 @@ that the planning/tracking panels have not leaked back onto the home page.
 
 | Where | Endpoint |
 |---|---|
-| Signature journeys | `GET /api/packages` (active only) |
-| Gallery | `GET /api/gallery` |
-| Journal | `GET /api/journal/published` |
-| Reviews | `GET /api/reviews` |
-| Enquiry form (`/plan`) | `POST /api/contact` - public |
+| Signature journeys, `/journeys`, detail page | `GET /api/packages`, `GET /api/packages/{id}`, `GET /api/packages/search?destination=` |
+| Gallery (home + `/gallery`) | `GET /api/gallery`, `GET /api/gallery/package/{id}` |
+| Journal (home + `/journal`) | `GET /api/journal/published`, `GET /api/journal/published/{id}` |
+| Reviews (home + `/reviews` + detail) | `GET /api/reviews`, `GET /api/reviews/package/{id}` |
+| Enquiry form (`/plan`, `/contact`) | `POST /api/contact` - public |
 | PIN tracker (`/plan`) | `GET /api/bookings/track?pin=` - public |
+| Sign in / sign up | `POST /api/auth/login`, `POST /api/auth/register` |
+| `/account` | `GET /api/customer/bookings`, `POST /api/bookings/request`, `POST /api/reviews` - all send the bearer token |
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
-and a small notice explains why, so the page never looks broken. Booking/review submission is *not*
-done here: those endpoints need a customer token and belong to the booking flow.
+and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
+needs a real session - so `/account` sends signed-out visitors to `/login?next=/account`.
 
 ## Design system
 
@@ -97,18 +112,20 @@ because of it.
 
 ```
 src/
-  api/client.js            fetch wrapper (base URL, timeouts, typed errors)
-  hooks/useApi.js          loader with loading / live / fallback states
-  data/fallback.js         sample packages, journal posts, reviews, FAQ copy
+  api/client.js            fetch wrapper (base URL, timeouts, typed errors) + every endpoint used
+  hooks/useApi.js          list loader with loading / live / fallback states
+  hooks/useResource.js     single-record loader (loading / ready / missing / error)
+  utils/format.js          price, date and paragraph helpers
+  data/fallback.js         sample journeys, journal posts, reviews, FAQ copy
   styles/theme.css         design tokens
   styles/base.css          reset, type, buttons, grid, reveal/motion utilities
-  styles/components.css    section styles
-  components/layout/       Header (topbar, sticky nav, mobile menu), Footer
-  components/plan/         EnquiryForm, TrackBooking  (used by /plan)
-  components/sections/     Hero, TrustBar, Philosophy, Packages, Sustainability,
-                           Gallery, Journal, Reviews, Faq, CtaBand
+  styles/components.css    section and page styles
+  components/layout/       Header, Footer, PageHero, SplashIntro
+  components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
+  components/sections/     Home page sections
   components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress
-  pages/                   Home, PlanPage, NotFound
+  pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
+                           GalleryPage, ReviewsPage, About, Contact, PlanPage, NotFound
 ```
 
 ## Images
@@ -119,5 +136,6 @@ for an `<img />` when you have it - the gallery already renders live `imageUrl` 
 
 ## Not built yet
 
-Package detail pages, the booking flow (customer login → request), the admin dashboard, and forms
-for reviews/contact beyond the enquiry form.
+The admin dashboard (`/api/admin/**` already covers packages, journal, gallery, queries and booking
+confirmations) and password reset / profile editing. Payment is out of scope by design - a booking
+is a request that a consultant confirms.
