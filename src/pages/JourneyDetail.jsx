@@ -6,6 +6,7 @@ import { useResource } from '../hooks/useResource'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
+import MediaFigure from '../components/ui/MediaFigure'
 import { ArrowRight, Calendar, Check, MapPin, Phone, Star, Users } from '../components/ui/Icons'
 import { formatDate, formatDays, formatPrice, toParagraphs } from '../utils/format'
 
@@ -122,7 +123,7 @@ export default function JourneyDetail() {
                 <div className="detail__strip">
                   {gallery.slice(0, 3).map((image) => (
                     <figure key={image.imageId}>
-                      <img src={image.imageUrl} alt={image.caption ?? pkg.title} loading="lazy" />
+                      <MediaFigure item={image} alt={image.caption ?? pkg.title} />
                       {image.caption && <figcaption>{image.caption}</figcaption>}
                     </figure>
                   ))}

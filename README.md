@@ -24,7 +24,9 @@ framework, so the palette and layout stay easy to change.
 | `/admin/queries` | Enquiries with a "new only" filter and a reply box that emails the sender |
 | `/admin/packages` | Journey CRUD, activate/deactivate, delete |
 | `/admin/journal` | Story CRUD, publish/unpublish, delete |
-| `/admin/gallery` | Add/edit/remove images, optionally attached to a journey |
+| `/admin/gallery` | Images and short clips on the public gallery, linked to a journey if you like |
+| `/admin/media` | **Media library**: upload images and short videos, see the path each is served from, delete |
+| `/admin/content` | **About and Contact pages**: every heading, paragraph, list entry and contact card, including the footer details |
 | `/admin/reviews` | Moderation: read every review, remove one from the public page |
 | `*` | 404 |
 
@@ -43,9 +45,9 @@ lists fall back to `src/data/fallback.js`, with a notice explaining which one yo
 | `ROLE_CUSTOMER` | `/account` - own bookings, new booking request, review form | reach `/admin` |
 | `ROLE_ADMIN` | `/admin` - the staff console | hold a booking or post a review (the backend rejects both with 403) |
 
-The admin console is reached from the small **Admin** link on the right of the site header, which
-only appears for a signed-out visitor or a customer. There is no self-service admin signup: accounts
-come from `app.bootstrap-admin.*` in the backend (`admin@test.com` / `Admin@12345` by default).
+The admin console is reached from the small **Admin sign in** link in the site footer. There is no
+self-service admin signup: accounts come from `app.bootstrap-admin.*` in the backend
+(`admin@test.com` / `Admin@12345` by default).
 
 `/admin/**` is guarded on the client too - `components/admin/AdminLayout.jsx` sends a signed-out
 visitor to `/login?next=<path>` and shows "Admin access required" for a customer session - but the
@@ -105,10 +107,19 @@ the planning/tracking panels have not leaked back onto the home page.
 | `/admin/packages` | `GET|POST /api/admin/packages`, `PUT /api/admin/packages/{id}`, `PATCH .../deactivate`, `DELETE /api/admin/packages/{id}` |
 | `/admin/journal` | `GET|POST /api/admin/journal`, `PUT /api/admin/journal/{id}`, `PATCH .../publish`, `PATCH .../unpublish`, `DELETE /api/admin/journal/{id}` |
 | `/admin/gallery` | `POST /api/admin/gallery`, `PUT /api/admin/gallery/{id}`, `DELETE /api/admin/gallery/{id}` |
+| `/admin/media` | `GET|POST /api/admin/media` (multipart), `GET /api/admin/media/limits`, `DELETE /api/admin/media/{id}` |
+| `/admin/content` | `GET /api/admin/content`, `PUT /api/admin/content/{section}` |
 | `/admin/reviews` | `DELETE /api/admin/reviews/{id}` |
+| About + Contact pages, footer | `GET /api/content/about`, `GET /api/content/contact` - public; the page falls back to `src/data/pageContent.js` if the API is silent |
 
 Every admin call goes through `src/api/admin.js`, which attaches the bearer token; the client never
 caches lists, so each mutation reloads the table it changed.
+
+**Uploads.** `src/components/admin/MediaPicker.jsx` is the shared "choose a file" dialog: it uploads
+through `POST /api/admin/media` and hands the picked asset back as `{ url, mediaType }`. Stored files
+are relative paths (`/media/<name>`), so `api.mediaUrl(path)` in `src/api/client.js` prefixes the API
+origin before anything is rendered - without it an `<img src="/media/...">` would resolve against the
+front-end origin and 404.
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
@@ -161,27 +172,33 @@ src/
   hooks/useResource.js     single-record loader (loading / ready / missing / error)
   utils/format.js          price, date and paragraph helpers
   data/fallback.js         sample journeys, journal posts, reviews, FAQ copy
+  data/pageContent.js      default copy for the editable About/Contact pages
   auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
+  hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens
   styles/base.css          reset, type, buttons, grid, reveal/motion utilities
   styles/components.css    section and page styles
   styles/admin.css         staff console theme (scoped to .admin)
   components/layout/       Header, Footer, PageHero, SplashIntro
   components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
-  components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills), useAdmin
+  components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills),
+                           MediaPicker, useAdmin
   components/sections/     Home page sections
-  components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress
+  components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress, MediaFigure
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
                            GalleryPage, ReviewsPage, About, Contact, PlanPage, Login, Register,
                            Account, NotFound
-  pages/admin/             Overview, Bookings, Queries, Packages, Journal, Gallery, Reviews
+  pages/admin/             Overview, Bookings, Queries, Packages, Journal, Gallery, Media, Content,
+                           Reviews
 ```
 
-## Images
+## Images and video
 
-No external image dependencies: scenes are drawn as SVG by `components/ui/Scenery.jsx` (temple,
-safari, tea, coast, train, hills). Drop photography into `public/images/` and swap a `<Scenery />`
-for an `<img />` when you have it - the gallery already renders live `imageUrl` values from the API.
+Uploaded files live in the backend (see its README) and are rendered by
+`components/ui/MediaFigure.jsx`, which picks an `<img>` or a `<video controls>` from the item's
+`mediaType`. Every gallery surface - the home strip, `/gallery` and the journey page - uses it, so a
+clip works everywhere a photo does. Until something is uploaded, the illustrated SVG scenes in
+`components/ui/Scenery.jsx` stand in.
 
 ## Not built yet
 

@@ -3,6 +3,7 @@ import { api } from '../../api/client'
 import { useApi } from '../../hooks/useApi'
 import Reveal from '../ui/Reveal'
 import Scenery from '../ui/Scenery'
+import MediaFigure from '../ui/MediaFigure'
 
 const TILES = [
   { variant: 'temple', caption: 'Sigiriya at dawn', span: 'wide' },
@@ -35,7 +36,11 @@ export default function Gallery() {
           {hasLive
             ? images.slice(0, 6).map((image) => (
                 <figure className={`mosaic__tile ${image.caption?.length > 30 ? 'wide' : ''}`} key={image.imageId}>
-                  <img src={image.imageUrl} alt={image.caption ?? 'Gallery image'} loading="lazy" />
+                  <MediaFigure
+                    item={image}
+                    alt={image.caption ?? 'Gallery image'}
+                    className={image.mediaType === 'VIDEO' ? 'mosaic__video' : undefined}
+                  />
                   <figcaption>{image.caption ?? image.packageTitle}</figcaption>
                 </figure>
               ))

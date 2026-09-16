@@ -3,6 +3,7 @@ import { useApi } from '../hooks/useApi'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
+import MediaFigure from '../components/ui/MediaFigure'
 import { formatDate } from '../utils/format'
 
 const TILES = [
@@ -47,7 +48,11 @@ export default function GalleryPage() {
             {hasLive
               ? images.map((image) => (
                   <figure className="mosaic__tile" key={image.imageId}>
-                    <img src={image.imageUrl} alt={image.caption ?? 'Gallery image'} loading="lazy" />
+                    <MediaFigure
+                      item={image}
+                      alt={image.caption ?? 'Gallery image'}
+                      className={image.mediaType === 'VIDEO' ? 'mosaic__video' : undefined}
+                    />
                     <figcaption>{image.caption ?? image.packageTitle ?? 'Sri Lanka'}</figcaption>
                   </figure>
                 ))

@@ -21,6 +21,14 @@ export function formatDays(days) {
   return `${days} ${Number(days) === 1 ? 'day' : 'days'}`
 }
 
+/** 1536000 -> "1.5 MB" */
+export function formatBytes(bytes) {
+  if (!bytes && bytes !== 0) return null
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${bytes} B`
+}
+
 /** Splits a textarea-style body into paragraphs for rendering. */
 export function toParagraphs(text) {
   if (!text) return []

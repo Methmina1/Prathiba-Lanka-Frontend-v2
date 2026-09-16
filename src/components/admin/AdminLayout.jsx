@@ -1,54 +1,83 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/AuthContext'
 import { ArrowRight, Close, Menu } from '../ui/Icons'
 
 /** Route metadata: the sidebar, the page title and the subtitle all come from here. */
-const NAV = [
+const GROUPS = [
   {
-    to: '/admin',
-    label: 'Dashboard',
-    end: true,
-    title: 'Dashboard',
-    description: 'Everything that needs attention today.',
+    label: 'Operations',
+    items: [
+      {
+        to: '/admin',
+        label: 'Dashboard',
+        end: true,
+        title: 'Dashboard',
+        description: 'Everything that needs attention today.',
+      },
+      {
+        to: '/admin/bookings',
+        label: 'Bookings',
+        title: 'Bookings',
+        description: 'Confirm or reject the requests customers have made.',
+      },
+      {
+        to: '/admin/queries',
+        label: 'Contact queries',
+        title: 'Contact queries',
+        description: 'Enquiries from the website contact form.',
+      },
+    ],
   },
   {
-    to: '/admin/bookings',
-    label: 'Bookings',
-    title: 'Bookings',
-    description: 'Confirm or reject the requests customers have made.',
+    label: 'Content',
+    items: [
+      {
+        to: '/admin/packages',
+        label: 'Packages',
+        title: 'Packages',
+        description: 'The journeys on offer - create, edit, deactivate or remove.',
+      },
+      {
+        to: '/admin/journal',
+        label: 'Journal',
+        title: 'Journal',
+        description: 'Stories, drafts and publishing.',
+      },
+      {
+        to: '/admin/gallery',
+        label: 'Gallery',
+        title: 'Gallery',
+        description: 'Images and short videos shown on the public gallery.',
+      },
+      {
+        to: '/admin/media',
+        label: 'Media library',
+        title: 'Media library',
+        description: 'Every uploaded image and clip, with the path it is served from.',
+      },
+      {
+        to: '/admin/content',
+        label: 'About and Contact',
+        title: 'About and Contact pages',
+        description: 'The words on those pages, including the footer contact details.',
+      },
+    ],
   },
   {
-    to: '/admin/queries',
-    label: 'Contact queries',
-    title: 'Contact queries',
-    description: 'Enquiries from the website contact form.',
-  },
-  {
-    to: '/admin/packages',
-    label: 'Packages',
-    title: 'Packages',
-    description: 'The journeys on offer - create, edit, deactivate or remove.',
-  },
-  {
-    to: '/admin/journal',
-    label: 'Journal',
-    title: 'Journal',
-    description: 'Stories, drafts and publishing.',
-  },
-  {
-    to: '/admin/gallery',
-    label: 'Gallery',
-    title: 'Gallery',
-    description: 'Images shown on the public gallery.',
-  },
-  {
-    to: '/admin/reviews',
-    label: 'Reviews',
-    title: 'Reviews',
-    description: 'Moderate what travellers have written.',
+    label: 'Community',
+    items: [
+      {
+        to: '/admin/reviews',
+        label: 'Reviews',
+        title: 'Reviews',
+        description: 'Moderate what travellers have written.',
+      },
+    ],
   },
 ]
+
+const NAV = GROUPS.flatMap((group) => group.items)
 
 export function adminRouteMeta(pathname) {
   const exact = NAV.find((item) => item.to === pathname)
@@ -130,18 +159,15 @@ export default function AdminLayout() {
           </div>
 
           <nav className="admin__nav" aria-label="Admin">
-            <span className="admin__nav-label">Operations</span>
-            {NAV.slice(0, 3).map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end}>
-                {item.label}
-              </NavLink>
-            ))}
-
-            <span className="admin__nav-label">Content</span>
-            {NAV.slice(3).map((item) => (
-              <NavLink key={item.to} to={item.to} end={item.end}>
-                {item.label}
-              </NavLink>
+            {GROUPS.map((group) => (
+              <Fragment key={group.label}>
+                <span className="admin__nav-label">{group.label}</span>
+                {group.items.map((item) => (
+                  <NavLink key={item.to} to={item.to} end={item.end}>
+                    {item.label}
+                  </NavLink>
+                ))}
+              </Fragment>
             ))}
 
             <span className="admin__nav-label">Public site</span>

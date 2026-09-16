@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { adminApi } from '../../api/admin'
 import { useAuth } from '../../auth/AuthContext'
 import { DataTable, Dialog, Field, Notice, StatusPill, Toolbar } from '../../components/admin/AdminUI'
+import MediaPicker from '../../components/admin/MediaPicker'
 import { describeError, useAdminList } from '../../components/admin/useAdmin'
 import { formatDate } from '../../utils/format'
 
@@ -13,6 +14,7 @@ export default function AdminJournal() {
   const { rows: posts, loading, error, reload } = useAdminList(() => adminApi.listJournal(token), [token])
 
   const [dialog, setDialog] = useState(null)
+  const [picker, setPicker] = useState(false)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState({ kind: 'info', text: '' })
   const [confirmDelete, setConfirmDelete] = useState(null)
@@ -174,8 +176,13 @@ export default function AdminJournal() {
               <textarea rows={2} value={dialog.form.description} onChange={patch('description')} />
             </Field>
 
-            <Field label="Cover image URL" hint="Optional - an illustration is used when this is empty.">
-              <input value={dialog.form.coverImageUrl} onChange={patch('coverImageUrl')} maxLength={255} />
+            <Field label="Cover image" hint="Optional - an illustration is used when this is empty.">
+              <div className="adm-inline">
+                <input value={dialog.form.coverImageUrl} onChange={patch('coverImageUrl')} maxLength={255} />
+                <button type="button" className="adm-btn adm-btn--outline" onClick={() => setPicker(true)}>
+                  Library
+                </button>
+              </div>
             </Field>
 
             <Field label="Story" hint="Blank lines separate paragraphs.">
@@ -200,6 +207,14 @@ export default function AdminJournal() {
           </form>
         )}
       </Dialog>
+
+      <MediaPicker
+        open={picker}
+        onClose={() => setPicker(false)}
+        onPick={(asset) =>
+          setDialog((current) => ({ ...current, form: { ...current.form, coverImageUrl: asset.url } }))
+        }
+      />
 
       <Dialog open={Boolean(confirmDelete)} title="Delete story" onClose={() => setConfirmDelete(null)}>
         <p style={{ marginBottom: '1rem', color: 'var(--adm-muted)' }}>

@@ -26,6 +26,8 @@ import AdminQueries from './pages/admin/Queries'
 import AdminPackages from './pages/admin/Packages'
 import AdminJournal from './pages/admin/Journal'
 import AdminGallery from './pages/admin/Gallery'
+import AdminMedia from './pages/admin/Media'
+import AdminContent from './pages/admin/Content'
 import AdminReviews from './pages/admin/Reviews'
 
 /** The public site: brand intro, marketing header and footer. */
@@ -71,6 +73,8 @@ export default function App({ initialSession = null }) {
           <Route path="packages" element={<AdminPackages />} />
           <Route path="journal" element={<AdminJournal />} />
           <Route path="gallery" element={<AdminGallery />} />
+          <Route path="media" element={<AdminMedia />} />
+          <Route path="content" element={<AdminContent />} />
           <Route path="reviews" element={<AdminReviews />} />
         </Route>
       </Routes>

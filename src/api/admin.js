@@ -55,4 +55,25 @@ export const adminApi = {
 
   // ---- reviews (moderation) ----------------------------------------------
   deleteReview: (token, id) => request(`/api/admin/reviews/${id}`, { method: 'DELETE', headers: auth(token) }),
+
+  // ---- media library ------------------------------------------------------
+  listMedia: (token, type) =>
+    request(`/api/admin/media${type ? `?type=${encodeURIComponent(type)}` : ''}`, { headers: auth(token) }),
+  mediaLimits: (token) => request('/api/admin/media/limits', { headers: auth(token) }),
+  /** Multipart upload; the browser sets the boundary, so no Content-Type header here. */
+  uploadMedia: (token, file, title) => {
+    const body = new FormData()
+    body.append('file', file)
+    if (title) body.append('title', title)
+    return request('/api/admin/media', { method: 'POST', headers: auth(token), body, timeoutMs: 120000 })
+  },
+  deleteMedia: (token, id) => request(`/api/admin/media/${id}`, { method: 'DELETE', headers: auth(token) }),
+
+  // ---- editable page content ---------------------------------------------
+  listContent: (token) => request('/api/admin/content', { headers: auth(token) }),
+  saveContent: (token, section, payload) =>
+    request(`/api/admin/content/${section}`, {
+      method: 'PUT',
+      ...json(token, { payload }),
+    }),
 }

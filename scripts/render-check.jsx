@@ -30,8 +30,7 @@ const ROUTES = {
   '/gallery': ['Where the journeys go', 'Sigiriya at dawn'],
   '/reviews': ['What people said afterwards', 'The train to Ella was the highlight'],
   '/about': ['Arranged by people who live here', 'How we got here'],
-  '/contact': ['Talk to us', 'Track a booking'],
-  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking'],
+  '/contact': ['Talk to us', 'Track a booking'],  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking'],
   '/login': ['Sign in', 'Create an account'],
   '/register': ['Create an account', 'At least 8 characters'],
   '/nope': ['This path leads nowhere'],
@@ -44,7 +43,9 @@ const ADMIN_ROUTES = {
   '/admin/queries': ['Admin console', 'Waiting for a reply'],
   '/admin/packages': ['Admin console', 'New package'],
   '/admin/journal': ['Admin console', 'New story'],
-  '/admin/gallery': ['Admin console', 'Add image'],
+  '/admin/gallery': ['Admin console', 'Add image or video'],
+  '/admin/media': ['Admin console', 'Media library'],
+  '/admin/content': ['Admin console', 'About and Contact', 'About page', 'Contact page'],
   '/admin/reviews': ['Admin console', 'Customers can review from their account page'],
 }
 

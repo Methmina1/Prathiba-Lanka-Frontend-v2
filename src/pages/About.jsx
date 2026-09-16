@@ -4,100 +4,52 @@ import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
 import CtaBand from '../components/sections/CtaBand'
 import { ArrowRight, Check } from '../components/ui/Icons'
-
-const VALUES = [
-  {
-    title: 'Local knowledge, not a script',
-    text: 'Our guides grew up with these roads, temples and tea estates. They will tell you when to go, and when not to.',
-  },
-  {
-    title: 'Private by default',
-    text: 'No shared coaches, no strangers at breakfast. Your vehicle, your guide, your pace.',
-  },
-  {
-    title: 'Priced in the open',
-    text: 'One figure per person, agreed before you travel. No commission stops, no surprise extras.',
-  },
-  {
-    title: 'Care for the island',
-    text: 'Family-run stays, plastic-free journeys and wildlife viewed at a respectful distance.',
-  },
-]
-
-const TIMELINE = [
-  {
-    year: '2014',
-    title: 'A single vehicle in Colombo',
-    text: 'Two guides, one van and a notebook of favourite guesthouses along the south coast.',
-  },
-  {
-    year: '2017',
-    title: 'The hill country routes',
-    text: 'We mapped the tea line properly - which carriage, which side, which stops are worth the walk.',
-  },
-  {
-    year: '2021',
-    title: 'Wildlife done quietly',
-    text: 'Long relationships with park trackers, and a firm rule about keeping our distance.',
-  },
-  {
-    year: 'Today',
-    title: 'A small team, still on the road',
-    text: 'We keep the number of journeys per season low enough that every traveller gets a real consultant.',
-  },
-]
+import { usePageContent } from '../hooks/usePageContent'
 
 export default function About() {
+  // Copy comes from the API (editable in the admin console) and falls back to the bundled defaults.
+  const { content } = usePageContent('about')
+  const { hero, story, values, timeline } = content
+
   return (
     <main className="page-enter">
       <PageHero
-        eyebrow="About us"
-        title="Arranged by people who live here"
-        lede="PrathibaLanka is a small Sri Lankan travel house. We build private journeys for travellers who would rather see four places properly than fourteen badly."
+        eyebrow={hero.eyebrow}
+        title={hero.title}
+        lede={hero.lede}
         crumbs={[{ label: 'About' }]}
-        scenery="train"
+        scenery={hero.scenery}
       />
 
       <section className="section">
         <div className="container philosophy">
           <Reveal className="philosophy__media" variant="reveal--right">
             <div className="philosophy__frame">
-              <Scenery variant="tea" ratio="4 / 5" />
+              <Scenery variant={story.scenery} ratio="4 / 5" />
             </div>
             <div className="philosophy__badge">
-              <strong>Since 2014</strong>
-              <span>Arranging journeys from Colombo</span>
+              <strong>{story.badgeTitle}</strong>
+              <span>{story.badgeText}</span>
             </div>
           </Reveal>
 
           <Reveal className="philosophy__copy" delay={120}>
-            <span className="eyebrow">Our story</span>
-            <h2>Fewer places. Longer looks.</h2>
-            <p className="lede">
-              We started with one vehicle and a list of places we loved. That has not really changed:
-              we still plan every journey by hand, and we still send people to the guesthouses we
-              would send our own families to.
-            </p>
+            <span className="eyebrow">{story.eyebrow}</span>
+            <h2>{story.heading}</h2>
+            <p className="lede">{story.lede}</p>
 
             <ul className="philosophy__points">
-              <li>
-                <span className="philosophy__tick">
-                  <Check width={15} height={15} />
-                </span>
-                <div>
-                  <strong>One consultant per journey</strong>
-                  <p>The person who plans your trip is the person who answers when you write.</p>
-                </div>
-              </li>
-              <li>
-                <span className="philosophy__tick">
-                  <Check width={15} height={15} />
-                </span>
-                <div>
-                  <strong>On the ground, always</strong>
-                  <p>A local number that is answered day or night, for the whole of your stay.</p>
-                </div>
-              </li>
+              {(story.points ?? []).map((point) => (
+                <li key={point.title}>
+                  <span className="philosophy__tick">
+                    <Check width={15} height={15} />
+                  </span>
+                  <div>
+                    <strong>{point.title}</strong>
+                    <p>{point.text}</p>
+                  </div>
+                </li>
+              ))}
             </ul>
 
             <Link className="link-arrow" to="/journeys">
@@ -111,12 +63,12 @@ export default function About() {
       <section className="section section--muted">
         <div className="container">
           <Reveal className="section-head section-head--center">
-            <span className="eyebrow">What we hold to</span>
-            <h2>Four things we do not compromise on</h2>
+            <span className="eyebrow">{values.eyebrow}</span>
+            <h2>{values.heading}</h2>
           </Reveal>
 
           <div className="grid grid--4">
-            {VALUES.map((value, index) => (
+            {(values.items ?? []).map((value, index) => (
               <Reveal key={value.title} delay={index * 100}>
                 <article className="card step-card">
                   <span className="step-card__number">{String(index + 1).padStart(2, '0')}</span>
@@ -132,13 +84,13 @@ export default function About() {
       <section className="section">
         <div className="container">
           <Reveal className="section-head">
-            <span className="eyebrow">Milestones</span>
-            <h2>How we got here</h2>
+            <span className="eyebrow">{timeline.eyebrow}</span>
+            <h2>{timeline.heading}</h2>
           </Reveal>
 
           <ol className="timeline">
-            {TIMELINE.map((entry, index) => (
-              <Reveal as="li" className="timeline__item" key={entry.year} delay={index * 90}>
+            {(timeline.items ?? []).map((entry, index) => (
+              <Reveal as="li" className="timeline__item" key={`${entry.year}-${entry.title}`} delay={index * 90}>
                 <span className="timeline__year">{entry.year}</span>
                 <div>
                   <strong>{entry.title}</strong>

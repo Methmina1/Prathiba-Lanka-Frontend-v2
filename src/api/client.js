@@ -9,10 +9,14 @@ export async function request(path, { timeoutMs = 6000, ...options } = {}) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
+    // FormData must set its own Content-Type, otherwise the multipart boundary is lost.
+    const isUpload = typeof FormData !== 'undefined' && options.body instanceof FormData
     const response = await fetch(`${BASE_URL}${path}`, {
       ...options,
       signal: controller.signal,
-      headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
+      headers: isUpload
+        ? { ...(options.headers ?? {}) }
+        : { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
     })
 
     const text = await response.text()
@@ -33,6 +37,15 @@ export async function request(path, { timeoutMs = 6000, ...options } = {}) {
 export const api = {
   baseUrl: BASE_URL,
 
+  /**
+   * Uploaded files are stored as a path (/media/<name>) so they survive a change of host. The
+   * browser needs the API origin in front of it, since the front end is served from its own origin.
+   */
+  mediaUrl: (path) => {
+    if (!path) return path
+    return /^https?:\/\//i.test(path) ? path : `${BASE_URL}${path}`
+  },
+
   // catalogue
   getPackages: () => request('/api/packages'),
   getPackage: (id) => request(`/api/packages/${id}`),
@@ -50,6 +63,9 @@ export const api = {
   // public actions
   submitQuery: (payload) => request('/api/contact', { method: 'POST', body: JSON.stringify(payload) }),
   trackBooking: (pin) => request(`/api/bookings/track?pin=${encodeURIComponent(pin)}`),
+
+  // editable page content (public read; the admin console writes it)
+  getPageContent: (section) => request(`/api/content/${section}`),
 
   // customer actions (need a bearer token)
   login: (email, password) =>
