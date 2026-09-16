@@ -17,6 +17,8 @@ framework, so the palette and layout stay easy to change.
 | `/about` | Our story, the four things we hold to, milestones timeline |
 | `/contact` | Phone/email/office cards, the enquiry form, a link to the PIN tracker |
 | `/plan` | **Plan your journey**: enquiry form (`POST /api/contact`), PIN tracker (`GET /api/bookings/track`), how-it-works steps |
+| `/login`, `/register` | Customer sign in and sign up (`POST /api/auth/login`, `POST /api/auth/register`); the JWT is kept in localStorage |
+| `/account` | Signed-in customers: their bookings (`GET /api/customer/bookings`), a new booking request (`POST /api/bookings/request`) and a review form (`POST /api/reviews`) |
 | `*` | 404 |
 
 Planning and booking-tracking live only on `/plan`; every "Plan your trip" / "Request" button routes
@@ -67,11 +69,12 @@ that the planning/tracking panels have not leaked back onto the home page.
 | Reviews (home + `/reviews` + detail) | `GET /api/reviews`, `GET /api/reviews/package/{id}` |
 | Enquiry form (`/plan`, `/contact`) | `POST /api/contact` - public |
 | PIN tracker (`/plan`) | `GET /api/bookings/track?pin=` - public |
+| Sign in / sign up | `POST /api/auth/login`, `POST /api/auth/register` |
+| `/account` | `GET /api/customer/bookings`, `POST /api/bookings/request`, `POST /api/reviews` - all send the bearer token |
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
-and a small notice explains why, so no page ever looks broken. Booking and review *submission* are
-not wired up here: those endpoints need a customer token and belong to the account area, which is
-the next page to build.
+and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
+needs a real session - so `/account` sends signed-out visitors to `/login?next=/account`.
 
 ## Design system
 
@@ -133,5 +136,6 @@ for an `<img />` when you have it - the gallery already renders live `imageUrl` 
 
 ## Not built yet
 
-Package detail pages, the booking flow (customer login → request), the admin dashboard, and forms
-for reviews/contact beyond the enquiry form.
+The admin dashboard (`/api/admin/**` already covers packages, journal, gallery, queries and booking
+confirmations) and password reset / profile editing. Payment is out of scope by design - a booking
+is a request that a consultant confirms.

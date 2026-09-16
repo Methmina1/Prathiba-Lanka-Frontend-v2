@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { ChevronDown, Close, Menu } from '../ui/Icons'
+import { useAuth } from '../../auth/AuthContext'
 
 const NAV = [
   { label: 'Home', to: '/' },
@@ -28,6 +29,8 @@ export default function Header() {
   const [atTop, setAtTop] = useState(true)
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const { session, email, signOut } = useAuth()
 
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY <= 4)
@@ -82,6 +85,15 @@ export default function Header() {
           </nav>
 
           <div className="navbar__actions">
+            {session ? (
+              <Link className="navbar__auth" to="/account">
+                {email ? email.split('@')[0] : 'Account'}
+              </Link>
+            ) : (
+              <Link className="navbar__auth" to="/login">
+                Sign in
+              </Link>
+            )}
             <Link className="btn btn--cta btn--sweep btn--sm" to="/plan">
               Plan your trip
             </Link>
@@ -108,6 +120,28 @@ export default function Header() {
           <Link className="mobile-menu__track" to="/plan#track" onClick={() => setOpen(false)}>
             Track your booking
           </Link>
+          {session ? (
+            <>
+              <Link to="/account" onClick={() => setOpen(false)}>
+                My account
+              </Link>
+              <button
+                type="button"
+                className="mobile-menu__track"
+                onClick={() => {
+                  setOpen(false)
+                  signOut()
+                  navigate('/', { replace: true })
+                }}
+              >
+                Sign out
+              </button>
+            </>
+          ) : (
+            <Link to="/login" onClick={() => setOpen(false)}>
+              Sign in
+            </Link>
+          )}
           <Link className="btn btn--cta btn--block" to="/plan" onClick={() => setOpen(false)}>
             Plan your trip
           </Link>

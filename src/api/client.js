@@ -55,6 +55,8 @@ export const api = {
   login: (email, password) =>
     request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
   register: (payload) => request('/api/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+  getMyBookings: (token) =>
+    request('/api/customer/bookings', { headers: { Authorization: `Bearer ${token}` } }),
   submitReview: (payload, token) =>
     request('/api/reviews', {
       method: 'POST',

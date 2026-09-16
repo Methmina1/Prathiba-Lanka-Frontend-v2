@@ -29,6 +29,8 @@ const ROUTES = {
   '/about': ['Arranged by people who live here', 'How we got here'],
   '/contact': ['Talk to us', 'Track a booking'],
   '/plan': ['Plan your journey', 'Request a journey', 'Track a booking'],
+  '/login': ['Sign in', 'Create an account'],
+  '/register': ['Create an account', 'At least 8 characters'],
   '/nope': ['This path leads nowhere'],
 }
 
