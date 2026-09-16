@@ -9,10 +9,13 @@ import { renderToString } from 'react-dom/server'
 import { MemoryRouter } from 'react-router-dom'
 import App from '../src/App.jsx'
 
-const render = (path) =>
+const ADMIN_SESSION = { token: 'test', email: 'admin@test.com', role: 'ROLE_ADMIN', userId: 1 }
+const CUSTOMER_SESSION = { token: 'test', email: 'customer@example.com', role: 'ROLE_CUSTOMER', userId: 2 }
+
+const render = (path, initialSession = null) =>
   renderToString(
     <MemoryRouter initialEntries={[path]}>
-      <App />
+      <App initialSession={initialSession} />
     </MemoryRouter>
   )
 
@@ -34,35 +37,63 @@ const ROUTES = {
   '/nope': ['This path leads nowhere'],
 }
 
+// the staff console, rendered with an admin session
+const ADMIN_ROUTES = {
+  '/admin': ['Admin console', 'Awaiting decision', 'New enquiries', 'Packages live'],
+  '/admin/bookings': ['Admin console', 'Pending', 'Confirmed', 'Rejected'],
+  '/admin/queries': ['Admin console', 'Waiting for a reply'],
+  '/admin/packages': ['Admin console', 'New package'],
+  '/admin/journal': ['Admin console', 'New story'],
+  '/admin/gallery': ['Admin console', 'Add image'],
+  '/admin/reviews': ['Admin console', 'Customers can review from their account page'],
+}
+
 // the home page must NOT contain the planning panels any more
 const HOME_FORBIDDEN = ['Request a journey', 'Send enquiry', 'Three steps, then the island']
 
 const problems = []
 
-for (const [path, expected] of Object.entries(ROUTES)) {
-  const html = render(path)
+const check = (label, path, expected, session, { min = 2000, forbidden = [] } = {}) => {
+  const html = render(path, session)
 
-  if (html.length < 2000) {
-    problems.push(`${path} rendered only ${html.length} characters`)
-    continue
+  if (html.length < min) {
+    problems.push(`${label} rendered only ${html.length} characters`)
+    return html
   }
 
   for (const needle of expected) {
-    if (!html.includes(needle)) problems.push(`${path} is missing "${needle}"`)
+    if (!html.includes(needle)) problems.push(`${label} is missing "${needle}"`)
   }
 
-  if (path === '/') {
-    for (const needle of HOME_FORBIDDEN) {
-      if (html.includes(needle)) problems.push(`home still contains "${needle}"`)
-    }
+  for (const needle of forbidden) {
+    if (html.includes(needle)) problems.push(`${label} still contains "${needle}"`)
   }
 
-  console.log(`${path.padEnd(20)} ${html.length.toLocaleString().padStart(7)} chars`)
+  console.log(`${label.padEnd(24)} ${html.length.toLocaleString().padStart(7)} chars`)
+  return html
 }
+
+for (const [path, expected] of Object.entries(ROUTES)) {
+  check(path, path, expected, null, { forbidden: path === '/' ? HOME_FORBIDDEN : [] })
+}
+
+for (const [path, expected] of Object.entries(ADMIN_ROUTES)) {
+  check(path, path, expected, ADMIN_SESSION)
+}
+
+// guard: a signed-in customer must not reach the console
+check('/admin (customer)', '/admin', ['Admin access required'], CUSTOMER_SESSION, {
+  min: 100,
+  forbidden: ['Packages live'],
+})
+
+// guard: a signed-out visitor is redirected to the sign-in page (nothing renders in its place)
+check('/admin (signed out)', '/admin', [], null, { min: 0, forbidden: ['Admin console', 'Packages live'] })
 
 if (problems.length > 0) {
   console.error('\n' + problems.map((problem) => ` - ${problem}`).join('\n'))
   process.exit(1)
 }
 
-console.log(`\nRender check passed: ${Object.keys(ROUTES).length} routes render as expected.`)
+const total = Object.keys(ROUTES).length + Object.keys(ADMIN_ROUTES).length + 2
+console.log(`\nRender check passed: ${total} routes render as expected.`)

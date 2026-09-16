@@ -5,6 +5,7 @@ import App from './App'
 import './styles/theme.css'
 import './styles/base.css'
 import './styles/components.css'
+import './styles/admin.css'
 
 // BASE_URL follows vite's `base`, so the router also works when the app is served from a subpath
 // (the optional GitHub Pages deployment does exactly that).

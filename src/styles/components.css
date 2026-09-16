@@ -1601,6 +1601,10 @@ html.intro-landing .site-header .brand__text {
   .navbar__actions .btn {
     display: none;
   }
+  /* the staff link moves into the drawer too */
+  .navbar__auth--admin {
+    display: none;
+  }
   .navbar__inner {
     gap: var(--space-3);
   }
@@ -2318,6 +2322,16 @@ html.intro-landing .site-header .brand__text {
 
 .navbar__auth:hover {
   color: var(--gold-300);
+}
+
+/* the discreet way into the staff console */
+.navbar__auth--admin {
+  color: var(--text-invert-faint);
+  letter-spacing: 0.22em;
+}
+
+.navbar__auth--admin:hover {
+  color: var(--gold-200);
 }
 
 .site-header.is-scrolled .navbar__auth {

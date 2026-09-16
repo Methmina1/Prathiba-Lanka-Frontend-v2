@@ -31,6 +31,7 @@ export default function Header() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { session, email, signOut } = useAuth()
+  const isAdmin = session?.role === 'ROLE_ADMIN'
 
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY <= 4)
@@ -85,9 +86,14 @@ export default function Header() {
           </nav>
 
           <div className="navbar__actions">
+            {!isAdmin && (
+              <Link className="navbar__auth navbar__auth--admin" to="/admin">
+                Admin
+              </Link>
+            )}
             {session ? (
-              <Link className="navbar__auth" to="/account">
-                {email ? email.split('@')[0] : 'Account'}
+              <Link className="navbar__auth" to={isAdmin ? '/admin' : '/account'}>
+                {email ? email.split('@')[0] : isAdmin ? 'Admin' : 'Account'}
               </Link>
             ) : (
               <Link className="navbar__auth" to="/login">
@@ -120,10 +126,15 @@ export default function Header() {
           <Link className="mobile-menu__track" to="/plan#track" onClick={() => setOpen(false)}>
             Track your booking
           </Link>
+          {!isAdmin && (
+            <Link to="/admin" onClick={() => setOpen(false)}>
+              Admin console
+            </Link>
+          )}
           {session ? (
             <>
-              <Link to="/account" onClick={() => setOpen(false)}>
-                My account
+              <Link to={isAdmin ? '/admin' : '/account'} onClick={() => setOpen(false)}>
+                {isAdmin ? 'Staff dashboard' : 'My account'}
               </Link>
               <button
                 type="button"

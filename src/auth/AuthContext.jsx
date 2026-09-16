@@ -9,12 +9,18 @@ const AuthContext = createContext(null)
  * Customer session: the JWT issued by /api/auth/login or /register, kept in localStorage so a
  * refresh does not sign you out. Reads happen in an effect, never during render, so the app still
  * renders on the server.
+ *
+ * `initialSession` exists for tests and server rendering - pass a session and hydration is skipped.
  */
-export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null)
-  const [ready, setReady] = useState(false)
+export function AuthProvider({ children, initialSession = null }) {
+  const [session, setSession] = useState(initialSession)
+  const [ready, setReady] = useState(initialSession !== null)
 
   useEffect(() => {
+    if (initialSession !== null) {
+      setReady(true)
+      return
+    }
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY)
       if (raw) setSession(JSON.parse(raw))
@@ -22,7 +28,7 @@ export function AuthProvider({ children }) {
       // a corrupt entry just means "signed out"
     }
     setReady(true)
-  }, [])
+  }, [initialSession])
 
   useEffect(() => {
     if (!ready) return

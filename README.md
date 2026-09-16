@@ -19,6 +19,13 @@ framework, so the palette and layout stay easy to change.
 | `/plan` | **Plan your journey**: enquiry form (`POST /api/contact`), PIN tracker (`GET /api/bookings/track`), how-it-works steps |
 | `/login`, `/register` | Customer sign in and sign up (`POST /api/auth/login`, `POST /api/auth/register`); the JWT is kept in localStorage |
 | `/account` | Signed-in customers: their bookings (`GET /api/customer/bookings`), a new booking request (`POST /api/bookings/request`) and a review form (`POST /api/reviews`) |
+| `/admin` | **Staff console.** Overview: pending/confirmed counts, live packages, new enquiries, recent bookings |
+| `/admin/bookings` | Every booking with status filter, confirm (price + date) and reject |
+| `/admin/queries` | Enquiries with a "new only" filter and a reply box that emails the sender |
+| `/admin/packages` | Journey CRUD, activate/deactivate, delete |
+| `/admin/journal` | Story CRUD, publish/unpublish, delete |
+| `/admin/gallery` | Add/edit/remove images, optionally attached to a journey |
+| `/admin/reviews` | Moderation: read every review, remove one from the public page |
 | `*` | 404 |
 
 Planning and booking-tracking live only on `/plan`; every "Plan your trip" / "Request" button routes
@@ -26,6 +33,24 @@ there. The header link `/plan#track` lands with the cursor already in the PIN fi
 
 Every page works without the backend: detail routes fall back to the matching sample record and the
 lists fall back to `src/data/fallback.js`, with a notice explaining which one you are seeing.
+
+## Who signs in
+
+`/login` is for two different people, decided by the role the backend returns in the JWT:
+
+| Role | Sees | Cannot |
+|---|---|---|
+| `ROLE_CUSTOMER` | `/account` - own bookings, new booking request, review form | reach `/admin` |
+| `ROLE_ADMIN` | `/admin` - the staff console | hold a booking or post a review (the backend rejects both with 403) |
+
+The admin console is reached from the small **Admin** link on the right of the site header, which
+only appears for a signed-out visitor or a customer. There is no self-service admin signup: accounts
+come from `app.bootstrap-admin.*` in the backend (`admin@test.com` / `Admin@12345` by default).
+
+`/admin/**` is guarded on the client too - `components/admin/AdminLayout.jsx` sends a signed-out
+visitor to `/login?next=<path>` and shows "Admin access required" for a customer session - but the
+real enforcement is `SecurityConfig`: every `/api/admin/**` call needs `ROLE_ADMIN`, so a customer
+token gets 403 whatever the UI does.
 
 ## Requirements
 
@@ -53,11 +78,14 @@ VITE_API_BASE_URL=https://api.example.com
 ```bash
 npm run build         # production build -> dist/
 npm run preview       # serve the build on http://localhost:4173
-npm run check:render  # renders /, /plan and the 404 route in Node and asserts their content
+npm run check:render  # renders all 22 routes in Node and asserts their content
 ```
 
-`check:render` is the useful one: it fails on undefined components or broken props, and it enforces
-that the planning/tracking panels have not leaked back onto the home page.
+`check:render` is the useful one: it renders every page (13 public, 7 admin with a stubbed admin
+session) with `renderToString`, so an undefined component, a bad hook or a broken prop fails the
+build without a browser. It also checks the two access rules - a customer session on `/admin` must
+show "Admin access required" and a signed-out one must render no console at all - and enforces that
+the planning/tracking panels have not leaked back onto the home page.
 
 ## API usage
 
@@ -71,6 +99,16 @@ that the planning/tracking panels have not leaked back onto the home page.
 | PIN tracker (`/plan`) | `GET /api/bookings/track?pin=` - public |
 | Sign in / sign up | `POST /api/auth/login`, `POST /api/auth/register` |
 | `/account` | `GET /api/customer/bookings`, `POST /api/bookings/request`, `POST /api/reviews` - all send the bearer token |
+| `/admin` | `GET /api/admin/bookings`, `GET /api/admin/packages`, `GET /api/admin/queries`, `GET /api/reviews` |
+| `/admin/bookings` | `GET /api/admin/bookings?status=`, `PATCH /api/admin/bookings/{id}/confirm`, `PATCH /api/admin/bookings/{id}/reject` |
+| `/admin/queries` | `GET /api/admin/queries?onlyNew=true`, `PATCH /api/admin/queries/{id}/respond` |
+| `/admin/packages` | `GET|POST /api/admin/packages`, `PUT /api/admin/packages/{id}`, `PATCH .../deactivate`, `DELETE /api/admin/packages/{id}` |
+| `/admin/journal` | `GET|POST /api/admin/journal`, `PUT /api/admin/journal/{id}`, `PATCH .../publish`, `PATCH .../unpublish`, `DELETE /api/admin/journal/{id}` |
+| `/admin/gallery` | `POST /api/admin/gallery`, `PUT /api/admin/gallery/{id}`, `DELETE /api/admin/gallery/{id}` |
+| `/admin/reviews` | `DELETE /api/admin/reviews/{id}` |
+
+Every admin call goes through `src/api/admin.js`, which attaches the bearer token; the client never
+caches lists, so each mutation reloads the table it changed.
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
@@ -89,6 +127,11 @@ emerald as a secondary note:
 Contrast: gold is 7.56:1 on ink and 7.29:1 with ink text on it, but only 2.48:1 as text on ivory -
 so gold text is never placed on light backgrounds (buttons use ink text on gold). Change the palette
 in this one file and the whole site follows.
+
+**Admin console.** `src/styles/admin.css` is a separate, deliberately corporate theme - a navy
+`#0f1f3d` sidebar, `#1d4ed8` primary actions, `#f4f6f9` canvas and white cards - and everything it
+defines is scoped under `.admin`, so the marketing palette and the staff palette cannot leak into
+each other. Body text is 16.4:1 and white-on-primary 6.4:1.
 
 **Motion.** `--dur*` and `--ease-out-soft` in the same file drive every transition. On top of that:
 a scroll-progress bar, `<Reveal>` (IntersectionObserver fade/lift with stagger), a slow drift on the
@@ -112,20 +155,26 @@ because of it.
 
 ```
 src/
-  api/client.js            fetch wrapper (base URL, timeouts, typed errors) + every endpoint used
+  api/client.js            fetch wrapper (base URL, timeouts, typed errors) + every public endpoint
+  api/admin.js             every /api/admin/** call the console makes
   hooks/useApi.js          list loader with loading / live / fallback states
   hooks/useResource.js     single-record loader (loading / ready / missing / error)
   utils/format.js          price, date and paragraph helpers
   data/fallback.js         sample journeys, journal posts, reviews, FAQ copy
+  auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
   styles/theme.css         design tokens
   styles/base.css          reset, type, buttons, grid, reveal/motion utilities
   styles/components.css    section and page styles
+  styles/admin.css         staff console theme (scoped to .admin)
   components/layout/       Header, Footer, PageHero, SplashIntro
   components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
+  components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills), useAdmin
   components/sections/     Home page sections
   components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
-                           GalleryPage, ReviewsPage, About, Contact, PlanPage, NotFound
+                           GalleryPage, ReviewsPage, About, Contact, PlanPage, Login, Register,
+                           Account, NotFound
+  pages/admin/             Overview, Bookings, Queries, Packages, Journal, Gallery, Reviews
 ```
 
 ## Images
@@ -136,6 +185,5 @@ for an `<img />` when you have it - the gallery already renders live `imageUrl` 
 
 ## Not built yet
 
-The admin dashboard (`/api/admin/**` already covers packages, journal, gallery, queries and booking
-confirmations) and password reset / profile editing. Payment is out of scope by design - a booking
-is a request that a consultant confirms.
+Password reset and profile editing. Payment is out of scope by design - a booking is a request that
+a consultant confirms.

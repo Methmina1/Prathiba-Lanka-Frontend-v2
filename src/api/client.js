@@ -5,7 +5,7 @@
  */
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
 
-async function request(path, { timeoutMs = 6000, ...options } = {}) {
+export async function request(path, { timeoutMs = 6000, ...options } = {}) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {

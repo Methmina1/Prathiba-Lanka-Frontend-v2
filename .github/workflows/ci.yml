@@ -36,8 +36,9 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Renders both routes in Node: fails on undefined components, broken props, or if the
-      # planning/tracking panels leak back onto the home page.
+      # Renders all 22 routes in Node (public + admin, plus both admin access rules): fails on
+      # undefined components, broken props, or if the planning/tracking panels leak back onto the
+      # home page.
       - name: Render check
         run: npm run check:render
 
