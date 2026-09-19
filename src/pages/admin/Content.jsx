@@ -122,6 +122,7 @@ export default function AdminContent() {
   const { token } = useAuth()
   const [tab, setTab] = useState('ABOUT')
   const [payload, setPayload] = useState(null)
+  const [payloadSection, setPayloadSection] = useState(null)
   const [meta, setMeta] = useState({ updatedAt: null, updatedByName: null })
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -138,6 +139,7 @@ export default function AdminContent() {
         const found = sections.find((entry) => entry.section === tab)
         const defaults = tab === 'ABOUT' ? ABOUT_DEFAULTS : CONTACT_DEFAULTS
         setPayload(mergeDefaults(defaults, found?.payload))
+        setPayloadSection(tab)
         setMeta({ updatedAt: found?.updatedAt ?? null, updatedByName: found?.updatedByName ?? null })
       })
       .catch((problem) => {
@@ -188,8 +190,12 @@ export default function AdminContent() {
     />
   )
 
-  // The tabs stay mounted while the payload loads, so the screen never blanks out.
-  if (!payload) {
+  // The tabs stay mounted while the payload loads, so the screen never blanks out. The section is
+  // carried with the payload because the two sections have different shapes (About has
+  // story/values/timeline, Contact has cards/aside): rendering one section's fields against the
+  // other's data dereferenced keys that do not exist and took the whole screen down. A tab switch
+  // therefore renders this waiting state until the matching payload arrives.
+  if (!payload || payloadSection !== tab) {
     return (
       <>
         <Toolbar>

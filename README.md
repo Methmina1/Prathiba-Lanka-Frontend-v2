@@ -81,6 +81,7 @@ VITE_API_BASE_URL=https://api.example.com
 npm run build         # production build -> dist/
 npm run preview       # serve the build on http://localhost:4173
 npm run check:render  # renders all 24 routes in Node and asserts their content
+npm run test:e2e      # drives the built site in Chromium (Playwright)
 npm run seed          # load the demo content into a running backend (optional)
 ```
 
@@ -90,6 +91,21 @@ fails the build without a browser. It also checks the two access rules - a custo
 `/admin` must show "Admin access required" and a signed-out one must render no console at all -
 asserts that the photographs the site ships with are still referenced by the pages that use them, and
 enforces that the planning/tracking panels have not leaked back onto the home page.
+
+`test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
+serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
+so it needs no backend. Twenty tests across three files:
+
+| File | Covers |
+|---|---|
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page, the About and 404 photography |
+| `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
+| `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer |
+
+The dashboard test exists because the console shipped with a layout bug that a Node render cannot see:
+the stat cards' label, figure and breakdown are spans, and with no layout on the card they sat on one
+line and overlapped. The suite also caught the content editor blanking the screen when switching
+sections, which is fixed.
 
 ## API usage
 
@@ -204,6 +220,11 @@ scripts/
   render-check.jsx         renders every route and asserts its content
   seed-demo-content.jsx    loads the demo content through the admin API
   optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
+tests/e2e/
+  fixtures.js              mocked API + session seeding
+  public.spec.js           hero, navigation, sign-in placement, covers
+  admin.spec.js            access rules, all nine screens, dashboard layout
+  mobile.spec.js           phone header, drawer, no sideways scroll
 ```
 
 ## Photographs
