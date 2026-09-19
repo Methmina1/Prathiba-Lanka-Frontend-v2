@@ -236,6 +236,70 @@ test('the home page draws Sri Lanka out of its nine provinces', async ({ page })
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
 })
 
+test('a province can be held, so the pointer can leave the map', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('#island').scrollIntoViewIfNeeded()
+
+  const card = page.locator('.island__card h3')
+  const hold = page.locator('.island__hold')
+  const map = page.locator('.province-map')
+
+  // Hovering a shape follows the pointer, and nothing is held.
+  const moveTo = async (name) => {
+    const point = await page.evaluate((label) => {
+      const path = document.querySelector(`.province-map__shape[aria-label="${label} Province"]`)
+      const box = path.getBBox()
+      const matrix = path.getScreenCTM()
+      const svg = path.ownerSVGElement
+      const svgPoint = svg.createSVGPoint()
+      // A concave province's bounding-box centre can sit outside it, so find a point well inside.
+      for (let ring = 1; ring <= 10; ring += 1) {
+        for (let y = 0; y <= 20; y += 1) {
+          for (let x = 0; x <= 20; x += 1) {
+            const candidate = { x: box.x + (box.width * x) / 20, y: box.y + (box.height * y) / 20 }
+            if (!path.isPointInFill(candidate)) continue
+            const margin = 3 * ring
+            const inside =
+              path.isPointInFill({ x: candidate.x + margin, y: candidate.y }) &&
+              path.isPointInFill({ x: candidate.x - margin, y: candidate.y }) &&
+              path.isPointInFill({ x: candidate.x, y: candidate.y + margin }) &&
+              path.isPointInFill({ x: candidate.x, y: candidate.y - margin })
+            if (!inside) continue
+            svgPoint.x = candidate.x
+            svgPoint.y = candidate.y
+            const screen = svgPoint.matrixTransform(matrix)
+            return { x: Math.round(screen.x), y: Math.round(screen.y) }
+          }
+        }
+      }
+      return null
+    }, name)
+    await page.mouse.move(point.x, point.y)
+  }
+
+  await moveTo('Central')
+  await expect(card).toHaveText('Central Province')
+  await expect(hold).toHaveText('Hold')
+
+  // Clicking holds it: the pointer can then cross the other provinces without changing the panel.
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+  await expect(hold).toHaveText('Held')
+  await expect(map).toHaveAttribute('data-held', 'central')
+
+  await moveTo('Uva')
+  await expect(card).toHaveText('Central Province')
+  await moveTo('Western')
+  await expect(card).toHaveText('Central Province')
+
+  // Clicking it again lets go, and the map follows the pointer once more.
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+  await expect(hold).toHaveText('Hold')
+  await expect(map).toHaveAttribute('data-held', '')
+
+  await moveTo('Uva')
+  await expect(card).toHaveText('Uva Province')
+})
+
 test('the About page shows the photo that ships with the site', async ({ page }) => {
   await page.goto('/about')
   await expect(page.locator('.page-hero__media img')).toHaveAttribute('src', '/images/sl/page-about.jpg')

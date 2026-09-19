@@ -100,7 +100,7 @@ so it needs no backend. Twenty-four tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the province map (nine shapes that tile the island at Sri Lanka's proportions, and choosing one), the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the province map (nine shapes that tile the island at Sri Lanka's proportions, choosing one, and holding one so the pointer can leave it), the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer |
 
@@ -180,13 +180,19 @@ line under the map is what the licence asks for; keep it.
 The map data is 58 KB of path coordinates in the bundle. It is worth it: the alternative is a
 picture of a map that cannot follow the palette, cannot be pointed at, and cannot be corrected.
 
+**Holding a province.** Hovering alone is not enough on this map: a province in the middle of the
+island is almost impossible to read, because every route to the panel on the right passes over its
+neighbours. So a click **holds** the province - the pointer can cross the rest of the map, or leave
+it entirely, and the panel stays put - and a second click on the same province lets go and hands the
+map back to the pointer. The panel carries a Hold/Held button that does the same thing, and `Held`
+on the map's `data-held` attribute is what the browser test asserts against.
+
 **Which journeys go through a province?** `src/data/provincePlaces.js` answers that from the places
 each journey names - its title, its region, its summary and every line of its day-by-day itinerary -
 so the panel stays right as packages are added or edited in the console, with no extra field to fill
 in. Journeys are ranked by how much of the trip is in that province (`3 of 7 days here`), so the tour
 that is mostly about a place comes above the one that merely passes through it, and the panel lists
-three with a link to the rest. Hovering moves the selection, clicking pins it, and every entry is a
-link into the catalogue.
+three with a link to the rest. Every entry is a link into the catalogue.
 
 The patterns have to be specific, and the near-misses are the interesting part:
 

@@ -6,7 +6,7 @@ import { MAP_SOURCE, MAP_VIEW_BOX, PROVINCES } from '../../data/provinces'
 import { journeysInProvince } from '../../data/provincePlaces'
 import { useApi } from '../../hooks/useApi'
 import { formatDays, formatPrice } from '../../utils/format'
-import { ArrowRight, MapPin } from '../ui/Icons'
+import { ArrowRight, Lock, MapPin } from '../ui/Icons'
 import Reveal from '../ui/Reveal'
 
 /** How many journeys the panel lists before it offers the rest. */
@@ -20,22 +20,30 @@ const LISTED = 3
  * map names each province and lists the journeys whose itineraries go through it - which is the
  * question the map exists to answer - and every one of them is a link into the catalogue.
  *
- * Hovering moves the selection; clicking pins it, so the list stays put while you read it. Leaving
- * the whole section drops back to the pinned province.
+ * Two ways to move around it, because hovering alone is not enough:
+ *
+ *   - while nothing is held, the province under the pointer is the one on show;
+ *   - clicking a province **holds** it. The pointer can then leave the map, cross the other
+ *     provinces on the way to the panel, and the list stays where it is. Clicking the held province
+ *     again lets go, and the map goes back to following the pointer.
+ *
+ * Without the hold, a province in the middle of the map was almost impossible to read: every route
+ * to the panel passes over its neighbours.
  */
 export default function ProvinceMap() {
   const { data: packages } = useApi(() => api.getPackages(), fallbackPackages)
 
   const [hoveredId, setHoveredId] = useState(null)
-  const [pinnedId, setPinnedId] = useState('central')
+  const [heldId, setHeldId] = useState(null)
 
-  const activeId = hoveredId ?? pinnedId
+  const activeId = heldId ?? hoveredId ?? 'central'
   const active = PROVINCES.find((province) => province.id === activeId) ?? PROVINCES[0]
   const journeys = journeysInProvince(packages, active.id)
 
-  const select = (provinceId) => {
+  /** A click holds the province; a second click on the same one lets go. */
+  const toggleHold = (provinceId) => {
+    setHeldId((current) => (current === provinceId ? null : provinceId))
     setHoveredId(provinceId)
-    setPinnedId(provinceId)
   }
 
   return (
@@ -46,36 +54,41 @@ export default function ProvinceMap() {
           <h2>Nine provinces, one island</h2>
           <p className="lede">
             Every journey we run crosses at least three of them. Point at the map to see what each
-            province is known for, and which journeys go through it.
+            province is known for, and which journeys go through it - click one to hold it there
+            while you read.
           </p>
         </Reveal>
 
-        {/* Leaving the section drops the hover, which falls back to whichever province was clicked */}
-        <div className="island" onMouseLeave={() => setHoveredId(null)}>
+        {/* No reset when the pointer leaves: the panel keeps the last province visited rather than
+            snapping back, and the hold is what stops it following the pointer at all. */}
+        <div className="island">
           <Reveal className="island__map">
             <svg
-              className="province-map"
+              className={`province-map ${heldId ? 'is-held' : ''}`}
               viewBox={MAP_VIEW_BOX}
               role="group"
               aria-label="Map of Sri Lanka showing its nine provinces"
               data-source={MAP_SOURCE}
+              data-held={heldId ?? ''}
             >
               {PROVINCES.map((province) => (
                 <path
                   key={province.id}
-                  className={`province-map__shape ${province.id === activeId ? 'is-active' : ''}`}
+                  className={`province-map__shape ${province.id === activeId ? 'is-active' : ''} ${
+                    province.id === heldId ? 'is-held' : ''
+                  }`}
                   d={province.d}
                   tabIndex={0}
                   role="button"
                   aria-label={`${province.name} Province`}
-                  aria-pressed={province.id === pinnedId}
+                  aria-pressed={province.id === heldId}
                   onMouseEnter={() => setHoveredId(province.id)}
                   onFocus={() => setHoveredId(province.id)}
-                  onClick={() => select(province.id)}
+                  onClick={() => toggleHold(province.id)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault()
-                      select(province.id)
+                      toggleHold(province.id)
                     }
                   }}
                 >
@@ -87,10 +100,28 @@ export default function ProvinceMap() {
 
           <Reveal className="island__panel" delay={120}>
             <div className="card island__card" aria-live="polite">
-              <span className="island__capital">
-                <MapPin width={15} height={15} />
-                {active.capital}
-              </span>
+              <div className="island__head">
+                <span className="island__capital">
+                  <MapPin width={15} height={15} />
+                  {active.capital}
+                </span>
+
+                <button
+                  type="button"
+                  className={`island__hold ${heldId ? 'is-held' : ''}`}
+                  onClick={() => toggleHold(active.id)}
+                  aria-pressed={Boolean(heldId)}
+                  title={
+                    heldId
+                      ? 'Click to release, and let the map follow the pointer again'
+                      : 'Click to hold this province while you read'
+                  }
+                >
+                  <Lock width={13} height={13} />
+                  {heldId ? 'Held' : 'Hold'}
+                </button>
+              </div>
+
               <h3>{active.name} Province</h3>
               <p>{active.blurb}</p>
               <ul className="island__districts">
@@ -150,9 +181,9 @@ export default function ProvinceMap() {
                   <button
                     type="button"
                     className={`island__pick ${province.id === activeId ? 'is-active' : ''}`}
-                    onClick={() => select(province.id)}
+                    onClick={() => toggleHold(province.id)}
                     onMouseEnter={() => setHoveredId(province.id)}
-                    aria-pressed={province.id === pinnedId}
+                    aria-pressed={province.id === heldId}
                   >
                     {province.name}
                   </button>

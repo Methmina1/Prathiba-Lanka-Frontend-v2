@@ -977,9 +977,54 @@ html.intro-landing .site-header .brand__text {
   stroke-width: 1.6;
 }
 
+/* The province the click is holding: the pointer can leave it and the map keeps showing it. */
+.province-map__shape.is-held {
+  stroke: var(--ivory-100);
+  stroke-width: 2;
+}
+
 .province-map__shape:focus-visible {
   stroke: var(--gold-200);
   stroke-width: 1.6;
+}
+
+.island__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* Says whether the map is following the pointer or holding a province, and does the holding. */
+.island__hold {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.28rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft),
+    background var(--dur) var(--ease-out-soft);
+}
+
+.island__hold:hover {
+  border-color: var(--border-gold);
+  color: var(--text-heading);
+}
+
+.island__hold.is-held {
+  border-color: var(--gold-500);
+  background: rgba(195, 154, 46, 0.14);
+  color: var(--gold-200);
 }
 
 .island__panel {

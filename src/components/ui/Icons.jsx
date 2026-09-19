@@ -44,6 +44,16 @@ export function Compass(props) {
   )
 }
 
+export function Lock(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="4" y="10.5" width="16" height="10.5" rx="2" />
+      <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
+      <path d="M12 15v2.5" />
+    </svg>
+  )
+}
+
 export function Clock(props) {
   return (
     <svg {...base} {...props}>
