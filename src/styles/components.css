@@ -814,8 +814,17 @@ html.intro-landing .site-header .brand__text {
 
 .section-cta {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
   margin-top: var(--space-7);
+  text-align: center;
+}
+
+.section-cta__note {
+  max-width: 46ch;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 /* ================================================================ packages */
@@ -884,6 +893,163 @@ html.intro-landing .site-header .brand__text {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   line-clamp: 3;
+}
+
+/* Opens the written-up version of the journey in the dialog. */
+.package-card__story {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold-300);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.package-card__story svg {
+  transition: transform var(--dur) var(--ease-out-soft);
+}
+
+.package-card__story:hover {
+  color: var(--gold-200);
+}
+
+.package-card__story:hover svg {
+  transform: translateX(5px);
+}
+
+/* ================================================================ story dialog */
+
+.story-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: rgb(4 14 26 / 78%);
+  backdrop-filter: blur(6px);
+  animation: story-fade var(--dur) var(--ease-out-soft);
+}
+
+.story {
+  display: flex;
+  flex-direction: column;
+  width: min(720px, 100%);
+  max-height: min(86vh, 900px);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-alt);
+  box-shadow: 0 40px 90px rgb(2 8 16 / 55%);
+  animation: story-rise var(--dur) var(--ease-out-soft);
+}
+
+.story__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.story__heading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.story__heading h2 {
+  font-size: 1.7rem;
+}
+
+.story__meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.story__close {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: none;
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.story__close:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-200);
+}
+
+.story__body {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  overflow-y: auto;
+}
+
+.story__cover {
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  border-radius: var(--radius);
+  object-fit: cover;
+}
+
+.story__body p {
+  color: var(--text-body);
+  line-height: 1.75;
+}
+
+.story__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+@keyframes story-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes story-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.99);
+  }
+}
+
+@media (max-width: 640px) {
+  .story-backdrop {
+    padding: 0;
+    place-items: end stretch;
+  }
+
+  .story {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .story__head,
+  .story__body,
+  .story__foot {
+    padding-inline: var(--space-5);
+  }
 }
 
 .package-card__foot {
@@ -1930,6 +2096,23 @@ html.intro-landing .site-header .brand__text {
 
 .detail__subhead {
   margin-top: var(--space-7);
+}
+
+/* The written-up description on the journey page: paragraphs with room to breathe. */
+.detail__story {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.detail__story p {
+  color: var(--text-body);
+  line-height: 1.8;
+}
+
+.detail__story p:first-child {
+  color: var(--text-heading);
+  font-size: 1.08rem;
 }
 
 .itinerary {

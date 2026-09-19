@@ -16,6 +16,7 @@ const EMPTY_FORM = {
   maxCapacity: '',
   status: 'ACTIVE',
   description: '',
+  longDescription: '',
   itinerary: '',
   imageUrl: '',
 }
@@ -46,6 +47,7 @@ export default function AdminPackages() {
         maxCapacity: pkg.maxCapacity ?? '',
         status: pkg.status ?? 'ACTIVE',
         description: pkg.description ?? '',
+        longDescription: pkg.longDescription ?? '',
         itinerary: pkg.itinerary ?? '',
         imageUrl: pkg.imageUrl ?? '',
       },
@@ -64,6 +66,7 @@ export default function AdminPackages() {
       maxCapacity: form.maxCapacity === '' ? null : Number(form.maxCapacity),
       status: form.status,
       description: form.description || null,
+      longDescription: form.longDescription || null,
       itinerary: form.itinerary || null,
       imageUrl: form.imageUrl || '',
     }
@@ -221,8 +224,20 @@ export default function AdminPackages() {
               </Field>
             </div>
 
-            <Field label="Short description" hint="Shown on the package card.">
+            <Field label="Short description" hint="Two lines on the package card: what the trip is, in one sentence.">
               <textarea rows={3} value={dialog.form.description} onChange={patch('description')} />
+            </Field>
+
+            <Field
+              label="Full description"
+              hint="Behind the “Read the full description” button and on the journey page. Leave a blank line between paragraphs."
+            >
+              <textarea
+                rows={10}
+                value={dialog.form.longDescription}
+                onChange={patch('longDescription')}
+                placeholder="Three or four paragraphs: the shape of the trip, what happens day to day, and what the hotels and the pace are like."
+              />
             </Field>
 
             <Field

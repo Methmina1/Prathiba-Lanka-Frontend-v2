@@ -57,6 +57,14 @@ seed-gallery-16          <- kultar-ruprai-g44CSKqUPuA-unsplash.jpg
 seed-gallery-17          <- lucas-klein-I73t54WLa0Q-unsplash.jpg
 seed-gallery-18          <- matt-dany-AN0ESciHPSQ-unsplash.jpg
 
+Journey covers. These are uploaded to the media library by the importer (see data/package-copy.json)
+and linked to the journeys they suit, so they can be swapped from the admin console afterwards:
+cover-leopard-water      <- udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg   (Golden Circuit, Yala)
+cover-leopard-stump      <- anupa-uthsara-iZo_xVpa0HI-unsplash.jpg        (Jungle & Coast Odyssey)
+cover-galle-fort         <- thilina-alagiyawanna-ZRDf1OzxXU8-unsplash.jpg (Emerald Isle Explorer)
+cover-kandyan-dancer     <- thilina-alagiyawanna-FjLJaeLB80w-unsplash.jpg (North To South Expedition)
+cover-sunset-palms       <- sarmat-batagov-eCMOUekVA_s-unsplash.jpg       (Luxury Grand Tour)
+
 Photographs freed by the hero swaps and not currently placed anywhere. They are still in ../Sri lanka
 and can be uploaded from the admin console whenever you want them:
   pexels-dtravel-vlog-1025192350-27913876.jpg   (hero-1 in the first pass)
@@ -68,7 +76,11 @@ and can be uploaded from the admin console whenever you want them:
   filiz-elaerts-XtAI_ChO4sk-unsplash.jpg        (the contact page panel)
   don-kaveen-93IYznJPkOA-unsplash.jpg           (hero-2, before the leopard photograph)
 
-Everything else in ../Sri lanka has not been placed yet. In total 50 of the 114 originals are in use, plus lepord.webp (which arrived separately).
+Everything else in ../Sri lanka has not been placed yet. In total 55 of the 114 originals are in use, plus lepord.webp (which arrived separately).
+
+The five cover-* files double as the media library entries the importer links to five of the
+journeys. The rest of the journey covers are photographs already in the site's own set (the four hero
+slides, the four seed-package pictures, the Sigiriya and tea journal covers, and about-story).
 
 The four hero photographs double as the covers of the four theme posts in the journal (turquoise
 coast, wildlife, culture, golden hour). Each was uploaded to the media library from the file above, so

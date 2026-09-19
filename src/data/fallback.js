@@ -13,6 +13,8 @@ export const fallbackPackages = [
     maxCapacity: 12,
     description:
       'Sigiriya at sunrise, the cave temples of Dambulla, the ancient city of Polonnaruwa and the lake at Kandy.',
+    longDescription:
+      'Eight days through the old kingdoms, with the rock fortress, the painted caves and two ruined capitals given the time they need.\n\nYou start in Colombo and drive north to Sigiriya, climbing early and spending the afternoon at Pidurangala for the view back onto it. Dambulla and Polonnaruwa fill the next two days - five painted caves, then a medieval city best covered by bicycle. Kandy closes the loop with the Temple of the Tooth and the drumming at the evening puja.\n\nFour-star hotels throughout, one long drive at each end, and room to add the tea country before you fly home.',
     status: 'ACTIVE',
     scenery: 'temple',
   },
@@ -25,6 +27,8 @@ export const fallbackPackages = [
     maxCapacity: 8,
     description:
       'Dawn game drives for leopards and sloth bears, then the great elephant gathering on the Minneriya tank.',
+    longDescription:
+      'A short trip built entirely around the parks, with two mornings in Yala and an afternoon at the Minneriya gathering.\n\nThe gate opens at half past five, so the first drive is in the dark and the second is in the last hour of light, when the animals move and the vehicles thin out. Between them there is lunch, a pool and not much else, which is the point.\n\nTented camps on the park boundary, a naturalist guide in the vehicle, and no driving off the track.',
     status: 'ACTIVE',
     scenery: 'safari',
   },
@@ -37,6 +41,8 @@ export const fallbackPackages = [
     maxCapacity: 10,
     description:
       'The Kandy to Ella line, tea factory walks, Horton Plains at first light and cool nights in a planter bungalow.',
+    longDescription:
+      'Five days in the hills, arranged around the train and the estates rather than the road.\n\nThe Kandy to Ella line does the hard work on day two: observation carriage, tea gardens to the window, and the Demodara loop. A factory walk follows the leaf from the weighing scale at the top of the building down to the sorting room at the bottom. Horton Plains takes the last morning, with World\u2019s End reached before the mist arrives.\n\nCold nights, short drives, and a planter\u2019s bungalow to come back to.',
     status: 'ACTIVE',
     scenery: 'tea',
   },
@@ -49,6 +55,8 @@ export const fallbackPackages = [
     maxCapacity: 14,
     description:
       'A Dutch fort, whale-watching off Mirissa, stilt fishermen at dusk and slow mornings on a quiet stretch of coast.',
+    longDescription:
+      'A week on the south coast with two bases and very little driving.\n\nGalle Fort first: the ramparts walked at sunset, the lighthouse, the Dutch Reformed Church and the streets behind them. Then east to Mirissa for whale watching from November to April, a surf lesson at Weligama if you want one, and the stilt fishermen working the shallows at Koggala on the way home.\n\nBeachfront hotels, breakfast that runs late, and one full day with nothing planned in it.',
     status: 'ACTIVE',
     scenery: 'coast',
   },

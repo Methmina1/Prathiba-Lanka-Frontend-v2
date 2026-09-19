@@ -21,6 +21,11 @@ const packages = [
     maxCapacity: 12,
     status: 'ACTIVE',
     description: 'Sigiriya at sunrise and the cave temples of Dambulla.',
+    // The write-up behind the "read the full description" button: paragraphs, split on blank lines.
+    longDescription: [
+      'Eight days through the old kingdoms, with the rock fortress and two ruined capitals.',
+      'Dambulla and Polonnaruwa fill the middle days, then Kandy closes the loop.',
+    ].join('\n\n'),
     // One line per day, the way the admin form and the rate-sheet importer write it.
     itinerary: [
       'Arrive in Colombo and transfer to Sigiriya.',

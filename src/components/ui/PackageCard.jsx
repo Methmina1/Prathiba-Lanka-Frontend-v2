@@ -20,10 +20,13 @@ function formatPrice(price) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
 }
 
-export default function PackageCard({ pkg, index = 0 }) {
+export default function PackageCard({ pkg, index = 0, onReadStory }) {
   const scenery = sceneryFor(pkg, index)
   const price = formatPrice(pkg.price)
   const days = pkg.durationDays ? `${pkg.durationDays} days` : null
+  // The card carries two lines of the short description; the written-up version opens in a dialog
+  // where the page provides one.
+  const hasStory = Boolean(onReadStory && pkg.longDescription)
 
   return (
     <article className="card package-card">
@@ -43,6 +46,13 @@ export default function PackageCard({ pkg, index = 0 }) {
           <Link to={`/journeys/${pkg.packageId}`}>{pkg.title}</Link>
         </h3>
         {pkg.description && <p className="package-card__text">{pkg.description}</p>}
+
+        {hasStory && (
+          <button type="button" className="package-card__story" onClick={() => onReadStory(pkg)}>
+            Read the full description
+            <ArrowRight width={15} height={15} />
+          </button>
+        )}
 
         <div className="package-card__foot">
           <div className="package-card__price">

@@ -7,9 +7,9 @@ framework, so the palette and layout stay easy to change.
 
 | Route | Contents |
 |---|---|
-| `/` | Hero carousel, trust badges, philosophy, signature journeys, sustainability, gallery, journal, reviews, FAQ, CTA band |
-| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala` |
-| `/journeys/:id` | One journey: overview, day-by-day itinerary, gallery strip, reviews for that package, sticky quote card |
+| `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), sustainability, gallery, journal, reviews, FAQ, CTA band |
+| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog |
+| `/journeys/:id` | One journey: overview, the full description, day-by-day itinerary, gallery strip, reviews for that package, sticky quote card |
 | `/journal` | Featured story plus the rest of the published posts |
 | `/journal/:id` | Full story, then more from the journal |
 | `/gallery` | Large mosaic of live gallery images, or the illustrated placeholders while it is empty |
@@ -96,11 +96,11 @@ enforces that the planning/tracking panels have not leaked back onto the home pa
 
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Twenty tests across three files:
+so it needs no backend. Twenty-three tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the About and 404 photography |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer |
 
@@ -176,12 +176,32 @@ refuses to delete a journey the gallery still points at).
 | Days | `durationDays`, and one numbered step per itinerary line |
 | Base price | `price` |
 | Day-by-day rows | `itinerary`, one line per day |
-| Locations row, day rows, hotel table, accommodation tier | the description, in full |
-| - | `imageUrl` is left empty on purpose: covers are chosen in Admin → Packages, and the card falls back to a drawn scene until one is |
+| Locations row, day rows, hotel table, accommodation tier | the description, in full, when the copy file has nothing for that package |
+
+### Written copy
+
+The words on the cards are not the sheet's words. `data/package-copy.json` holds, for each journey:
+
+| Field | Where it appears |
+|---|---|
+| `summary` | the card on the home and journeys pages, and the lede at the top of the journey page - two lines, no more |
+| `story` | the popup behind **Read the full description** on the journeys page, and the "About this journey" section of the journey page. Three or four paragraphs, separated by a blank line |
+| `cover` | a file in `public/images/sl`, uploaded to the media library on the first import and linked as the journey's cover |
+
+The importer merges that with the sheet: facts (route, durations, prices, hotels, day-by-day steps)
+come from the workbook, prose comes from the copy file, and a package the copy file does not mention
+keeps a generated description made from the sheet's own facts and gets no long one. The copy is
+written for the site rather than lifted from any source document, and it is editable in
+Admin → Packages → *Full description* afterwards like every other field.
 
 Note on the numbers: the two price columns in the workbook disagree (the overview lists 550-2100 for
 the 13 tours, each package sheet lists 650-6500). The importer uses the package sheet, and prints the
 overview figure it did not use, so the difference is visible on every run rather than silent.
+
+**Covers.** Each of the thirteen journeys has a photograph, chosen from the picture library for the
+part of the island that journey is about (the leopard for the Yala-heavy tours, the tea estates for
+the hill-country ones, the fort and the dancer for the heritage ones). They are ordinary media
+library entries, so swapping one is a two-click job in Admin → Packages.
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
@@ -232,10 +252,11 @@ src/
   api/admin.js             every /api/admin/** call the console makes
   hooks/useApi.js          list loader with loading / live / fallback states
   hooks/useResource.js     single-record loader (loading / ready / missing / error)
-  utils/format.js          price, date and paragraph helpers
+  utils/format.js          price, date, paragraph and line helpers
   data/fallback.js         sample journeys, journal posts, reviews, FAQ copy
   data/pageContent.js      default copy for the editable About/Contact pages
   data/photos.js           the photographs that ship with the site, by slot
+  data/package-copy.json   the written summary, full description and cover for each journey
   auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens
@@ -247,7 +268,8 @@ src/
   components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills),
                            MediaPicker, useAdmin
   components/sections/     Home page sections
-  components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress, MediaFigure, CoverImage
+  components/ui/           Icons, Scenery, PackageCard, StoryDialog, Reveal, ScrollProgress,
+                           MediaFigure, CoverImage
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
                            GalleryPage, ReviewsPage, About, Contact, PlanPage, Login, Register,
                            Account, NotFound
@@ -261,7 +283,7 @@ scripts/
   optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
 tests/e2e/
   fixtures.js              mocked API + session seeding
-  public.spec.js           hero, navigation, sign-in placement, covers
+  public.spec.js           hero, home layout, story dialog, journey page, covers
   admin.spec.js            access rules, all nine screens, dashboard layout
   mobile.spec.js           phone header, drawer, no sideways scroll
 ```
@@ -274,7 +296,7 @@ carries an uploaded one instead. Which is which:
 | Where | Comes from | Changed by |
 |---|---|---|
 | Home hero carousel, page header bands, the "fewer places" panel, the CTA band, the contact map panel, the 404 page | `public/images/sl/*.jpg`, mapped slot by slot in `src/data/photos.js` | replacing the file, or editing that map (a developer change) |
-| Journey cards and journey headers | the package's `imageUrl` | Admin → Packages → Cover image (media library) |
+| Journey cards and journey headers | the package's `imageUrl`, seeded per journey by `npm run import:packages` from `data/package-copy.json` | Admin → Packages → Cover image (media library) |
 | Journal cards, featured story, story cover | the post's `coverImageUrl` | Admin → Journal → Cover image (media library) |
 | Gallery, home gallery strip | gallery items (image or short video) | Admin → Gallery, files from Admin → Media library |
 | About and Contact header bands and the About story panel | `hero.image` / `story.image` in the page content | Admin → About and Contact (media library) |

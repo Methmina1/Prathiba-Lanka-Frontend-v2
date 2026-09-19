@@ -103,6 +103,59 @@ test('a journey detail page opens from a card', async ({ page }) => {
   await expect(steps.last()).toContainText('Polonnaruwa by bicycle')
 })
 
+test('the home page shows two rows of three journeys and a way to the rest', async ({ page }) => {
+  await page.goto('/')
+
+  const section = page.locator('#journeys')
+  await expect(section.locator('.package-card')).toHaveCount(2) // the fixture API holds two
+  await expect(section.locator('.grid')).toHaveClass(/grid--3/)
+
+  // three per row: the first three cards share a top edge, any fourth would not
+  const columns = await section.locator('.grid').evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(' ').length)
+  expect(columns).toBe(3)
+
+  // the home cards carry no story button - that lives on the journeys page
+  await expect(section.locator('.package-card__story')).toHaveCount(0)
+  await expect(section.locator('.section-cta a')).toHaveText('See every journey')
+})
+
+test('a journey card opens the full description in a dialog', async ({ page }) => {
+  const errors = collectPageErrors(page)
+  await page.goto('/journeys')
+
+  const trigger = page.locator('.package-card__story').first()
+  await expect(trigger).toHaveText(/Read the full description/)
+  await trigger.click()
+
+  const dialog = page.locator('.story')
+  await expect(dialog).toBeVisible()
+  await expect(dialog.locator('#story-title')).toHaveText('Classical Heritage')
+  await expect(dialog.locator('.story__meta')).toContainText('8 days')
+  await expect(dialog.locator('.story__body p')).toHaveCount(2)
+  await expect(dialog.locator('.story__body p').first()).toContainText('Eight days through the old kingdoms')
+  await expect(dialog.getByRole('link', { name: 'Day-by-day itinerary' })).toBeVisible()
+
+  // the page behind is frozen while it is open, and Escape puts it back
+  await expect(page.locator('body')).toHaveCSS('overflow', 'hidden')
+  await page.keyboard.press('Escape')
+  await expect(dialog).toHaveCount(0)
+  await expect(page.locator('body')).not.toHaveCSS('overflow', 'hidden')
+
+  expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
+})
+
+test('the journey page prints the full write-up and the itinerary steps', async ({ page }) => {
+  await page.goto('/journeys')
+  await page.locator('.package-card h3 a').first().click()
+
+  await expect(page.locator('.detail__story p')).toHaveCount(2)
+  await expect(page.locator('.detail__story p').first()).toContainText('Eight days through the old kingdoms')
+  await expect(page.locator('.itinerary li')).toHaveCount(3)
+
+  // the header lede is the one-line summary, not the whole write-up
+  await expect(page.locator('.page-hero__inner p')).toHaveText('Sigiriya at sunrise and the cave temples of Dambulla.')
+})
+
 test('the About page shows the photo that ships with the site', async ({ page }) => {
   await page.goto('/about')
   await expect(page.locator('.page-hero__media img')).toHaveAttribute('src', '/images/sl/page-about.jpg')

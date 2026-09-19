@@ -1,7 +1,7 @@
 /**
  * Imports the tour packages from the rate sheet into the backend, through the admin API.
  *
- *   npm run import:packages -- <packages.json> [--prune]
+ *   npm run import:packages -- <packages.json> [--prune] [--copy <copy.json>]
  *
  * The JSON comes from scripts/extract-tour-packages.ps1, which reads the workbook. Packages are
  * matched on title, so running it again updates what the sheet already contains rather than
@@ -21,23 +21,54 @@
  *                          two disagree and the sheet is the one with the itinerary and hotels
  *   day-by-day          -> itinerary, one line per day, numbered by the front end
  *   hotel table         -> the hotels and the accommodation tier, summarised in the description
- *   -                   -> imageUrl is left empty; set covers from the admin console
+ *
+ * data/package-copy.json then replaces the generated wording with the copy written for the site:
+ * `summary` becomes the description (two lines on a card, no more) and `story` becomes the
+ * longDescription behind the "read the full description" dialog and on the journey page. A package
+ * the copy file does not mention keeps the generated description and gets no long one.
+ *
+ * `cover` names a photograph in public/images/sl. It is uploaded to the media library once and
+ * linked, and only when the package has no cover yet, so a cover chosen in the console is never
+ * overwritten by a later run.
  */
 import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import { api } from '../src/api/client.js'
 import { adminApi } from '../src/api/admin.js'
 
-const [file, ...flags] = process.argv.slice(2)
+const here = dirname(fileURLToPath(import.meta.url))
+const photoDir = join(here, '..', 'public', 'images', 'sl')
+
+const args = process.argv.slice(2)
+const flags = new Set()
+let copyFile = join(here, '..', 'data', 'package-copy.json')
+let file = null
+
+for (let index = 0; index < args.length; index += 1) {
+  const arg = args[index]
+  if (arg === '--copy') {
+    copyFile = args[index + 1]
+    index += 1
+  } else if (arg.startsWith('--')) {
+    flags.add(arg)
+  } else if (!file) {
+    file = arg
+  }
+}
+
 if (!file) {
-  console.error('usage: npm run import:packages -- <packages.json> [--prune]')
+  console.error('usage: npm run import:packages -- <packages.json> [--prune] [--copy <copy.json>]')
   process.exit(1)
 }
-const prune = flags.includes('--prune')
+const prune = flags.has('--prune')
 
 // The extractor runs under Windows PowerShell, whose "Set-Content -Encoding UTF8" writes a byte
 // order mark; JSON.parse() refuses it, so strip one if it is there.
 const sheet = JSON.parse((await readFile(file, 'utf8')).replace(/^\uFEFF/, ''))
 const overview = new Map((sheet.overview ?? []).map((row) => [row.number, row]))
+const copy = JSON.parse((await readFile(copyFile, 'utf8')).replace(/^\uFEFF/, ''))
+delete copy._note
 
 const titleCase = (value) =>
   value
@@ -68,7 +99,27 @@ if (!token) throw new Error('no admin token - is the backend running?')
 const existing = await adminApi.listPackages(token)
 const byTitle = new Map(existing.map((pkg) => [pkg.title, pkg]))
 
-console.log(`Importing ${sheet.packages.length} packages from ${file}\n`)
+/**
+ * Uploads a cover photograph unless the media library already holds one with that file name, so
+ * re-running does not fill the library with copies of the same picture.
+ */
+const CONTENT_TYPES = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' }
+
+const media = await adminApi.listMedia(token)
+const upload = async (fileName, title) => {
+  const already = media.find((asset) => asset.originalName === fileName)
+  if (already) return already
+
+  const type = CONTENT_TYPES[fileName.slice(fileName.lastIndexOf('.')).toLowerCase()]
+  if (!type) throw new Error(`No content type known for ${fileName}`)
+  const bytes = await readFile(join(photoDir, fileName))
+  const asset = await adminApi.uploadMedia(token, new File([bytes], fileName, { type }), title)
+  media.push(asset)
+  return asset
+}
+
+console.log(`Importing ${sheet.packages.length} packages from ${file}`)
+console.log(`Copy from ${copyFile}\n`)
 
 const imported = []
 for (const entry of sheet.packages) {
@@ -77,13 +128,16 @@ for (const entry of sheet.packages) {
   const matchesUnesco = entry.days.some((day) => /unesco/i.test(day.text ?? ''))
   const overviewRow = overview.get(entry.number)
   const tier = tidy(entry.accommodation ?? overviewRow?.accommodation)
+  const written = copy[title]
 
   const stays = entry.stays
     .map((stay) => stay.hotel)
     .filter(Boolean)
     .map((hotel) => hotel.replace(/\s*★+\s*$/, ''))
 
-  const description = [
+  // Used only for a journey the copy file has nothing to say about: a factual line assembled from
+  // the sheet, so a new package is never blank on the card.
+  const generated = [
     `${subtitle} · ${experience(entry.experience)} · ${tidy(entry.duration)}.`,
     `Visiting ${tidy(entry.locations)}.`,
     matchesUnesco ? 'Includes UNESCO World Heritage sites.' : null,
@@ -94,19 +148,26 @@ for (const entry of sheet.packages) {
     .filter(Boolean)
     .join(' ')
 
+  const match = byTitle.get(title)
+
   const payload = {
     title,
     destination: experience(entry.experience),
     durationDays: entry.days.length || days(entry.duration),
     price: money(entry.price),
     maxCapacity: null,
-    description,
+    description: written?.summary ?? generated,
+    longDescription: written?.story ?? null,
     itinerary: entry.days.map((day) => day.text).join('\n'),
-    imageUrl: '',
     status: 'ACTIVE',
   }
 
-  const match = byTitle.get(title)
+  // A cover is only attached when the package has none: whatever staff picked in the console wins.
+  if (!match?.imageUrl && written?.cover) {
+    const asset = await upload(written.cover, `${title} cover`)
+    payload.imageUrl = asset.url
+  }
+
   const saved = match
     ? await adminApi.updatePackage(token, match.packageId, payload)
     : await adminApi.createPackage(token, payload)
@@ -116,11 +177,13 @@ for (const entry of sheet.packages) {
     overviewRow && money(overviewRow.price) !== payload.price
       ? `   (overview sheet says $${overviewRow.price})`
       : ''
+  const coverNote = payload.imageUrl ? '  cover' : match?.imageUrl ? '  cover kept' : '  no cover'
 
   console.log(
     `  ${match ? 'updated' : 'created'}  ${saved.title.padEnd(26)} ${String(payload.durationDays).padStart(2)} days  ` +
-      `$${String(payload.price).padStart(4)}  ${String(entry.days.length).padStart(2)} itinerary lines  ` +
-      `${payload.destination}${priceNote}`,
+      `$${String(payload.price).padStart(4)}  ${String(entry.days.length).padStart(2)} lines  ` +
+      `${written ? `${String(written.summary.length).padStart(3)}+${String(written.story.length).padStart(4)} chars copy` : 'generated copy     '}` +
+      `${coverNote}${priceNote}`,
   )
 }
 

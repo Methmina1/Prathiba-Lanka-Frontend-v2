@@ -5,8 +5,12 @@ import { useApi } from '../../hooks/useApi'
 import PackageCard from '../ui/PackageCard'
 import Reveal from '../ui/Reveal'
 
+/** The home page shows two rows of three; the rest live on the journeys page. */
+const SHOWN = 6
+
 export default function Packages() {
   const { data: packages, status } = useApi(() => api.getPackages(), fallbackPackages)
+  const shown = packages.slice(0, SHOWN)
 
   return (
     <section className="section section--muted" id="journeys">
@@ -34,8 +38,8 @@ export default function Packages() {
           </p>
         )}
 
-        <div className="grid grid--4">
-          {packages.map((pkg, index) => (
+        <div className="grid grid--3">
+          {shown.map((pkg, index) => (
             <Reveal key={pkg.packageId} delay={index * 110} variant="reveal--zoom">
               <PackageCard pkg={pkg} index={index} />
             </Reveal>
@@ -43,9 +47,14 @@ export default function Packages() {
         </div>
 
         <div className="section-cta">
-          <Link className="btn btn--ghost" to="/plan">
-            Request a custom itinerary
+          <Link className="btn btn--cta btn--sweep" to="/journeys">
+            {packages.length > shown.length
+              ? `See all ${packages.length} journeys`
+              : 'See every journey'}
           </Link>
+          <p className="section-cta__note">
+            Each one is a starting point. Tell us your dates and we will reshape it.
+          </p>
         </div>
       </div>
     </section>
