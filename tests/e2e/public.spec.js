@@ -156,6 +156,73 @@ test('the journey page prints the full write-up and the itinerary steps', async 
   await expect(page.locator('.page-hero__inner p')).toHaveText('Sigiriya at sunrise and the cave temples of Dambulla.')
 })
 
+test('the home page draws Sri Lanka out of its nine provinces', async ({ page }) => {
+  const errors = collectPageErrors(page)
+  await page.goto('/')
+
+  const map = page.locator('#island .province-map')
+  await expect(map.locator('path')).toHaveCount(9)
+  await expect(page.locator('.island__pick')).toHaveCount(9)
+
+  // The shapes have to add up to the island, not just sit near each other: sample a grid over the
+  // paths and check the proportions of Sri Lanka (about 0.57 wide for its height) and that the land
+  // fills roughly the share of the bounding box that the real island does (about 60%).
+  const shape = await map.evaluate((svg) => {
+    const [, , viewWidth, viewHeight] = svg.getAttribute('viewBox').split(/\s+/).map(Number)
+    const paths = [...svg.querySelectorAll('path')]
+    const canvas = document.createElement('canvas')
+    canvas.width = 46
+    canvas.height = 80
+    const ctx = canvas.getContext('2d')
+    ctx.setTransform(46 / viewWidth, 0, 0, 80 / viewHeight, 0, 0)
+
+    const shapes = paths.map((path) => new Path2D(path.getAttribute('d')))
+    let union = 0
+    let sum = 0
+    for (let y = 0; y < 80; y += 1) {
+      for (let x = 0; x < 46; x += 1) {
+        let hits = 0
+        for (const candidate of shapes) if (ctx.isPointInPath(candidate, x + 0.5, y + 0.5)) hits += 1
+        sum += hits
+        union += hits > 0 ? 1 : 0
+      }
+    }
+
+    const box = paths.reduce(
+      (acc, path) => {
+        const b = path.getBBox()
+        return {
+          left: Math.min(acc.left, b.x),
+          top: Math.min(acc.top, b.y),
+          right: Math.max(acc.right, b.x + b.width),
+          bottom: Math.max(acc.bottom, b.y + b.height),
+        }
+      },
+      { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
+    )
+
+    return {
+      aspect: (box.right - box.left) / (box.bottom - box.top),
+      coverage: union / (46 * 80),
+      overlap: (sum - union) / union,
+    }
+  })
+
+  expect(shape.aspect, 'the island should be taller than it is wide, like Sri Lanka').toBeGreaterThan(0.5)
+  expect(shape.aspect).toBeLessThan(0.65)
+  expect(shape.coverage, 'the land should fill about 60% of the map box').toBeGreaterThan(0.5)
+  expect(shape.coverage).toBeLessThan(0.72)
+  expect(shape.overlap, 'provinces should tile the island, not overlap it').toBeLessThan(0.06)
+
+  // Picking a province names it and its capital.
+  await page.locator('.island__pick', { hasText: 'Northern' }).click()
+  await expect(page.locator('.island__card h3')).toHaveText('Northern Province')
+  await expect(page.locator('.island__capital')).toContainText('Jaffna')
+  await expect(page.locator('.island__districts li')).toHaveCount(5)
+
+  expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
+})
+
 test('the About page shows the photo that ships with the site', async ({ page }) => {
   await page.goto('/about')
   await expect(page.locator('.page-hero__media img')).toHaveAttribute('src', '/images/sl/page-about.jpg')

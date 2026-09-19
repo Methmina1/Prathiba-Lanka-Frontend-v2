@@ -7,7 +7,7 @@ framework, so the palette and layout stay easy to change.
 
 | Route | Contents |
 |---|---|
-| `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), sustainability, gallery, journal, reviews, FAQ, CTA band |
+| `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), the province map, sustainability, gallery, journal, reviews, FAQ, CTA band |
 | `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog |
 | `/journeys/:id` | One journey: overview, the full description, day-by-day itinerary, gallery strip, reviews for that package, sticky quote card |
 | `/journal` | Featured story plus the rest of the published posts |
@@ -96,11 +96,11 @@ enforces that the planning/tracking panels have not leaked back onto the home pa
 
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Twenty-three tests across three files:
+so it needs no backend. Twenty-four tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the province map (nine shapes that tile the island at Sri Lanka's proportions, and choosing one), the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer |
 
@@ -148,6 +148,37 @@ the way a member of staff would create it, so all of it stays editable in the co
 re-run (journal posts are matched on title, gallery items on their file), and it takes an optional
 base URL: `npm run seed -- http://localhost:8080`. Journeys are not seeded from here - the catalogue
 is the agency's own, and it is loaded from the rate sheet (below).
+
+## The province map
+
+Under the journeys on the home page, the nine provinces are drawn in their real positions, so the
+outline they make is Sri Lanka. Pointing at a province (or picking it from the list) names it, gives
+its capital, its districts and a line about what is there.
+
+The geometry is generated, never hand-written - a map is a factual claim, and a province drawn in
+the wrong place is worse than no map at all:
+
+```bash
+node scripts/build-province-map.mjs
+```
+
+`scripts/build-province-map.mjs` writes `src/data/provinces.js`. It reads the silhouettes supplied in
+`public/map` **only if they really are the province each file is named after**: every supplied file
+and every reference province is rasterised in a browser and scored by intersection over union, and a
+file has to reach 0.80 against its namesake to be used. If all nine pass, the map is drawn from
+`public/map`; if any fails, all nine come from the reference geometry instead, so the map is at least
+consistent and correct. The script prints the scores, so the check is visible on every run rather
+than hidden inside it.
+
+The reference is [@svg-maps/sri-lanka](https://www.npmjs.com/package/@svg-maps/sri-lanka): 25
+districts, CC BY 4.0, originally from [MapSVG](https://mapsvg.com/maps/sri-lanka). Districts are
+grouped into the nine provinces, and each province's districts are joined into one path - which has
+to be done carefully, because `m 44.4,578.9 2.6,0.07` is an absolute moveto followed by a *relative*
+lineto, so a joined path needs the moveto rewritten rather than its letter upper-cased. The credit
+line under the map is what the licence asks for; keep it.
+
+The map data is 58 KB of path coordinates in the bundle. It is worth it: the alternative is a
+picture of a map that cannot follow the palette, cannot be pointed at, and cannot be corrected.
 
 ## The package catalogue
 
@@ -257,6 +288,7 @@ src/
   data/pageContent.js      default copy for the editable About/Contact pages
   data/photos.js           the photographs that ship with the site, by slot
   data/package-copy.json   the written summary, full description and cover for each journey
+  data/provinces.js        the nine province shapes, placed on the island (generated)
   auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens
@@ -267,7 +299,7 @@ src/
   components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
   components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills),
                            MediaPicker, useAdmin
-  components/sections/     Home page sections
+  components/sections/     Home page sections (including ProvinceMap)
   components/ui/           Icons, Scenery, PackageCard, StoryDialog, Reveal, ScrollProgress,
                            MediaFigure, CoverImage
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
@@ -280,6 +312,7 @@ scripts/
   seed-demo-content.jsx    loads the demo content through the admin API
   extract-tour-packages.ps1  rate workbook (.xlsx) -> packages.json, no Excel needed
   import-tour-packages.jsx   packages.json -> packages through the admin API
+  build-province-map.mjs   public/map + reference districts -> src/data/provinces.js
   optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
 tests/e2e/
   fixtures.js              mocked API + session seeding
