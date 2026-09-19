@@ -36,7 +36,8 @@ seed-package-hillcountry <- hans-peter-traunig-oZ0bM6cNeD0-unsplash.jpg
 seed-package-coast       <- ben-o-bro-5xNhXCAhSbk-unsplash.jpg
 seed-journal-season      <- bhanuka-gamage-tilu7pgvRN8-unsplash.jpg
 seed-journal-sigiriya    <- erik-esly-ZWdrM9IBBIE-unsplash.jpg
-seed-journal-tea         <- izuru-kannagara-UeSfcl4xreE-unsplash.jpg
+seed-journal-tea         <- izuru-kannagara-UeSfcl4xreE-unsplash.jpg
+seed-journal-planning    <- anupa-uthsara-czCVCfj_O4A-unsplash.jpg
 seed-gallery-01          <- adil-murshed-uZLvoR-gkBg-unsplash.jpg
 seed-gallery-02          <- agnieszka-stankiewicz-FXdq4CCcRuw-unsplash.jpg
 seed-gallery-03          <- anastasiia-malai-zihIH7Blzbs-unsplash.jpg
@@ -64,6 +65,5 @@ and can be uploaded from the admin console whenever you want them:
   tomas-malik-UL23OjMTHXE-unsplash.jpg          (hero-4 in the first pass)
   udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg   (hero-4 in the second pass)
   anupa-uthsara-5Np6ZsLDVIM-unsplash.jpg        (gallery, then hero-2)
-  anupa-uthsara-czCVCfj_O4A-unsplash.jpg        (hero-1 in the first pass)
 
-Everything else in ../Sri lanka has not been placed yet. In total 49 of the 114 originals are in use.
+Everything else in ../Sri lanka has not been placed yet. In total 50 of the 114 originals are in use.

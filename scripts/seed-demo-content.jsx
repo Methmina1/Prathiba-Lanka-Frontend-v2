@@ -136,6 +136,20 @@ const JOURNAL = [
       'Buy from the factory shop rather than the airport. It is cheaper, it is fresher, and the money stays on the estate.',
     ].join('\n\n'),
   },
+  {
+    title: 'What happens between your first email and your first morning',
+    description:
+      'A booking is a request, not a checkout. Here is the handful of steps between sending it and standing in a vehicle at dawn.',
+    photo: 'seed-journal-planning.jpg',
+    content: [
+      'Every journey starts as an enquiry, and every enquiry is read by a person. You tell us roughly when you are coming, how long you have, and the two or three things you would not want to miss; we reply with a first outline and a price, usually inside a working day.',
+      'That outline is a draft, and it is meant to be pulled apart. Too much driving, not enough beach, a night in a place you have heard about - all of that is easier to change on paper than on the road, so we would rather go around twice now.',
+      'Once the shape is right we hold the rooms and the vehicle, which is when the price becomes final. Nothing is charged through this site: the booking form creates a request with a PIN, and a consultant confirms it with the date and the agreed price. You can follow that status yourself with the PIN, no account needed.',
+      'Then come the unglamorous parts that decide how the trip actually feels. Which side of the train to sit on for the hill country. Whether the safari is better on the first morning or the last. Where to stop between two long drives so the day does not become a transfer. We write all of it into the itinerary you travel with.',
+      'On the morning itself you meet your guide, and from then on the plan is ours to adjust. The island has its own ideas about weather and timing, and a good guide will move the day around it rather than stick to a spreadsheet.',
+      'If you would rather talk it through first, the enquiry form on the contact page is the fastest way in. There is no obligation on it, and no automatic booking.',
+    ].join('\n\n'),
+  },
 ]
 
 /** Gallery captions stay empty: describe the photographs yourself in the console. */
@@ -157,23 +171,33 @@ if (process.argv[2]) {
   process.env.VITE_API_BASE_URL = process.argv[2]
 }
 
-const upload = async (token, fileName, title) => {
-  const bytes = await readFile(join(photoDir, fileName))
-  const file = new File([bytes], fileName, { type: 'image/jpeg' })
-  return adminApi.uploadMedia(token, file, title)
-}
-
 const login = await api.login(ADMIN_EMAIL, ADMIN_PASSWORD)
 const token = login.token
 if (!token) throw new Error(`Could not sign in as ${ADMIN_EMAIL} - is the backend running?`)
 console.log(`Seeding ${api.baseUrl} as ${ADMIN_EMAIL}\n`)
+
+/**
+ * Uploads a file unless the media library already holds one with that name. Reusing the existing
+ * asset is what makes a second run update the content instead of uploading everything again and
+ * duplicating every gallery item.
+ */
+const existingMedia = await adminApi.listMedia(token)
+const upload = async (fileName, title) => {
+  const already = existingMedia.find((asset) => asset.originalName === fileName)
+  if (already) return already
+
+  const bytes = await readFile(join(photoDir, fileName))
+  const asset = await adminApi.uploadMedia(token, new File([bytes], fileName, { type: 'image/jpeg' }), title)
+  existingMedia.push(asset)
+  return asset
+}
 
 // ---------------------------------------------------------------- packages
 const existingPackages = await adminApi.listPackages(token)
 const packageIds = {}
 
 for (const spec of PACKAGES) {
-  const asset = await upload(token, spec.photo, `${spec.title} cover`)
+  const asset = await upload(spec.photo, `${spec.title} cover`)
   const payload = {
     title: spec.title,
     destination: spec.destination,
@@ -199,7 +223,7 @@ for (const spec of PACKAGES) {
 const existingPosts = await adminApi.listJournal(token)
 
 for (const spec of JOURNAL) {
-  const asset = await upload(token, spec.photo, `${spec.title} cover`)
+  const asset = await upload(spec.photo, `${spec.title} cover`)
   const payload = {
     title: spec.title,
     description: spec.description,
@@ -221,9 +245,12 @@ const existingGallery = await api.getGallery()
 const usedUrls = new Set(existingGallery.map((item) => item.imageUrl))
 
 // One photograph per journey, linked, so the journey page has a "from the road" strip.
+// Matched on the package rather than on the file, so a library holding two copies of a photograph
+// cannot produce a second gallery item for the same journey.
+const linkedPackages = new Set(existingGallery.filter((item) => item.packageId).map((item) => item.packageId))
 for (const [title, packageId] of Object.entries(packageIds)) {
-  const asset = await upload(token, PACKAGES.find((p) => p.title === title).photo, `${title} on the road`)
-  if (usedUrls.has(asset.url)) {
+  const asset = await upload(PACKAGES.find((p) => p.title === title).photo, `${title} on the road`)
+  if (linkedPackages.has(packageId) || usedUrls.has(asset.url)) {
     console.log(`  gallery  skipped   ${title} (already present)`)
     continue
   }
@@ -234,11 +261,12 @@ for (const [title, packageId] of Object.entries(packageIds)) {
     mediaType: 'IMAGE',
   })
   usedUrls.add(asset.url)
+  linkedPackages.add(packageId)
   console.log(`  gallery  linked    ${title} (${packageId}) -> ${asset.url}`)
 }
 
 for (const photo of GALLERY) {
-  const asset = await upload(token, photo, null)
+  const asset = await upload(photo, null)
   if (usedUrls.has(asset.url)) {
     console.log(`  gallery  skipped   ${photo} (already present)`)
     continue
@@ -254,7 +282,7 @@ for (const [section, photos] of Object.entries(PAGE_PHOTOS)) {
   const payload = structuredClone(current.payload)
 
   for (const [field, photo] of Object.entries(photos)) {
-    const asset = await upload(token, photo, `${section} ${field}`)
+    const asset = await upload(photo, `${section} ${field}`)
     payload[field].image = asset.url
   }
 
