@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { fallbackPackages } from '../data/fallback'
 import { CONTACT_FALLBACK } from '../data/social'
+import { useAuth } from '../auth/AuthContext'
 import { usePageContent } from '../hooks/usePageContent'
 import { useResource } from '../hooks/useResource'
 import PageHero from '../components/layout/PageHero'
@@ -57,6 +58,7 @@ export default function JourneyDetail() {
   const reviews = useRelatedList(status === 'ready', () => api.getReviewsByPackage(id), id)
 
   // The quote card shows whichever contact detail the agency actually publishes.
+  const { mayBook } = useAuth()
   const { content: contact } = usePageContent('contact')
   const contactCards = contact.cards ?? []
   const phone = contactCards.find((card) => card.href?.startsWith('tel:') && card.value)
@@ -232,15 +234,26 @@ export default function JourneyDetail() {
                 </li>
               </ul>
 
-              <Link className="btn btn--cta btn--sweep btn--block" to="/plan">
-                Request this journey
-                <ArrowRight width={15} height={15} />
-              </Link>
+              {/* Staff cannot book - the backend refuses an admin token with 403 - so they are not
+                  offered the request button. The price and the facts still show. */}
+              {mayBook ? (
+                <>
+                  <Link className="btn btn--cta btn--sweep btn--block" to="/plan">
+                    Request this journey
+                    <ArrowRight width={15} height={15} />
+                  </Link>
 
-              <p className="quote-card__note">
-                No payment now. We reply with an itinerary and a price, usually within one working
-                day.
-              </p>
+                  <p className="quote-card__note">
+                    No payment now. We reply with an itinerary and a price, usually within one
+                    working day.
+                  </p>
+                </>
+              ) : (
+                <Link className="btn btn--ghost btn--block" to="/admin/bookings">
+                  This is a customer journey — open the console
+                  <ArrowRight width={15} height={15} />
+                </Link>
+              )}
 
               {/* The agency's real contact details, from the same cards the contact page edits.
                   There is no published phone number yet, so this falls back to email. */}
@@ -263,10 +276,12 @@ export default function JourneyDetail() {
                 Every journey here is a starting point. Add a day in the hills, swap a safari for a
                 cooking class, or slow the whole thing down.
               </p>
-              <Link className="link-arrow" to="/plan">
-                Build a custom itinerary
-                <ArrowRight width={15} height={15} />
-              </Link>
+              {mayBook && (
+                <Link className="link-arrow" to="/plan">
+                  Build a custom itinerary
+                  <ArrowRight width={15} height={15} />
+                </Link>
+              )}
             </div>
           </aside>
         </div>

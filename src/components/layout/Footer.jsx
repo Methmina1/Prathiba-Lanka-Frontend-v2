@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Mail, MapPin, Phone } from '../ui/Icons'
 import { CONTACT_FALLBACK, SOCIAL_LINKS } from '../../data/social'
+import { useAuth } from '../../auth/AuthContext'
 import { usePageContent } from '../../hooks/usePageContent'
 
 const DISCOVER = [
@@ -23,6 +24,7 @@ const SOCIAL_ICONS = { facebook: Facebook, instagram: Instagram }
 
 export default function Footer() {
   // The same contact details the Contact page shows, so editing them once updates both.
+  const { mayBook } = useAuth()
   const { content } = usePageContent('contact')
   const cards = content.cards ?? []
   const phone = cards.find((card) => card.href?.startsWith('tel:') && card.value)
@@ -112,12 +114,17 @@ export default function Footer() {
             <li>
               <Link to="/contact">Contact</Link>
             </li>
-            <li>
-              <Link to="/plan">Plan your journey</Link>
-            </li>
-            <li>
-              <Link to="/plan#track">Track a booking</Link>
-            </li>
+            {/* An administrator is staff, and staff cannot book: the backend refuses it with 403. */}
+            {mayBook && (
+              <>
+                <li>
+                  <Link to="/plan">Plan your journey</Link>
+                </li>
+                <li>
+                  <Link to="/plan#track">Track a booking</Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>

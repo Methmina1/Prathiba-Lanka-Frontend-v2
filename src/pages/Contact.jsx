@@ -4,6 +4,7 @@ import EnquiryForm from '../components/plan/EnquiryForm'
 import Reveal from '../components/ui/Reveal'
 import { ArrowRight, Clock, Mail, MapPin, Phone } from '../components/ui/Icons'
 import PHOTOS from '../data/photos'
+import { useAuth } from '../auth/AuthContext'
 import { usePageContent } from '../hooks/usePageContent'
 import { api } from '../api/client'
 
@@ -12,6 +13,7 @@ const ICONS = { phone: Phone, mail: Mail, map: MapPin, clock: Clock }
 export default function Contact() {
   // Everything on this page is editable in the admin console; see usePageContent.
   const { content } = usePageContent('contact')
+  const { mayBook } = useAuth()
   const { hero, cards, aside } = content
 
   return (
@@ -63,10 +65,12 @@ export default function Contact() {
               <div className="card contact-panel">
                 <h3>{aside.heading}</h3>
                 <p>{aside.text}</p>
-                <Link className="btn btn--cta btn--sweep btn--block" to="/plan#track">
-                  Track a booking
-                  <ArrowRight width={15} height={15} />
-                </Link>
+                {mayBook && (
+                  <Link className="btn btn--cta btn--sweep btn--block" to="/plan#track">
+                    Track a booking
+                    <ArrowRight width={15} height={15} />
+                  </Link>
+                )}
               </div>
 
               <div className="card contact-panel contact-panel--map">

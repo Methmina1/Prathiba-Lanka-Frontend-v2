@@ -19,6 +19,44 @@ test('a customer is told the console needs an administrator', async ({ page }) =
   await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
 })
 
+test('an administrator is not offered the booking flow', async ({ page }) => {
+  await signIn(page, ADMIN_SESSION)
+
+  // Staff do not book trips: the booking endpoints refuse an admin token (403), so the site does not
+  // invite them. Every route into /plan goes, and the band points at the console instead.
+  await page.goto('/')
+  await expect(page.locator('.navbar__actions a[href="/plan"]')).toHaveCount(0)
+  await expect(page.locator('.footer__links a[href="/plan"]')).toHaveCount(0)
+  await expect(page.locator('.cta-band a[href="/plan"]')).toHaveCount(0)
+  await expect(page.locator('.cta-band a[href="/admin"]')).toHaveCount(1)
+  await expect(page.locator('.hero a[href="/plan"]')).toHaveCount(0)
+
+  await page.goto('/journeys')
+  await expect(page.locator('.package-card__meta a[href="/plan"]')).toHaveCount(0)
+  // …while the journey itself is still readable
+  await expect(page.locator('.package-card__meta a[href^="/journeys/"]')).not.toHaveCount(0)
+
+  await page.goto('/plan')
+  await expect(page.locator('h1')).toHaveText('Booking is for customers')
+  await expect(page.locator('.plan form')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Open the console' })).toBeVisible()
+})
+
+test('a customer still gets the booking flow', async ({ page }) => {
+  await signIn(page, CUSTOMER_SESSION)
+
+  await page.goto('/')
+  await expect(page.locator('.navbar__actions a[href="/plan"]')).toHaveCount(1)
+  await expect(page.locator('.footer__links a[href="/plan"]')).toHaveCount(1)
+
+  await page.goto('/journeys')
+  await expect(page.locator('.package-card__meta a[href="/plan"]').first()).toBeVisible()
+
+  await page.goto('/plan')
+  await expect(page.locator('h1')).toHaveText('Plan your journey')
+  await expect(page.locator('.plan form').first()).toBeVisible()
+})
+
 test('an admin reaches every console screen', async ({ page }) => {
   const errors = collectPageErrors(page)
   await signIn(page, ADMIN_SESSION)

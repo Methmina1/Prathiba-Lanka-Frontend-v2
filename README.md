@@ -43,11 +43,19 @@ lists fall back to `src/data/fallback.js`, with a notice explaining which one yo
 | Role | Sees | Cannot |
 |---|---|---|
 | `ROLE_CUSTOMER` | `/account` - own bookings, new booking request, review form | reach `/admin` |
-| `ROLE_ADMIN` | `/admin` - the staff console | hold a booking or post a review (the backend rejects both with 403) |
+| `ROLE_ADMIN` | `/admin` - the staff console | book a trip or post a review |
+
+An administrator is staff, so the booking flow is closed to them twice over: the backend refuses
+`/api/bookings/request`, `/api/customer/bookings` and `POST /api/reviews` with a 403 for an admin
+token (`@PreAuthorize("hasRole('CUSTOMER')")` on the controllers), and the site does not offer the
+flow at all - no *Plan your trip* in the header, no *Plan your journey* in the footer, no *Request*
+on a journey card or page, and `/plan` explains instead of showing the forms. That decision lives in
+one place, `mayBook` in `auth/AuthContext.jsx`, so a new call to action cannot quietly reintroduce
+it.
 
 The admin console is reached from the small **Admin sign in** link in the site footer. There is no
-self-service admin signup: accounts come from `app.bootstrap-admin.*` in the backend
-(`admin@test.com` / `Admin@12345` by default).
+self-service admin signup: the account comes from `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`
+in the backend.
 
 `/admin/**` is guarded on the client too - `components/admin/AdminLayout.jsx` sends a signed-out
 visitor to `/login?next=<path>` and shows "Admin access required" for a customer session - but the

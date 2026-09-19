@@ -30,8 +30,7 @@ export default function Header() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { session, email, signOut } = useAuth()
-  const isAdmin = session?.role === 'ROLE_ADMIN'
+  const { session, email, isAdmin, mayBook, signOut } = useAuth()
 
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY <= 4)
@@ -92,9 +91,12 @@ export default function Header() {
                 {email ? email.split('@')[0] : isAdmin ? 'Admin' : 'Account'}
               </Link>
             )}
-            <Link className="btn btn--cta btn--sweep btn--sm" to="/plan">
-              Plan your trip
-            </Link>
+            {/* Staff do not book trips, so the booking call to action is not shown to them. */}
+            {mayBook && (
+              <Link className="btn btn--cta btn--sweep btn--sm" to="/plan">
+                Plan your trip
+              </Link>
+            )}
             <button
               type="button"
               className="navbar__toggle"
@@ -115,9 +117,11 @@ export default function Header() {
               {item.label}
             </Link>
           ))}
-          <Link className="mobile-menu__track" to="/plan#track" onClick={() => setOpen(false)}>
-            Track your booking
-          </Link>
+          {mayBook && (
+            <Link className="mobile-menu__track" to="/plan#track" onClick={() => setOpen(false)}>
+              Track your booking
+            </Link>
+          )}
           {session && (
             <>
               <Link to={isAdmin ? '/admin' : '/account'} onClick={() => setOpen(false)}>
@@ -136,9 +140,11 @@ export default function Header() {
               </button>
             </>
           )}
-          <Link className="btn btn--cta btn--block" to="/plan" onClick={() => setOpen(false)}>
-            Plan your trip
-          </Link>
+          {mayBook && (
+            <Link className="btn btn--cta btn--block" to="/plan" onClick={() => setOpen(false)}>
+              Plan your trip
+            </Link>
+          )}
         </nav>
       </div>
     </header>

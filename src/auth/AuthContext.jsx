@@ -62,6 +62,17 @@ export function AuthProvider({ children, initialSession = null }) {
       email: session?.email ?? null,
       userId: session?.userId ?? null,
       isCustomer: session?.role === 'ROLE_CUSTOMER',
+      isAdmin: session?.role === 'ROLE_ADMIN',
+      /**
+       * Whether this visitor may use the booking flow at all.
+       *
+       * An administrator may not: the backend refuses a booking request made with an admin token
+       * (403 - see @PreAuthorize on BookingController), because an admin is staff rather than a
+       * traveller, and the id in an admin token is not a customer id. So the site does not offer
+       * them the booking pages, rather than walking them into a refusal. Guests may book - the
+       * enquiry form is public.
+       */
+      mayBook: session?.role !== 'ROLE_ADMIN',
       signIn,
       signUp,
       signOut,

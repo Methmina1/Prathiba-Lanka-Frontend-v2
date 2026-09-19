@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
+import { useAuth } from '../../auth/AuthContext'
 import { useApi } from '../../hooks/useApi'
 import Reveal from '../ui/Reveal'
 import { ArrowRight, Star } from '../ui/Icons'
@@ -13,6 +14,7 @@ import { ArrowRight, Star } from '../ui/Icons'
  */
 export default function Reviews() {
   const { data: reviews } = useApi(() => api.getReviews())
+  const { mayBook } = useAuth()
 
   if (reviews.length === 0) {
     return (
@@ -27,12 +29,14 @@ export default function Reviews() {
             </p>
           </div>
 
-          <div className="section-cta">
-            <Link className="btn btn--cta btn--sweep" to="/plan">
-              Travelled with us? Tell us about it
-              <ArrowRight width={15} height={15} />
-            </Link>
-          </div>
+          {mayBook && (
+            <div className="section-cta">
+              <Link className="btn btn--cta btn--sweep" to="/plan">
+                Travelled with us? Tell us about it
+                <ArrowRight width={15} height={15} />
+              </Link>
+            </div>
+          )}
         </div>
       </section>
     )

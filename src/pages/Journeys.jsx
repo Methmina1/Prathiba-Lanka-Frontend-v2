@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { fallbackPackages } from '../data/fallback'
 import { useApi } from '../hooks/useApi'
+import { useAuth } from '../auth/AuthContext'
 import PageHero from '../components/layout/PageHero'
 import PHOTOS from '../data/photos'
 import PackageCard from '../components/ui/PackageCard'
@@ -12,6 +13,7 @@ import { Search } from '../components/ui/Icons'
 
 export default function Journeys() {
   const { data: packages, status } = useApi(() => api.getPackages(), fallbackPackages)
+  const { mayBook } = useAuth()
   const [params, setParams] = useSearchParams()
   const urlTerm = params.get('destination') ?? ''
 
@@ -130,9 +132,11 @@ export default function Journeys() {
                 We build custom itineraries too - tell us where you would like to go and we will
                 draft something.
               </p>
-              <a className="btn btn--cta btn--sweep" href="/plan">
-                Plan a custom trip
-              </a>
+              {mayBook && (
+                <Link className="btn btn--cta btn--sweep" to="/plan">
+                  Plan a custom trip
+                </Link>
+              )}
             </div>
           ) : (
             <div className="grid grid--3">
