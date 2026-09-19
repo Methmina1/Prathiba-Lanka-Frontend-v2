@@ -1,4 +1,4 @@
-﻿Where each photograph in this folder came from.
+Where each photograph in this folder came from.
 
 The files here are web-sized copies (scripts/optimize-images.ps1) of the originals in
 ../Sri lanka. This list exists so a slot can be traced back, re-exported at a different size, or
@@ -8,7 +8,7 @@ one-file job - and everything under seed-* can also be swapped from the admin co
 hero-1                   <- anupa-uthsara-czCVCfj_O4A-unsplash.jpg
 hero-2                   <- anupa-uthsara-5Np6ZsLDVIM-unsplash.jpg
 hero-3                   <- zoshua-colah-Wj11_YgLuTc-unsplash.jpg
-hero-4                   <- tommaso-delton-_sFOJHDmO6A-unsplash.jpg
+hero-4                   <- udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg
 page-journeys            <- large-vecteezy_sri-lankan-leopard_7975795_large.jpg
 page-journal             <- norman-meyer-5rNFa-GRsuY-unsplash.jpg
 page-gallery             <- hendrik-cornelissen-jpTT_SAU034-unsplash.jpg
@@ -27,7 +27,7 @@ tile-3                   <- dilani-wickramanayake-16FXoeP7unQ-unsplash.jpg
 tile-4                   <- jalitha-hewage-Dw2QYtzSNn0-unsplash.jpg
 tile-5                   <- jayasahan-hansana-qxFfPt_2OjI-unsplash.jpg
 tile-6                   <- my-journal-kdVahzrXhUg-unsplash.jpg
-journal-1                <- udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg
+journal-1                <- tommaso-delton-_sFOJHDmO6A-unsplash.jpg
 journal-2                <- yves-alarie-yaGheETUSK4-unsplash.jpg
 journal-3                <- y-yu--cjtJMf5X_w-unsplash.jpg
 seed-package-heritage    <- christoph-theisinger-9PPYa3LK6II-unsplash.jpg
@@ -56,9 +56,11 @@ seed-gallery-16          <- kultar-ruprai-g44CSKqUPuA-unsplash.jpg
 seed-gallery-17          <- lucas-klein-I73t54WLa0Q-unsplash.jpg
 seed-gallery-18          <- matt-dany-AN0ESciHPSQ-unsplash.jpg
 
-Photographs still unused from the original set (available to upload in the console):
-  pexels-dtravel-vlog-1025192350-27913876.jpg   (was hero-1)
-  ranmali-kirinde-K42AU4q-Ew0-unsplash.jpg      (was hero-2)
-  juho-s-uDk9n1yKxTw-unsplash.jpg               (was hero-3)
-  tomas-malik-UL23OjMTHXE-unsplash.jpg          (was hero-4)
-  ...and the rest of ../Sri lanka.
+Photographs freed by the hero swaps and not currently placed anywhere. They are still in ../Sri lanka
+and can be uploaded from the admin console whenever you want them:
+  pexels-dtravel-vlog-1025192350-27913876.jpg   (hero-1 in the first pass)
+  ranmali-kirinde-K42AU4q-Ew0-unsplash.jpg      (hero-2 in the first pass)
+  juho-s-uDk9n1yKxTw-unsplash.jpg               (hero-3 in the first pass)
+  tomas-malik-UL23OjMTHXE-unsplash.jpg          (hero-4 in the first pass)
+
+Everything else in ../Sri lanka has not been placed yet. In total 49 of the 114 originals are in use.
