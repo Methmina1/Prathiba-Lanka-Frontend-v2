@@ -1120,6 +1120,36 @@ html.intro-landing .site-header .brand__text {
   padding: var(--space-6);
 }
 
+/* The account panel sits under both columns: this page is where a visitor signs in or signs up. */
+.plan__account {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-6);
+}
+
+.plan__account h3 {
+  margin-bottom: var(--space-2);
+}
+
+.plan__account p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.plan__account-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.plan__account-actions .btn {
+  white-space: nowrap;
+}
+
 .plan__hint {
   margin: var(--space-2) 0 var(--space-5);
   color: var(--text-muted);
@@ -1644,6 +1674,11 @@ html.intro-landing .site-header .brand__text {
   }
   .plan__form,
   .plan__track {
+    padding: var(--space-5);
+  }
+  /* one column: the account copy and its buttons stack */
+  .plan__account {
+    grid-template-columns: minmax(0, 1fr);
     padding: var(--space-5);
   }
   .review-card {

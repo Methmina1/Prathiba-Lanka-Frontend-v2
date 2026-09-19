@@ -41,7 +41,7 @@ const ROUTES = {
   '/reviews': ['What people said afterwards', 'The train to Ella was the highlight'],
   '/about': ['Arranged by people who live here', 'How we got here', '/images/sl/about-story.jpg'],
   '/contact': ['Talk to us', 'Track a booking', '/images/sl/contact-map.jpg'],
-  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking'],
+  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking', 'Sign in', 'Create an account'],
   '/login': ['Sign in', 'Create an account'],
   '/register': ['Create an account', 'At least 8 characters'],
   '/nope': ['This path leads nowhere', '/images/sl/not-found.jpg'],
@@ -60,8 +60,15 @@ const ADMIN_ROUTES = {
   '/admin/reviews': ['Admin console', 'Customers can review from their account page'],
 }
 
-// the home page must NOT contain the planning panels any more
-const HOME_FORBIDDEN = ['Request a journey', 'Send enquiry', 'Three steps, then the island']
+// the home page must NOT contain the planning panels any more, and the header must not offer a
+// sign-in link - that lives on the plan page now
+const HOME_FORBIDDEN = [
+  'Request a journey',
+  'Send enquiry',
+  'Three steps, then the island',
+  'navbar__auth',
+  'Sign in',
+]
 
 const problems = []
 

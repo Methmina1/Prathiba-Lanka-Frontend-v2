@@ -86,13 +86,10 @@ export default function Header() {
           </nav>
 
           <div className="navbar__actions">
-            {session ? (
+            {/* Signed-out visitors sign in from the plan page; the bar stays navigation + the CTA. */}
+            {session && (
               <Link className="navbar__auth" to={isAdmin ? '/admin' : '/account'}>
                 {email ? email.split('@')[0] : isAdmin ? 'Admin' : 'Account'}
-              </Link>
-            ) : (
-              <Link className="navbar__auth" to="/login">
-                Sign in
               </Link>
             )}
             <Link className="btn btn--cta btn--sweep btn--sm" to="/plan">
@@ -121,7 +118,7 @@ export default function Header() {
           <Link className="mobile-menu__track" to="/plan#track" onClick={() => setOpen(false)}>
             Track your booking
           </Link>
-          {session ? (
+          {session && (
             <>
               <Link to={isAdmin ? '/admin' : '/account'} onClick={() => setOpen(false)}>
                 {isAdmin ? 'Staff dashboard' : 'My account'}
@@ -138,10 +135,6 @@ export default function Header() {
                 Sign out
               </button>
             </>
-          ) : (
-            <Link to="/login" onClick={() => setOpen(false)}>
-              Sign in
-            </Link>
           )}
           <Link className="btn btn--cta btn--block" to="/plan" onClick={() => setOpen(false)}>
             Plan your trip
