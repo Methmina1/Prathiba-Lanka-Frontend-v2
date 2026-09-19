@@ -180,6 +180,21 @@ line under the map is what the licence asks for; keep it.
 The map data is 58 KB of path coordinates in the bundle. It is worth it: the alternative is a
 picture of a map that cannot follow the palette, cannot be pointed at, and cannot be corrected.
 
+**Which journeys go through a province?** `src/data/provincePlaces.js` answers that from the places
+each journey names - its title, its region, its summary and every line of its day-by-day itinerary -
+so the panel stays right as packages are added or edited in the console, with no extra field to fill
+in. Journeys are ranked by how much of the trip is in that province (`3 of 7 days here`), so the tour
+that is mostly about a place comes above the one that merely passes through it, and the panel lists
+three with a link to the rest. Hovering moves the selection, clicking pins it, and every entry is a
+link into the catalogue.
+
+The patterns have to be specific, and the near-misses are the interesting part:
+
+- **Galle** is Southern, **Galle Face** is in Colombo - so the Southern pattern looks ahead and
+  excludes it, or every tour that starts in the capital would claim the south coast.
+- **Little Adam's Peak** is in Ella (Uva); **Adam's Peak** (Sri Pada) is 100 km away in Sabaragamuwa.
+  One keyword would have merged them, so that pattern carries an `unless`.
+
 ## The package catalogue
 
 The journeys on the site are the agency's real ones, and they come from the rate workbook - one
@@ -289,6 +304,7 @@ src/
   data/photos.js           the photographs that ship with the site, by slot
   data/package-copy.json   the written summary, full description and cover for each journey
   data/provinces.js        the nine province shapes, placed on the island (generated)
+  data/provincePlaces.js   which places belong to which province, for the map's journey list
   auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens

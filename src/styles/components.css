@@ -930,7 +930,9 @@ html.intro-landing .site-header .brand__text {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
   gap: var(--space-7);
-  align-items: center;
+  /* Top-aligned on purpose: centring would move the map up and down as the journey list changes
+     length, so a province would slide out from under the pointer. */
+  align-items: start;
   margin-top: var(--space-6);
 }
 
@@ -990,6 +992,9 @@ html.intro-landing .site-header .brand__text {
   display: grid;
   gap: var(--space-3);
   width: 100%;
+  /* Stops the panel jumping about while the pointer runs across the map: the journey list changes
+     length from province to province. */
+  min-height: 360px;
   padding: var(--space-6);
 }
 
@@ -1029,6 +1034,78 @@ html.intro-landing .site-header .brand__text {
   color: var(--text-muted);
   font-size: 0.72rem;
   letter-spacing: 0.06em;
+}
+
+/* "Which journeys go through here" - the reason the map is on the page. */
+.island__journeys {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.island__journeys h4 {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.island__journey-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.island__journey {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(244, 239, 228, 0.02);
+  transition: border-color var(--dur) var(--ease-out-soft), background var(--dur) var(--ease-out-soft);
+}
+
+.island__journey:hover {
+  border-color: var(--border-gold);
+  background: rgba(195, 154, 46, 0.08);
+}
+
+.island__journey-name {
+  color: var(--text-heading);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.island__journey-meta {
+  grid-column: 1;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.island__journey svg {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  color: var(--gold-300);
+  transition: transform var(--dur) var(--ease-out-soft);
+}
+
+.island__journey:hover svg {
+  transform: translateX(4px);
+}
+
+.island__journey-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
 }
 
 .island__list {

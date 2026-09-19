@@ -214,11 +214,24 @@ test('the home page draws Sri Lanka out of its nine provinces', async ({ page })
   expect(shape.coverage).toBeLessThan(0.72)
   expect(shape.overlap, 'provinces should tile the island, not overlap it').toBeLessThan(0.06)
 
-  // Picking a province names it and its capital.
-  await page.locator('.island__pick', { hasText: 'Northern' }).click()
+  // Picking a province names it, and lists the journeys whose itinerary goes through it.
+  await page.getByRole('button', { name: 'Northern', exact: true }).click()
   await expect(page.locator('.island__card h3')).toHaveText('Northern Province')
   await expect(page.locator('.island__capital')).toContainText('Jaffna')
   await expect(page.locator('.island__districts li')).toHaveCount(5)
+  await expect(page.locator('.island__journeys h4')).toHaveText('No fixed journey stops here yet')
+
+  // The fixture catalogue has a Cultural Triangle journey, which is Central.
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+  await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
+  const journey = page.locator('.island__journey').first()
+  await expect(journey).toContainText('Classical Heritage')
+  await expect(journey.locator('.island__journey-meta')).toContainText('of 8 days here')
+
+  // …and it is a way into the catalogue, not decoration.
+  await journey.click()
+  await expect(page).toHaveURL(/\/journeys\/41$/)
+  await expect(page.locator('h1')).toHaveText('Classical Heritage')
 
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
 })

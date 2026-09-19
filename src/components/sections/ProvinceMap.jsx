@@ -1,22 +1,42 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { api } from '../../api/client'
+import { fallbackPackages } from '../../data/fallback'
 import { MAP_SOURCE, MAP_VIEW_BOX, PROVINCES } from '../../data/provinces'
+import { journeysInProvince } from '../../data/provincePlaces'
+import { useApi } from '../../hooks/useApi'
+import { formatDays, formatPrice } from '../../utils/format'
 import { ArrowRight, MapPin } from '../ui/Icons'
 import Reveal from '../ui/Reveal'
+
+/** How many journeys the panel lists before it offers the rest. */
+const LISTED = 3
 
 /**
  * The island, province by province.
  *
  * The nine shapes in src/data/provinces.js are placed where they belong, so the outline that comes
- * out of them is Sri Lanka rather than nine drawings near each other. Pointing at a province - or
- * focusing it, or picking it from the list - names it and says what is there.
+ * out of them is Sri Lanka rather than nine drawings near each other. Running the pointer across the
+ * map names each province and lists the journeys whose itineraries go through it - which is the
+ * question the map exists to answer - and every one of them is a link into the catalogue.
  *
- * The geometry is generated (scripts/build-province-map.mjs), not hand-drawn: this map makes a
- * factual claim about where each province is, so it is built from real district boundaries.
+ * Hovering moves the selection; clicking pins it, so the list stays put while you read it. Leaving
+ * the whole section drops back to the pinned province.
  */
 export default function ProvinceMap() {
-  const [activeId, setActiveId] = useState('central')
+  const { data: packages } = useApi(() => api.getPackages(), fallbackPackages)
+
+  const [hoveredId, setHoveredId] = useState(null)
+  const [pinnedId, setPinnedId] = useState('central')
+
+  const activeId = hoveredId ?? pinnedId
   const active = PROVINCES.find((province) => province.id === activeId) ?? PROVINCES[0]
+  const journeys = journeysInProvince(packages, active.id)
+
+  const select = (provinceId) => {
+    setHoveredId(provinceId)
+    setPinnedId(provinceId)
+  }
 
   return (
     <section className="section" id="island">
@@ -26,11 +46,12 @@ export default function ProvinceMap() {
           <h2>Nine provinces, one island</h2>
           <p className="lede">
             Every journey we run crosses at least three of them. Point at the map to see what each
-            province is known for.
+            province is known for, and which journeys go through it.
           </p>
         </Reveal>
 
-        <div className="island">
+        {/* Leaving the section drops the hover, which falls back to whichever province was clicked */}
+        <div className="island" onMouseLeave={() => setHoveredId(null)}>
           <Reveal className="island__map">
             <svg
               className="province-map"
@@ -47,14 +68,14 @@ export default function ProvinceMap() {
                   tabIndex={0}
                   role="button"
                   aria-label={`${province.name} Province`}
-                  aria-pressed={province.id === activeId}
-                  onMouseEnter={() => setActiveId(province.id)}
-                  onFocus={() => setActiveId(province.id)}
-                  onClick={() => setActiveId(province.id)}
+                  aria-pressed={province.id === pinnedId}
+                  onMouseEnter={() => setHoveredId(province.id)}
+                  onFocus={() => setHoveredId(province.id)}
+                  onClick={() => select(province.id)}
                   onKeyDown={(event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault()
-                      setActiveId(province.id)
+                      select(province.id)
                     }
                   }}
                 >
@@ -77,6 +98,50 @@ export default function ProvinceMap() {
                   <li key={district}>{district}</li>
                 ))}
               </ul>
+
+              <div className="island__journeys">
+                <h4>
+                  {journeys.length === 0
+                    ? 'No fixed journey stops here yet'
+                    : `${journeys.length} journey${journeys.length === 1 ? '' : 's'} through ${active.name}`}
+                </h4>
+
+                {journeys.length > 0 ? (
+                  <ul className="island__journey-list">
+                    {journeys.slice(0, LISTED).map(({ pkg, days }) => {
+                      const price = formatPrice(pkg.price)
+                      const length = formatDays(pkg.durationDays)
+                      return (
+                        <li key={pkg.packageId}>
+                          <Link className="island__journey" to={`/journeys/${pkg.packageId}`}>
+                            <span className="island__journey-name">{pkg.title}</span>
+                            <span className="island__journey-meta">
+                              {[
+                                days > 0 && length ? `${days} of ${length} here` : length,
+                                price ? `from ${price}` : 'price on request',
+                              ]
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </span>
+                            <ArrowRight width={14} height={14} />
+                          </Link>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                ) : (
+                  <p className="island__journey-empty">
+                    We still build trips here — tell us your dates and we will draft one.
+                  </p>
+                )}
+
+                {journeys.length > LISTED && (
+                  <Link className="link-arrow" to="/journeys">
+                    All {journeys.length} journeys
+                    <ArrowRight width={15} height={15} />
+                  </Link>
+                )}
+              </div>
             </div>
 
             <ul className="island__list">
@@ -85,9 +150,9 @@ export default function ProvinceMap() {
                   <button
                     type="button"
                     className={`island__pick ${province.id === activeId ? 'is-active' : ''}`}
-                    onClick={() => setActiveId(province.id)}
-                    onMouseEnter={() => setActiveId(province.id)}
-                    aria-pressed={province.id === activeId}
+                    onClick={() => select(province.id)}
+                    onMouseEnter={() => setHoveredId(province.id)}
+                    aria-pressed={province.id === pinnedId}
                   >
                     {province.name}
                   </button>
@@ -96,7 +161,7 @@ export default function ProvinceMap() {
             </ul>
 
             <Link className="link-arrow" to="/journeys">
-              See the journeys
+              See every journey
               <ArrowRight width={15} height={15} />
             </Link>
 
