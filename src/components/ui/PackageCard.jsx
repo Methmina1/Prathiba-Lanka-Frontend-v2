@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { api } from '../../api/client'
 import Scenery from '../ui/Scenery'
 import { ArrowRight, Users } from '../ui/Icons'
 
@@ -27,7 +28,12 @@ export default function PackageCard({ pkg, index = 0 }) {
   return (
     <article className="card package-card">
       <Link className="package-card__media" to={`/journeys/${pkg.packageId}`} aria-label={pkg.title}>
-        <Scenery variant={scenery} ratio="3 / 2" />
+        {/* The cover uploaded in the console wins; otherwise the drawn scene stands in. */}
+        {pkg.imageUrl ? (
+          <img src={api.mediaUrl(pkg.imageUrl)} alt={pkg.title} loading="lazy" />
+        ) : (
+          <Scenery variant={scenery} ratio="3 / 2" />
+        )}
         {days && <span className="package-card__days">{days}</span>}
       </Link>
 

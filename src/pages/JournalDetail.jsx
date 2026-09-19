@@ -4,7 +4,8 @@ import { fallbackJournal } from '../data/fallback'
 import { useResource } from '../hooks/useResource'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
-import Scenery from '../components/ui/Scenery'
+import CoverImage from '../components/ui/CoverImage'
+import PHOTOS from '../data/photos'
 import { ArrowRight } from '../components/ui/Icons'
 import { formatDate, toParagraphs } from '../utils/format'
 
@@ -65,7 +66,7 @@ export default function JournalDetail() {
 
           <Reveal>
             <div className="post__cover">
-              <Scenery variant={scenery} ratio="16 / 7" />
+              <CoverImage src={post.coverImageUrl} fallback={PHOTOS.journalFallback[0]} alt={post.title} />
             </div>
           </Reveal>
 
@@ -103,7 +104,11 @@ export default function JournalDetail() {
                 {others.map((entry, index) => (
                   <Link className="card journal-card" to={`/journal/${entry.journalId}`} key={entry.journalId}>
                     <div className="journal-card__media">
-                      <Scenery variant={entry.scenery ?? SCENERY[index % SCENERY.length]} ratio="16 / 10" />
+                      <CoverImage
+                        src={entry.coverImageUrl}
+                        fallback={PHOTOS.journalFallback[index % PHOTOS.journalFallback.length]}
+                        alt={entry.title}
+                      />
                     </div>
                     <div className="journal-card__body">
                       <span className="journal-card__date">

@@ -1,6 +1,6 @@
-import Scenery from '../ui/Scenery'
 import Reveal from '../ui/Reveal'
 import { ArrowRight, Check } from '../ui/Icons'
+import PHOTOS from '../../data/photos'
 
 const POINTS = [
   {
@@ -19,7 +19,7 @@ export default function Philosophy() {
       <div className="container philosophy">
         <Reveal className="philosophy__media" variant="reveal--right">
           <div className="philosophy__frame">
-            <Scenery variant="train" ratio="4 / 5" />
+            <img src={PHOTOS.philosophy} alt="" loading="lazy" />
           </div>
           <div className="philosophy__badge">
             <strong>Since 2014</strong>

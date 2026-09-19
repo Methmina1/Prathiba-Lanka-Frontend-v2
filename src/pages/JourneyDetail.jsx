@@ -86,6 +86,7 @@ export default function JourneyDetail() {
         title={pkg.title}
         lede={pkg.description}
         crumbs={[{ label: 'Journeys', to: '/journeys' }, { label: pkg.title }]}
+        image={pkg.imageUrl ? api.mediaUrl(pkg.imageUrl) : undefined}
         scenery={scenery}
       />
 

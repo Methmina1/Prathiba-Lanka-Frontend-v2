@@ -21,19 +21,30 @@ const render = (path, initialSession = null) =>
 
 // path -> strings that must appear in the rendered markup
 const ROUTES = {
-  '/': ['The emerald isle', 'Signature journeys', 'Conscious exploration', 'Common questions'],
-  '/journeys': ['Signature journeys', 'Search by destination'],
+  '/': [
+    'The emerald isle',
+    'Signature journeys',
+    'Conscious exploration',
+    'Common questions',
+    // the photographs that ship with the site (see src/data/photos.js)
+    '/images/sl/hero-1.jpg',
+    '/images/sl/philosophy.jpg',
+    '/images/sl/cta-band.jpg',
+    '/images/sl/tile-1.jpg',
+  ],
+  '/journeys': ['Signature journeys', 'Search by destination', '/images/sl/page-journeys.jpg'],
   // the sample data ships with the app, so detail routes render without a backend
   '/journeys/demo-1': ['Classical Heritage', 'About this journey', 'Request this journey'],
-  '/journal': ['Stories from the island', 'Read the story'],
-  '/journal/demo-1': ['When to visit Sri Lanka', 'All stories'],
-  '/gallery': ['Where the journeys go', 'Sigiriya at dawn'],
+  '/journal': ['Stories from the island', 'Read the story', '/images/sl/journal-1.jpg'],
+  '/journal/demo-1': ['When to visit Sri Lanka', 'All stories', '/images/sl/journal-1.jpg'],
+  '/gallery': ['Where the journeys go', 'Nothing has been uploaded yet', '/images/sl/tile-1.jpg'],
   '/reviews': ['What people said afterwards', 'The train to Ella was the highlight'],
-  '/about': ['Arranged by people who live here', 'How we got here'],
-  '/contact': ['Talk to us', 'Track a booking'],  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking'],
+  '/about': ['Arranged by people who live here', 'How we got here', '/images/sl/about-story.jpg'],
+  '/contact': ['Talk to us', 'Track a booking', '/images/sl/contact-map.jpg'],
+  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking'],
   '/login': ['Sign in', 'Create an account'],
   '/register': ['Create an account', 'At least 8 characters'],
-  '/nope': ['This path leads nowhere'],
+  '/nope': ['This path leads nowhere', '/images/sl/not-found.jpg'],
 }
 
 // the staff console, rendered with an admin session

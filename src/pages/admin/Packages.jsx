@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { api } from '../../api/client'
 import { adminApi } from '../../api/admin'
 import { useAuth } from '../../auth/AuthContext'
 import { DataTable, Dialog, Field, Notice, StatusPill, Toolbar } from '../../components/admin/AdminUI'
+import MediaPicker from '../../components/admin/MediaPicker'
 import { describeError, useAdminList } from '../../components/admin/useAdmin'
 import { formatDays, formatPrice } from '../../utils/format'
 
@@ -15,6 +17,7 @@ const EMPTY_FORM = {
   status: 'ACTIVE',
   description: '',
   itinerary: '',
+  imageUrl: '',
 }
 
 export default function AdminPackages() {
@@ -22,6 +25,7 @@ export default function AdminPackages() {
   const { rows: packages, loading, error, reload } = useAdminList(() => adminApi.listPackages(token), [token])
 
   const [dialog, setDialog] = useState(null) // { mode, form }
+  const [picker, setPicker] = useState(false)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState({ kind: 'info', text: '' })
   const [confirmDelete, setConfirmDelete] = useState(null)
@@ -43,6 +47,7 @@ export default function AdminPackages() {
         status: pkg.status ?? 'ACTIVE',
         description: pkg.description ?? '',
         itinerary: pkg.itinerary ?? '',
+        imageUrl: pkg.imageUrl ?? '',
       },
     })
   }
@@ -60,6 +65,7 @@ export default function AdminPackages() {
       status: form.status,
       description: form.description || null,
       itinerary: form.itinerary || null,
+      imageUrl: form.imageUrl || '',
     }
 
     try {
@@ -219,6 +225,36 @@ export default function AdminPackages() {
               <textarea rows={3} value={dialog.form.description} onChange={patch('description')} />
             </Field>
 
+            <Field
+              label="Cover image"
+              hint="Shown on the journey card and at the top of the journey page. Empty uses the drawn scene."
+            >
+              <div className="adm-inline">
+                <input
+                  value={dialog.form.imageUrl}
+                  onChange={patch('imageUrl')}
+                  maxLength={255}
+                  placeholder="/media/… or any image URL"
+                />
+                <button type="button" className="adm-btn adm-btn--outline" onClick={() => setPicker(true)}>
+                  Library
+                </button>
+                {dialog.form.imageUrl && (
+                  <button
+                    type="button"
+                    className="adm-btn adm-btn--outline"
+                    onClick={() => setDialog((current) => ({ ...current, form: { ...current.form, imageUrl: '' } }))}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </Field>
+
+            {dialog.form.imageUrl && (
+              <img className="adm-preview" src={api.mediaUrl(dialog.form.imageUrl)} alt="" />
+            )}
+
             <Field label="Itinerary" hint="One line per day - each line becomes a numbered step.">
               <textarea rows={6} value={dialog.form.itinerary} onChange={patch('itinerary')} />
             </Field>
@@ -234,6 +270,14 @@ export default function AdminPackages() {
           </form>
         )}
       </Dialog>
+
+      <MediaPicker
+        open={picker}
+        onClose={() => setPicker(false)}
+        onPick={(asset) =>
+          setDialog((current) => ({ ...current, form: { ...current.form, imageUrl: asset.url } }))
+        }
+      />
 
       <Dialog open={Boolean(confirmDelete)} title="Delete package" onClose={() => setConfirmDelete(null)}>
         <p style={{ marginBottom: '1rem', color: 'var(--adm-muted)' }}>

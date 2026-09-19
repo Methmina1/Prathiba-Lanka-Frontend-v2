@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom'
 import PageHero from '../components/layout/PageHero'
 import EnquiryForm from '../components/plan/EnquiryForm'
 import Reveal from '../components/ui/Reveal'
-import Scenery from '../components/ui/Scenery'
 import { ArrowRight, Clock, Mail, MapPin, Phone } from '../components/ui/Icons'
+import PHOTOS from '../data/photos'
 import { usePageContent } from '../hooks/usePageContent'
+import { api } from '../api/client'
 
 const ICONS = { phone: Phone, mail: Mail, map: MapPin, clock: Clock }
 
@@ -20,6 +21,7 @@ export default function Contact() {
         title={hero.title}
         lede={hero.lede}
         crumbs={[{ label: 'Contact' }]}
+        image={hero.image ? api.mediaUrl(hero.image) : PHOTOS.pageHero.contact}
         scenery={hero.scenery}
       />
 
@@ -65,7 +67,7 @@ export default function Contact() {
               </div>
 
               <div className="card contact-panel contact-panel--map">
-                <Scenery variant="hills" ratio="16 / 9" />
+                <img src={PHOTOS.contactMap} alt="" loading="lazy" />
                 <div className="contact-panel__map-label">
                   <MapPin width={15} height={15} />
                   {aside.mapLabel}

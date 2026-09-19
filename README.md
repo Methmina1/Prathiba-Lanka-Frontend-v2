@@ -80,14 +80,16 @@ VITE_API_BASE_URL=https://api.example.com
 ```bash
 npm run build         # production build -> dist/
 npm run preview       # serve the build on http://localhost:4173
-npm run check:render  # renders all 22 routes in Node and asserts their content
+npm run check:render  # renders all 24 routes in Node and asserts their content
+npm run seed          # load the demo content into a running backend (optional)
 ```
 
-`check:render` is the useful one: it renders every page (13 public, 7 admin with a stubbed admin
-session) with `renderToString`, so an undefined component, a bad hook or a broken prop fails the
-build without a browser. It also checks the two access rules - a customer session on `/admin` must
-show "Admin access required" and a signed-out one must render no console at all - and enforces that
-the planning/tracking panels have not leaked back onto the home page.
+`check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
+stubbed admin session) with `renderToString`, so an undefined component, a bad hook or a broken prop
+fails the build without a browser. It also checks the two access rules - a customer session on
+`/admin` must show "Admin access required" and a signed-out one must render no console at all -
+asserts that the photographs the site ships with are still referenced by the pages that use them, and
+enforces that the planning/tracking panels have not leaked back onto the home page.
 
 ## API usage
 
@@ -119,7 +121,14 @@ caches lists, so each mutation reloads the table it changed.
 through `POST /api/admin/media` and hands the picked asset back as `{ url, mediaType }`. Stored files
 are relative paths (`/media/<name>`), so `api.mediaUrl(path)` in `src/api/client.js` prefixes the API
 origin before anything is rendered - without it an `<img src="/media/...">` would resolve against the
-front-end origin and 404.
+front-end origin and 404. Photographs that ship with the site (`/images/sl/...`) are already
+resolvable and are returned untouched by the same helper.
+
+**Seeding.** `npm run seed` loads the demo content into a running backend *through the admin API* -
+every photograph is uploaded to the media library and every package, journal post and gallery item is
+created the way a member of staff would create it, so all of it stays editable in the console. It is
+safe to re-run (records are matched on title, gallery items on their file), and it takes an optional
+base URL: `npm run seed -- http://localhost:8080`.
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
@@ -173,6 +182,7 @@ src/
   utils/format.js          price, date and paragraph helpers
   data/fallback.js         sample journeys, journal posts, reviews, FAQ copy
   data/pageContent.js      default copy for the editable About/Contact pages
+  data/photos.js           the photographs that ship with the site, by slot
   auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens
@@ -184,21 +194,49 @@ src/
   components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills),
                            MediaPicker, useAdmin
   components/sections/     Home page sections
-  components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress, MediaFigure
+  components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress, MediaFigure, CoverImage
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
                            GalleryPage, ReviewsPage, About, Contact, PlanPage, Login, Register,
                            Account, NotFound
   pages/admin/             Overview, Bookings, Queries, Packages, Journal, Gallery, Media, Content,
                            Reviews
+scripts/
+  render-check.jsx         renders every route and asserts its content
+  seed-demo-content.jsx    loads the demo content through the admin API
+  optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
 ```
 
-## Images and video
+## Photographs
 
-Uploaded files live in the backend (see its README) and are rendered by
-`components/ui/MediaFigure.jsx`, which picks an `<img>` or a `<video controls>` from the item's
-`mediaType`. Every gallery surface - the home strip, `/gallery` and the journey page - uses it, so a
-clip works everywhere a photo does. Until something is uploaded, the illustrated SVG scenes in
-`components/ui/Scenery.jsx` stand in.
+The site carries its own photographs in `public/images/sl`, and everything that is content-managed
+carries an uploaded one instead. Which is which:
+
+| Where | Comes from | Changed by |
+|---|---|---|
+| Home hero carousel, page header bands, the "fewer places" panel, the CTA band, the contact map panel, the 404 page | `public/images/sl/*.jpg`, mapped slot by slot in `src/data/photos.js` | replacing the file, or editing that map (a developer change) |
+| Journey cards and journey headers | the package's `imageUrl` | Admin → Packages → Cover image (media library) |
+| Journal cards, featured story, story cover | the post's `coverImageUrl` | Admin → Journal → Cover image (media library) |
+| Gallery, home gallery strip | gallery items (image or short video) | Admin → Gallery, files from Admin → Media library |
+| About and Contact header bands and the About story panel | `hero.image` / `story.image` in the page content | Admin → About and Contact (media library) |
+| Journey page "from the road" strip | gallery items linked to that journey | Admin → Gallery → link to a package |
+
+Nothing is decorative filler: every managed slot falls back to a photograph that ships with the site
+(`components/ui/CoverImage.jsx`, `src/data/photos.js`) when no upload has been chosen, and to the drawn
+scenes in `components/ui/Scenery.jsx` when there is no photograph at all.
+
+**The originals.** `public/images/Sri lanka` holds the full-resolution photographs the site was built
+from (1-13 MB each - the media endpoint would refuse anything over 10 MB anyway). They are not served:
+`scripts/optimize-images.ps1` turns them into web-sized copies, which is where everything in
+`public/images/sl` came from.
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/optimize-images.ps1 `
+    -Source "public/images/Sri lanka" -Destination ".image-work"
+```
+
+That writes `<name>-lg.jpg` (1920px, quality 82 - headers and covers) and `<name>-sm.jpg` (900px,
+quality 78 - tiles and cards) per photo, applies the EXIF orientation to the pixels and drops the rest
+of the metadata, so no camera GPS data ships with the site.
 
 ## Not built yet
 

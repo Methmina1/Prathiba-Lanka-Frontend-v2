@@ -1,15 +1,19 @@
 import { Link } from 'react-router-dom'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
-import Scenery from '../components/ui/Scenery'
 import CtaBand from '../components/sections/CtaBand'
 import { ArrowRight, Check } from '../components/ui/Icons'
+import PHOTOS from '../data/photos'
 import { usePageContent } from '../hooks/usePageContent'
+import { api } from '../api/client'
 
 export default function About() {
   // Copy comes from the API (editable in the admin console) and falls back to the bundled defaults.
   const { content } = usePageContent('about')
   const { hero, story, values, timeline } = content
+
+  // A photo set in the console wins; otherwise the site's own picture of the hill country is used.
+  const storyImage = story.image ? api.mediaUrl(story.image) : PHOTOS.aboutStory
 
   return (
     <main className="page-enter">
@@ -18,6 +22,7 @@ export default function About() {
         title={hero.title}
         lede={hero.lede}
         crumbs={[{ label: 'About' }]}
+        image={hero.image ? api.mediaUrl(hero.image) : PHOTOS.pageHero.about}
         scenery={hero.scenery}
       />
 
@@ -25,7 +30,7 @@ export default function About() {
         <div className="container philosophy">
           <Reveal className="philosophy__media" variant="reveal--right">
             <div className="philosophy__frame">
-              <Scenery variant={story.scenery} ratio="4 / 5" />
+              <img src={storyImage} alt="" loading="lazy" />
             </div>
             <div className="philosophy__badge">
               <strong>{story.badgeTitle}</strong>

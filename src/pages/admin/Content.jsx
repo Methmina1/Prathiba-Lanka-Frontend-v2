@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react'
 import { adminApi } from '../../api/admin'
 import { useAuth } from '../../auth/AuthContext'
 import { Notice, Segmented, Toolbar } from '../../components/admin/AdminUI'
+import MediaPicker from '../../components/admin/MediaPicker'
 import { describeError } from '../../components/admin/useAdmin'
+import { api } from '../../api/client'
 import { ABOUT_DEFAULTS, CONTACT_DEFAULTS, mergeDefaults } from '../../data/pageContent'
 import { formatDate } from '../../utils/format'
 
@@ -13,6 +15,31 @@ const TABS = [
 
 const SCENERY = ['train', 'tea', 'coast', 'temple', 'safari', 'hills', 'galle', 'ella']
 const ICONS = ['phone', 'mail', 'map', 'clock']
+
+/**
+ * A photograph slot: the stored path, a button into the media library, a preview, and a way back to
+ * the site's own picture.
+ */
+function ImageField({ label, value, onChange, onBrowse, hint }) {
+  return (
+    <div className="adm-field">
+      <span>{label}</span>
+      <div className="adm-inline">
+        <input
+          value={value ?? ''}
+          onChange={(event) => onChange(event.target.value)}
+          maxLength={255}
+          placeholder="Empty uses the site's own photograph"
+        />
+        <button type="button" className="adm-btn adm-btn--outline" onClick={onBrowse}>
+          Library
+        </button>
+      </div>
+      {value && <img className="adm-preview" src={api.mediaUrl(value)} alt="" />}
+      {hint && <span className="adm-field__hint">{hint}</span>}
+    </div>
+  )
+}
 
 /** A labelled text input bound to a path inside the payload, e.g. "hero.title". */
 function TextField({ label, value, onChange, hint, textarea = false, maxLength = 400 }) {
@@ -99,6 +126,7 @@ export default function AdminContent() {
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState({ kind: 'info', text: '' })
+  const [pickerPath, setPickerPath] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -146,6 +174,19 @@ export default function AdminContent() {
       setBusy(false)
     }
   }
+
+  /** Opens the media library and writes the chosen file back into the field that asked for it. */
+  function browse(path) {
+    setPickerPath(path)
+  }
+
+  const picker = (
+    <MediaPicker
+      open={Boolean(pickerPath)}
+      onClose={() => setPickerPath(null)}
+      onPick={(asset) => patch(pickerPath, asset.url)}
+    />
+  )
 
   // The tabs stay mounted while the payload loads, so the screen never blanks out.
   if (!payload) {
@@ -199,8 +240,15 @@ export default function AdminContent() {
                 </option>
               ))}
             </select>
-            <span className="adm-field__hint">Drawn by the site, not an upload.</span>
+            <span className="adm-field__hint">Used when no photograph is set below.</span>
           </label>
+          <ImageField
+            label="Header photograph"
+            value={payload.hero.image}
+            onChange={(v) => patch('hero.image', v)}
+            onBrowse={() => browse('hero.image')}
+            hint="Replaces the header band on this page. Empty keeps the site's own photograph."
+          />
         </div>
       </div>
 
@@ -231,6 +279,13 @@ export default function AdminContent() {
                   ))}
                 </select>
               </label>
+              <ImageField
+                label="Story photograph"
+                value={payload.story.image}
+                onChange={(v) => patch('story.image', v)}
+                onBrowse={() => browse('story.image')}
+                hint="Fills the tall framed panel beside this section."
+              />
             </div>
           </div>
 
@@ -348,12 +403,14 @@ export default function AdminContent() {
       <div className="adm-card">
         <div className="adm-card__body">
           <p className="adm-table__muted">
-            Changes appear on the public page as soon as you save. The header illustration and the
-            story image are drawn by the site; photos and clips live in the media library and are
-            used by the gallery and journal covers.
+            Changes appear on the public page as soon as you save. Photographs come from the media
+            library - upload one there and pick it here. Left empty, a page falls back to the
+            photographs and drawn scenes that ship with the site.
           </p>
         </div>
       </div>
+
+      {picker}
     </>
   )
 }

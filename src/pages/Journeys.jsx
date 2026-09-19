@@ -4,6 +4,7 @@ import { api } from '../api/client'
 import { fallbackPackages } from '../data/fallback'
 import { useApi } from '../hooks/useApi'
 import PageHero from '../components/layout/PageHero'
+import PHOTOS from '../data/photos'
 import PackageCard from '../components/ui/PackageCard'
 import Reveal from '../components/ui/Reveal'
 import { Search } from '../components/ui/Icons'
@@ -79,6 +80,7 @@ export default function Journeys() {
         title="Signature journeys"
         lede="Starting points, not fixed departures. Every itinerary below can be stretched, shortened or rebuilt around your dates and your pace."
         crumbs={[{ label: 'Journeys' }]}
+        image={PHOTOS.pageHero.journeys}
         scenery="tea"
       />
 

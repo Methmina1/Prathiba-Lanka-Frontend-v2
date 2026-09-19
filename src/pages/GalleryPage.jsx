@@ -2,19 +2,18 @@ import { api } from '../api/client'
 import { useApi } from '../hooks/useApi'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
-import Scenery from '../components/ui/Scenery'
 import MediaFigure from '../components/ui/MediaFigure'
+import PHOTOS from '../data/photos'
 import { formatDate } from '../utils/format'
 
+/** Shown until the gallery has uploaded rows; the photos ship with the site. */
 const TILES = [
-  { variant: 'temple', caption: 'Sigiriya at dawn', span: 'wide' },
-  { variant: 'safari', caption: 'Yala, block one', span: 'tall' },
-  { variant: 'tea', caption: 'Tea terraces near Ella' },
-  { variant: 'coast', caption: 'Stilt fishermen, Koggala' },
-  { variant: 'train', caption: 'The Nine Arch bridge' },
-  { variant: 'hills', caption: 'Knuckles range', span: 'wide' },
-  { variant: 'coast', caption: 'Mirissa at dusk' },
-  { variant: 'temple', caption: 'Dambulla cave temples' },
+  { image: PHOTOS.galleryTiles[0], span: 'wide' },
+  { image: PHOTOS.galleryTiles[1], span: 'tall' },
+  { image: PHOTOS.galleryTiles[2] },
+  { image: PHOTOS.galleryTiles[3] },
+  { image: PHOTOS.galleryTiles[4] },
+  { image: PHOTOS.galleryTiles[5], span: 'wide' },
 ]
 
 export default function GalleryPage() {
@@ -28,10 +27,11 @@ export default function GalleryPage() {
         title="Where the journeys go"
         lede={
           hasLive
-            ? 'Photographs uploaded from the road by our guides.'
-            : 'Illustrated previews for now - replace them with your own photography in /public/images.'
+            ? 'Photographs and short clips uploaded from the road.'
+            : 'A first look at the island - more goes up as the season runs.'
         }
         crumbs={[{ label: 'Gallery' }]}
+        image={PHOTOS.pageHero.gallery}
         scenery="coast"
       />
 
@@ -39,8 +39,9 @@ export default function GalleryPage() {
         <div className="container">
           {!hasLive && (
             <p className="notice">
-              The gallery is empty, so these are the illustrated placeholders. Upload real images
-              through <code>/api/admin/gallery</code> and they appear here.
+              Nothing has been uploaded yet, so these are the photographs that ship with the site.
+              Add images and clips in the admin console (Gallery, or the media library) and they
+              appear here instead.
             </p>
           )}
 
@@ -57,9 +58,8 @@ export default function GalleryPage() {
                   </figure>
                 ))
               : TILES.map((tile, index) => (
-                  <Reveal className={`mosaic__tile ${tile.span ?? ''}`} key={tile.caption} delay={index * 60} as="figure">
-                    <Scenery variant={tile.variant} ratio="1 / 1" />
-                    <figcaption>{tile.caption}</figcaption>
+                  <Reveal className={`mosaic__tile ${tile.span ?? ''}`} key={tile.image} delay={index * 60} as="figure">
+                    <img src={tile.image} alt="" loading="lazy" />
                   </Reveal>
                 ))}
           </div>

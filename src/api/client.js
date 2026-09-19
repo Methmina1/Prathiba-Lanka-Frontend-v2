@@ -38,12 +38,15 @@ export const api = {
   baseUrl: BASE_URL,
 
   /**
-   * Uploaded files are stored as a path (/media/<name>) so they survive a change of host. The
-   * browser needs the API origin in front of it, since the front end is served from its own origin.
+   * Resolves a stored image reference for the browser. Uploaded files are stored as a path
+   * (/media/<name>) so they survive a change of host, and the browser needs the API origin in front
+   * of them - the front end is served from its own origin. Anything else (a photograph that ships
+   * with the site, or a full URL) is already resolvable, so it is returned untouched.
    */
   mediaUrl: (path) => {
     if (!path) return path
-    return /^https?:\/\//i.test(path) ? path : `${BASE_URL}${path}`
+    if (/^https?:\/\//i.test(path)) return path
+    return path.startsWith('/media/') ? `${BASE_URL}${path}` : path
   },
 
   // catalogue

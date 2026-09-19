@@ -1,10 +1,15 @@
 import { Link } from 'react-router-dom'
 import Reveal from '../ui/Reveal'
 import { ArrowRight, Phone, WhatsApp } from '../ui/Icons'
+import PHOTOS from '../../data/photos'
 
 export default function CtaBand() {
   return (
     <section className="cta-band">
+      <div className="cta-band__media" aria-hidden="true">
+        <img src={PHOTOS.ctaBand} alt="" loading="lazy" />
+      </div>
+
       <div className="container cta-band__inner">
         <Reveal>
           <h2>The journey awaits</h2>

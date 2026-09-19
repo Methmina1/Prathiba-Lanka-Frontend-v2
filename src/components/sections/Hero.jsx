@@ -1,38 +1,34 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Scenery from '../ui/Scenery'
 import { ArrowRight } from '../ui/Icons'
+import PHOTOS from '../../data/photos'
 
 const SLIDES = [
   {
-    scenery: 'hills',
     eyebrow: 'Sri Lanka',
     title: 'The emerald isle, unhurried',
     text: 'Private journeys for travellers who would rather see four places properly than fourteen badly.',
     cta: { label: 'Explore journeys', to: '/#journeys' },
   },
   {
-    scenery: 'temple',
     eyebrow: 'Cultural Triangle',
     title: 'Sacred summits, stone cities',
     text: 'Sigiriya before the heat, Dambulla at noon, Polonnaruwa by bicycle and Kandy as the light goes.',
     cta: { label: 'Cultural journeys', to: '/#journeys' },
   },
   {
-    scenery: 'safari',
     eyebrow: 'Wildlife',
     title: 'Leopards at first light',
     text: 'Dawn drives in Yala, the great elephant gathering at Minneriya, whales off the south coast in season.',
     cta: { label: 'Safari journeys', to: '/#journeys' },
   },
   {
-    scenery: 'tea',
     eyebrow: 'Hill Country',
     title: 'Mist, tea and slow trains',
     text: 'The Kandy to Ella line, planter bungalows, and mornings that smell of eucalyptus and rain.',
     cta: { label: 'Hill country journeys', to: '/#journeys' },
   },
-]
+].map((slide, index) => ({ ...slide, image: PHOTOS.hero[index] }))
 
 export default function Hero() {
   const [index, setIndex] = useState(0)
@@ -57,7 +53,7 @@ export default function Hero() {
       <div className="hero__media" aria-hidden="true">
         {SLIDES.map((item, i) => (
           <div className={`hero__slide ${i === index ? 'is-active' : ''}`} key={item.title}>
-            <Scenery variant={item.scenery} ratio="16 / 9" />
+            <img src={item.image} alt="" loading={i === 0 ? 'eager' : 'lazy'} />
           </div>
         ))}
         <div className="hero__scrim" />
