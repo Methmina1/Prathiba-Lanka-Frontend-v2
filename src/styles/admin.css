@@ -318,7 +318,12 @@
   margin-bottom: var(--space-5);
 }
 
+/* The label, the figure and the breakdown are spans, so the card has to lay them out itself -
+ * as inline boxes they ran together on one line and their margin-top was ignored. */
 .adm-stat {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
   padding: var(--space-5);
 }
 
@@ -331,7 +336,6 @@
 }
 
 .adm-stat__value {
-  margin-top: var(--space-2);
   color: var(--adm-text);
   font-size: 2rem;
   font-weight: 600;
@@ -339,9 +343,15 @@
 }
 
 .adm-stat__meta {
-  margin-top: var(--space-2);
   color: var(--adm-muted);
   font-size: 0.78rem;
+}
+
+/* the two cards that hold buttons instead of a figure */
+.adm-stat__links {
+  display: grid;
+  justify-items: start;
+  gap: 0.4rem;
 }
 
 /* ---------------------------------------------------------------- toolbar */

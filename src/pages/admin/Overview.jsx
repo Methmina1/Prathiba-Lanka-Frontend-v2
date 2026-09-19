@@ -81,7 +81,7 @@ export default function AdminOverview() {
         </div>
         <div className="adm-card adm-stat">
           <span className="adm-stat__label">Quick actions</span>
-          <span className="adm-stat__meta" style={{ display: 'grid', gap: '0.4rem', marginTop: '0.5rem' }}>
+          <span className="adm-stat__meta adm-stat__links">
             <Link className="adm-btn adm-btn--sm adm-btn--outline" to="/admin/bookings">
               Review bookings
             </Link>
@@ -92,7 +92,7 @@ export default function AdminOverview() {
         </div>
         <div className="adm-card adm-stat">
           <span className="adm-stat__label">Storefront</span>
-          <span className="adm-stat__meta" style={{ display: 'grid', gap: '0.4rem', marginTop: '0.5rem' }}>
+          <span className="adm-stat__meta adm-stat__links">
             <Link className="adm-btn adm-btn--sm adm-btn--outline" to="/admin/packages">
               Manage packages
             </Link>
