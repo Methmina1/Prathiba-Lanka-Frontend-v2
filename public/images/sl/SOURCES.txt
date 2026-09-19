@@ -1,4 +1,4 @@
-﻿Where each photograph in this folder came from.
+Where each photograph in this folder came from.
 
 The files here are web-sized copies (scripts/optimize-images.ps1) of the originals in
 ../Sri lanka. This list exists so a slot can be traced back, re-exported at a different size, or
@@ -6,7 +6,7 @@ credited. Slot names describe the place they fill, not the photograph, so replac
 one-file job - and everything under seed-* can also be swapped from the admin console instead.
 
 hero-1                   <- zoshua-colah-7gWQmbue9NE-unsplash.jpg
-hero-2                   <- don-kaveen-93IYznJPkOA-unsplash.jpg
+hero-2                   <- lepord.webp                       (WebP, 2400x1600, served as-is)
 hero-3                   <- zoshua-colah-Wj11_YgLuTc-unsplash.jpg
 hero-4                   <- sarmat-batagov-alqbSR-1uYk-unsplash.jpg
 page-journeys            <- large-vecteezy_sri-lankan-leopard_7975795_large.jpg
@@ -36,7 +36,7 @@ seed-package-hillcountry <- hans-peter-traunig-oZ0bM6cNeD0-unsplash.jpg
 seed-package-coast       <- ben-o-bro-5xNhXCAhSbk-unsplash.jpg
 seed-journal-season      <- bhanuka-gamage-tilu7pgvRN8-unsplash.jpg
 seed-journal-sigiriya    <- erik-esly-ZWdrM9IBBIE-unsplash.jpg
-seed-journal-tea         <- izuru-kannagara-UeSfcl4xreE-unsplash.jpg
+seed-journal-tea         <- izuru-kannagara-UeSfcl4xreE-unsplash.jpg
 seed-journal-planning    <- anupa-uthsara-czCVCfj_O4A-unsplash.jpg
 seed-gallery-01          <- adil-murshed-uZLvoR-gkBg-unsplash.jpg
 seed-gallery-02          <- agnieszka-stankiewicz-FXdq4CCcRuw-unsplash.jpg
@@ -66,5 +66,11 @@ and can be uploaded from the admin console whenever you want them:
   udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg   (hero-4 in the second pass)
   anupa-uthsara-5Np6ZsLDVIM-unsplash.jpg        (gallery, then hero-2)
   filiz-elaerts-XtAI_ChO4sk-unsplash.jpg        (the contact page panel)
+  don-kaveen-93IYznJPkOA-unsplash.jpg           (hero-2, before the leopard photograph)
 
-Everything else in ../Sri lanka has not been placed yet. In total 50 of the 114 originals are in use.
+Everything else in ../Sri lanka has not been placed yet. In total 50 of the 114 originals are in use, plus lepord.webp (which arrived separately).
+
+The four hero photographs double as the covers of the four theme posts in the journal (turquoise
+coast, wildlife, culture, golden hour). Each was uploaded to the media library from the file above, so
+every cover is byte-identical to the slide it belongs to - change the hero slide and its journal post
+together if you swap one.

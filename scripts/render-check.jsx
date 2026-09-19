@@ -22,12 +22,16 @@ const render = (path, initialSession = null) =>
 // path -> strings that must appear in the rendered markup
 const ROUTES = {
   '/': [
-    'The emerald isle',
+    // the four hero themes: coast, wildlife, culture, sunsets (only the active slide's copy renders)
+    'Turquoise water',
     'Signature journeys',
     'Conscious exploration',
     'Common questions',
     // the photographs that ship with the site (see src/data/photos.js)
     '/images/sl/hero-1.jpg',
+    '/images/sl/hero-2.webp',
+    '/images/sl/hero-3.jpg',
+    '/images/sl/hero-4.jpg',
     '/images/sl/philosophy.jpg',
     '/images/sl/cta-band.jpg',
     '/images/sl/tile-1.jpg',

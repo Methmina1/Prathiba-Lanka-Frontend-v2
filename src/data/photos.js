@@ -11,10 +11,14 @@
  * public/images/Sri lanka, and scripts/optimize-images.ps1 produces web-sized copies of them.
  */
 export const PHOTOS = {
-  /** Home hero carousel - order matters, it matches the slides in components/sections/Hero.jsx. */
+  /**
+   * Home hero carousel - order matters, it matches the slides in components/sections/Hero.jsx.
+   * Slide 2 is a WebP (2400x1600): the file arrived that way and it is already lighter than the
+   * JPEGs around it, so it is served as-is - every browser the site supports reads WebP.
+   */
   hero: [
     '/images/sl/hero-1.jpg',
-    '/images/sl/hero-2.jpg',
+    '/images/sl/hero-2.webp',
     '/images/sl/hero-3.jpg',
     '/images/sl/hero-4.jpg',
   ],

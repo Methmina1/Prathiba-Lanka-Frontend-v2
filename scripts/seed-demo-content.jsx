@@ -150,6 +150,63 @@ const JOURNAL = [
       'If you would rather talk it through first, the enquiry form on the contact page is the fastest way in. There is no obligation on it, and no automatic booking.',
     ].join('\n\n'),
   },
+
+  // The four home-page themes, each covered by the same photograph as its hero slide.
+  {
+    title: 'The turquoise coast: where to swim, and when',
+    description:
+      'Sri Lanka has two coasts and they take turns. How the seasons work, and which bays we send people to.',
+    photo: 'hero-1.jpg',
+    content: [
+      'Sri Lanka has two coasts that take turns. From November to April the south and west are calm and clear - Mirissa, Unawatuna, Weligama, Bentota. From May to September the south-west monsoon moves in and the east dries out, so Trincomalee, Nilaveli and Passikudah become the places to swim.',
+      'The south coast is the easier introduction: a string of bays an hour or two apart, with reef close enough to snorkel from the sand at Unawatuna and Hikkaduwa, and surf breaks at Weligama that suit a first lesson.',
+      'Mirissa is the busiest of them, and the reason is the whales: blue whales and sperm whales pass close to the continental shelf from November to April, and a dawn boat from the harbour is a two-hour round trip. We book the smaller boats with a spotter on the roof rather than the largest hull in the bay.',
+      'The east is a different mood entirely. Trincomalee has one of the finest natural deep-water harbours in the world, and Nilaveli beach is wide enough that you can walk twenty minutes and pass three people. Pigeon Island, a short boat ride offshore, has reef and blacktip reef sharks in water you can see the bottom of.',
+      'The sea is warm all year, around 27 to 29 degrees, but the sun is not forgiving. Swim early, swim late, and give the middle of the day to lunch and a book. Most of our travellers end up swimming twice a day rather than once.',
+      'If you only have a week, stay on one coast and go deep rather than trying to see both. The distances look small on a map and are much longer on the road.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'What you will actually see on a Sri Lankan safari',
+    description:
+      'Leopards are the headline, but the island\u2019s wildlife is wider than one cat. What a good week of game drives looks like.',
+    photo: 'hero-2.webp',
+    content: [
+      'Yala is the park everyone has heard of, and it earns that: one of the highest leopard densities anywhere in the world, along with sloth bears, crocodiles and a great deal else. It is also the busiest, which is why we go in when the gate opens at 5.30am and are usually back out before the convoys arrive.',
+      'Wilpattu, in the north-west, is the opposite. It is the largest park in the country, it has few visitors, and its landscape - shallow sand-rimmed lakes called villus - is beautiful in a quiet way. Leopards live here too, and you may have a sighting entirely to yourself.',
+      'The elephant gathering at Minneriya, roughly July to October, is the largest seasonal gathering of Asian elephants anywhere: herds moving onto the drying tank bed, sometimes several hundred animals in view at once. It is not a zoo and it is not guaranteed, but when it happens it is the most extraordinary thing on the island.',
+      'Udawalawe is where the elephants are almost certain - a reservoir park with a resident population, and a good choice for families or a short trip. The transit home next door rehabilitates orphaned calves.',
+      'What we ask of you: no elephant rides, no baiting, no driving off the track to get closer, and no crowding an animal that is trying to cross. A good guide turns the engine off and waits, which is usually when the best sighting happens anyway.',
+      'Bring binoculars, neutral colours, a hat and patience. The drives are long, the mornings are cold, the afternoons are hot, and the good sightings are rarely on a schedule.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Reading the past: the Cultural Triangle and Kandy',
+    description:
+      'Rock fortresses, cave temples and a sacred city - and how to see them without walking past what matters.',
+    photo: 'hero-3.jpg',
+    content: [
+      'The Cultural Triangle is the dry-zone heart of the old kingdoms: Anuradhapura, Polonnaruwa and Sigiriya, with the cave temples of Dambulla just south of it. These are not ruins in the European sense; they are living religious sites, and each takes a day to absorb.',
+      'Sigiriya is the one everybody photographs: a granite outcrop around 200 metres high with a royal citadel on top, water gardens at the base and frescoes in a sheltered pocket halfway up. Go when the gate opens at 6.30am - by nine the coaches arrive and the metal stairs become a queue.',
+      'Polonnaruwa is flatter and greener, a medieval capital you can cover by bicycle, with the Gal Vihara\u2019s four great Buddha figures carved directly into a granite face. It is the site people underrate most and talk about longest afterwards.',
+      'Anuradhapura is older and larger, with the great stupas and the sacred Bo tree, grown from a cutting of the tree under which the Buddha is said to have attained enlightenment. It is a pilgrimage site first and a monument second: dress accordingly, and expect to take your shoes off more often than you planned.',
+      'Dambulla\u2019s caves hold something like 150 statues and painted ceilings repainted by successive kingdoms, which is why the colour is still alive. Kandy, up in the hills, holds the Temple of the Sacred Tooth Relic, with drumming at the evening puja and a lake you can walk around in half an hour.',
+      'Two things separate seeing these places from understanding them: a guide who can read the carvings and the chronicles, and going early. We build a slow afternoon in after each ancient city, because the heat is real and the detail is dense.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Chasing the golden hour on the west coast',
+    description: 'The sun sets over the sea for half the year. Where to be standing when it does.',
+    photo: 'hero-4.jpg',
+    content: [
+      'Because the island sits just north of the equator, the sun goes down quickly and at roughly the same time all year: somewhere between 5.50pm and 6.30pm. There is no long northern twilight here. It is bright, then it is gold, then it is dark.',
+      'From November to April the west and south-west coasts face the sunset directly, which makes Galle Face in Colombo, Mount Lavinia, Bentota, Hikkaduwa and Mirissa the obvious places to be. Negombo, twenty minutes from the airport, is where a lot of travellers watch their first one.',
+      'The light is best in the half hour before the sun reaches the water, and again for ten minutes after it has gone - which is usually when the sky does the thing you actually came for. Stay for that part.',
+      'Fishing is the other half of the picture. Stilt fishermen still work the shallows around Koggala at dusk, and the Negombo lagoon fills with outrigger canoes coming home. Ask before photographing anyone working; a smile and a question about the catch usually settles it.',
+      'If you are in the hill country or on the east coast you are not missing out - you get the sunrise instead. The view from a tea estate at first light, mist sitting in the valleys below, is the morning equivalent, and there are far fewer people around to share it with.',
+      'Our advice is simple: do not plan anything for the last hour of daylight. Put yourself somewhere with a western horizon, order something cold, and let the day finish itself.',
+    ].join('\n\n'),
+  },
 ]
 
 /** Gallery captions stay empty: describe the photographs yourself in the console. */
@@ -181,13 +238,26 @@ console.log(`Seeding ${api.baseUrl} as ${ADMIN_EMAIL}\n`)
  * asset is what makes a second run update the content instead of uploading everything again and
  * duplicating every gallery item.
  */
+const CONTENT_TYPES = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif',
+  '.avif': 'image/avif',
+}
+
 const existingMedia = await adminApi.listMedia(token)
 const upload = async (fileName, title) => {
   const already = existingMedia.find((asset) => asset.originalName === fileName)
   if (already) return already
 
+  const extension = fileName.slice(fileName.lastIndexOf('.')).toLowerCase()
+  const type = CONTENT_TYPES[extension]
+  if (!type) throw new Error(`No content type known for ${fileName}`)
+
   const bytes = await readFile(join(photoDir, fileName))
-  const asset = await adminApi.uploadMedia(token, new File([bytes], fileName, { type: 'image/jpeg' }), title)
+  const asset = await adminApi.uploadMedia(token, new File([bytes], fileName, { type }), title)
   existingMedia.push(asset)
   return asset
 }
