@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
 import { fallbackPackages } from '../../data/fallback'
 import { MAP_SOURCE, MAP_VIEW_BOX, PROVINCES } from '../../data/provinces'
+import { PROVINCE_COPY } from '../../data/provinceCopy'
 import { journeysInProvince } from '../../data/provincePlaces'
 import { useApi } from '../../hooks/useApi'
 import { formatDays, formatPrice } from '../../utils/format'
@@ -123,7 +124,8 @@ export default function ProvinceMap() {
               </div>
 
               <h3>{active.name} Province</h3>
-              <p>{active.blurb}</p>
+              {/* The written description, with the generated one-liner as the fallback. */}
+              <p className="island__about">{PROVINCE_COPY[active.id] ?? active.blurb}</p>
               <ul className="island__districts">
                 {active.districts.map((district) => (
                   <li key={district}>{district}</li>

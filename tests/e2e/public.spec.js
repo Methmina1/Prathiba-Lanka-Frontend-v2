@@ -214,15 +214,17 @@ test('the home page draws Sri Lanka out of its nine provinces', async ({ page })
   expect(shape.coverage).toBeLessThan(0.72)
   expect(shape.overlap, 'provinces should tile the island, not overlap it').toBeLessThan(0.06)
 
-  // Picking a province names it, and lists the journeys whose itinerary goes through it.
+  // Picking a province names it, describes it, and lists the journeys whose itinerary goes through it.
   await page.getByRole('button', { name: 'Northern', exact: true }).click()
   await expect(page.locator('.island__card h3')).toHaveText('Northern Province')
   await expect(page.locator('.island__capital')).toContainText('Jaffna')
+  await expect(page.locator('.island__about')).toContainText('Tamil-speaking')
   await expect(page.locator('.island__districts li')).toHaveCount(5)
   await expect(page.locator('.island__journeys h4')).toHaveText('No fixed journey stops here yet')
 
   // The fixture catalogue has a Cultural Triangle journey, which is Central.
   await page.getByRole('button', { name: 'Central', exact: true }).click()
+  await expect(page.locator('.island__about')).toContainText('The tea country')
   await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
   const journey = page.locator('.island__journey').first()
   await expect(journey).toContainText('Classical Heritage')

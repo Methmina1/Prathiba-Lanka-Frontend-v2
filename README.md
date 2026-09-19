@@ -180,6 +180,12 @@ line under the map is what the licence asks for; keep it.
 The map data is 58 KB of path coordinates in the bundle. It is worth it: the alternative is a
 picture of a map that cannot follow the palette, cannot be pointed at, and cannot be corrected.
 
+**What each province is like.** `src/data/provinceCopy.js` holds a description per province, written
+for somebody who has never been to Sri Lanka: what the place feels like, what you would do there, and
+the season that suits it (the whale season at Mirissa, the elephant gathering on the Minneriya tank,
+the east coast being the answer to the south-west monsoon). It lives outside `src/data/provinces.js`
+on purpose - that file is generated, and re-running the map script must not wipe the words.
+
 **Holding a province.** Hovering alone is not enough on this map: a province in the middle of the
 island is almost impossible to read, because every route to the panel on the right passes over its
 neighbours. So a click **holds** the province - the pointer can cross the rest of the map, or leave
@@ -310,6 +316,7 @@ src/
   data/photos.js           the photographs that ship with the site, by slot
   data/package-copy.json   the written summary, full description and cover for each journey
   data/provinces.js        the nine province shapes, placed on the island (generated)
+  data/provinceCopy.js     what to say about each province, for the map panel
   data/provincePlaces.js   which places belong to which province, for the map's journey list
   auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults

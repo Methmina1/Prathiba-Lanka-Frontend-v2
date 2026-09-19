@@ -1063,6 +1063,12 @@ html.intro-landing .site-header .brand__text {
   line-height: 1.7;
 }
 
+/* The province description: the longest text in the panel, so it gets the room and the leading. */
+.island__about {
+  font-size: 0.96rem;
+  line-height: 1.75;
+}
+
 .island__districts {
   display: flex;
   flex-wrap: wrap;
