@@ -1,4 +1,4 @@
-Where each photograph in this folder came from.
+﻿Where each photograph in this folder came from.
 
 The files here are web-sized copies (scripts/optimize-images.ps1) of the originals in
 ../Sri lanka. This list exists so a slot can be traced back, re-exported at a different size, or
@@ -65,12 +65,3 @@ and can be uploaded from the admin console whenever you want them:
   udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg   (hero-4 in the second pass)
 
 Everything else in ../Sri lanka has not been placed yet. In total 49 of the 114 originals are in use.
-
-Notes on individual files:
-  hero-2.jpg is MIRRORED. It is anupa-uthsara-5Np6ZsLDVIM-unsplash.jpg flipped left to right, so the
-  subject faces right. The original in ../Sri lanka is not flipped - re-export it and apply
-  RotateFlip(RotateNoneFlipX) after resizing to reproduce this file.
-
-Portrait photographs (hero-1, hero-2, hero-4) are shown with object-fit: contain from 768px up, with a
-blurred copy of themselves behind, because the hero band is about 2:1 and 'cover' would enlarge them
-by roughly 40% and cut off half the frame. hero-3 is landscape and still fills the band.

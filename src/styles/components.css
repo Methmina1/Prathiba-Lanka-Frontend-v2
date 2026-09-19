@@ -491,34 +491,19 @@ html.intro-landing .site-header .brand__text {
   opacity: 1;
 }
 
+.hero__slide.is-active > svg {
+  animation: drift 14s var(--ease-in-out-soft) forwards;
+}
+
 .hero__slide img {
-  position: relative;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* A portrait photograph in a 2:1 band is enlarged ~40% by 'cover' and cut in half. Where there is
- * room (from tablet up), show the whole frame instead and let a blurred copy of the same photograph
- * fill the sides, so the band still reads as a full-bleed image. */
-.hero__slide-fill {
-  position: absolute;
-  inset: -8%;
-  background-position: center;
-  background-size: cover;
-  filter: blur(42px) saturate(1.1) brightness(0.42);
-}
-
-@media (min-width: 768px) {
-  .hero__slide--contain img {
-    object-fit: contain;
-  }
-}
-
-/* the slow push-in the drawn scenes had, eased off so the photograph is not being zoomed into */
-.hero__slide.is-active img,
-.hero__slide.is-active .hero__slide-fill {
-  animation: drift 26s var(--ease-in-out-soft) forwards;
+/* the same slow push-in the drawn scenes had, so the hero still breathes */
+.hero__slide.is-active img {
+  animation: drift 18s var(--ease-in-out-soft) forwards;
 }
 
 .hero__scrim {
@@ -1408,7 +1393,7 @@ html.intro-landing .site-header .brand__text {
   inset: auto 0 -60% 0;
   height: 120%;
   background: radial-gradient(closest-side, rgba(195, 154, 46, 0.2), transparent 70%);
-  animation: glow-drift 18s var(--ease-in-out-soft) infinite alternate;
+  animation: drift 18s var(--ease-in-out-soft) infinite alternate;
   z-index: 1;
 }
 

@@ -11,19 +11,12 @@
  * public/images/Sri lanka, and scripts/optimize-images.ps1 produces web-sized copies of them.
  */
 export const PHOTOS = {
-  /**
-   * Home hero carousel - order matters, it matches the slides in components/sections/Hero.jsx.
-   *
-   * `fit` says how the photograph meets the band, which is roughly 2:1 on a desktop:
-   *   'cover'   - fills it and crops the overflow. Right for a landscape photo.
-   *   'contain' - shows the whole frame, with a blurred copy of itself filling the sides. Right for
-   *               a portrait photo, which 'cover' would blow up by ~40% and cut in half.
-   */
+  /** Home hero carousel - order matters, it matches the slides in components/sections/Hero.jsx. */
   hero: [
-    { src: '/images/sl/hero-1.jpg', fit: 'contain' },
-    { src: '/images/sl/hero-2.jpg', fit: 'contain' },
-    { src: '/images/sl/hero-3.jpg', fit: 'cover' },
-    { src: '/images/sl/hero-4.jpg', fit: 'contain' },
+    '/images/sl/hero-1.jpg',
+    '/images/sl/hero-2.jpg',
+    '/images/sl/hero-3.jpg',
+    '/images/sl/hero-4.jpg',
   ],
 
   /** Header band on each inner page. */
