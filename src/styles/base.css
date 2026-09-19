@@ -432,7 +432,19 @@ textarea {
   transform: translateX(34px);
 }
 
+/* Barely-there push-in for the hero photographs. It used to be 8%, which on a photograph that
+ * 'cover' has already enlarged reads as the page zooming at you. */
 @keyframes drift {
+  from {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.02) translate3d(0, -0.8%, 0);
+  }
+}
+
+/* the soft gold glow behind the closing band keeps its wider breathing */
+@keyframes glow-drift {
   from {
     transform: scale(1) translate3d(0, 0, 0);
   }

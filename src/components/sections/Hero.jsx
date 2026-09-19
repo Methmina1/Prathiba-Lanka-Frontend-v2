@@ -28,7 +28,7 @@ const SLIDES = [
     text: 'The Kandy to Ella line, planter bungalows, and mornings that smell of eucalyptus and rain.',
     cta: { label: 'Hill country journeys', to: '/#journeys' },
   },
-].map((slide, index) => ({ ...slide, image: PHOTOS.hero[index] }))
+].map((slide, index) => ({ ...slide, ...PHOTOS.hero[index] }))
 
 export default function Hero() {
   const [index, setIndex] = useState(0)
@@ -52,8 +52,19 @@ export default function Hero() {
     >
       <div className="hero__media" aria-hidden="true">
         {SLIDES.map((item, i) => (
-          <div className={`hero__slide ${i === index ? 'is-active' : ''}`} key={item.title}>
-            <img src={item.image} alt="" loading={i === 0 ? 'eager' : 'lazy'} />
+          <div
+            className={`hero__slide ${i === index ? 'is-active' : ''} ${item.fit === 'contain' ? 'hero__slide--contain' : ''}`}
+            key={item.title}
+          >
+            {/* The blurred copy only shows either side of a 'contain' slide. */}
+            {item.fit === 'contain' && (
+              <div
+                className="hero__slide-fill"
+                style={{ backgroundImage: `url(${item.src})` }}
+                aria-hidden="true"
+              />
+            )}
+            <img src={item.src} alt="" loading={i === 0 ? 'eager' : 'lazy'} />
           </div>
         ))}
         <div className="hero__scrim" />
