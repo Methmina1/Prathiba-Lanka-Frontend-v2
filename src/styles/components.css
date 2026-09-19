@@ -74,7 +74,10 @@
 .navbar__inner {
   display: flex;
   align-items: center;
-  gap: var(--space-5);
+  /* A deliberate minimum between the logo, the links and the buttons. The nav is pushed right by its
+   * own auto margin, but when the bar is tight - a narrow laptop, or a browser at 125% - that margin
+   * collapses to nothing and this gap is all that keeps the links off the logo. */
+  gap: var(--space-7);
   min-height: var(--header-height);
 }
 
@@ -133,7 +136,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0.65rem 0.85rem;
+  /* Trimmed from 0.85rem: the seven links were filling the bar edge to edge, leaving the nav no
+   * room to sit away from the logo. */
+  padding: 0.65rem 0.72rem;
   color: var(--text-invert-muted);
   font-size: 0.68rem;
   font-weight: 500;
@@ -145,8 +150,8 @@
 .nav__link::after {
   content: '';
   position: absolute;
-  left: 0.85rem;
-  right: 0.85rem;
+  left: 0.72rem;
+  right: 0.72rem;
   bottom: 0.4rem;
   height: 1px;
   background: var(--gold-400);
@@ -211,6 +216,14 @@
 
 .navbar__actions .btn {
   white-space: nowrap;
+}
+
+/* With the full nav showing, the bar uses its last gutter of space: the links and the button sit a
+ * little further right, while the logo stays exactly where it is. */
+@media (min-width: 1081px) {
+  .navbar__inner {
+    padding-right: 0;
+  }
 }
 
 .brand__text {
