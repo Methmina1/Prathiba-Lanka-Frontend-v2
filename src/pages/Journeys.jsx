@@ -4,14 +4,19 @@ import { api } from '../api/client'
 import { fallbackPackages } from '../data/fallback'
 import { useApi } from '../hooks/useApi'
 import PageHero from '../components/layout/PageHero'
+import PHOTOS from '../data/photos'
 import PackageCard from '../components/ui/PackageCard'
 import Reveal from '../components/ui/Reveal'
+import StoryDialog from '../components/ui/StoryDialog'
 import { Search } from '../components/ui/Icons'
 
 export default function Journeys() {
   const { data: packages, status } = useApi(() => api.getPackages(), fallbackPackages)
   const [params, setParams] = useSearchParams()
   const urlTerm = params.get('destination') ?? ''
+
+  // The journey whose full description is open, if any.
+  const [story, setStory] = useState(null)
 
   const [term, setTerm] = useState(urlTerm)
   const [results, setResults] = useState(null)
@@ -79,6 +84,7 @@ export default function Journeys() {
         title="Signature journeys"
         lede="Starting points, not fixed departures. Every itinerary below can be stretched, shortened or rebuilt around your dates and your pace."
         crumbs={[{ label: 'Journeys' }]}
+        image={PHOTOS.pageHero.journeys}
         scenery="tea"
       />
 
@@ -132,13 +138,15 @@ export default function Journeys() {
             <div className="grid grid--3">
               {shown.map((pkg, index) => (
                 <Reveal key={pkg.packageId} delay={index * 90} variant="reveal--zoom">
-                  <PackageCard pkg={pkg} index={index} />
+                  <PackageCard pkg={pkg} index={index} onReadStory={setStory} />
                 </Reveal>
               ))}
             </div>
           )}
         </div>
       </section>
+
+      <StoryDialog pkg={story} onClose={() => setStory(null)} />
     </main>
   )
 }

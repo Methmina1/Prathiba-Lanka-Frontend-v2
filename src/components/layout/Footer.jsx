@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Facebook, Instagram, Mail, MapPin, Phone, WhatsApp } from '../ui/Icons'
+import { usePageContent } from '../../hooks/usePageContent'
 
 const DISCOVER = [
   { label: 'Home', to: '/' },
@@ -18,6 +19,13 @@ const JOURNEYS = [
 ]
 
 export default function Footer() {
+  // The same contact details the Contact page shows, so editing them once updates both.
+  const { content } = usePageContent('contact')
+  const cards = content.cards ?? []
+  const phone = cards.find((card) => card.href?.startsWith('tel:'))
+  const email = cards.find((card) => card.href?.startsWith('mailto:'))
+  const office = cards.find((card) => card.icon === 'map')
+
   return (
     <footer className="site-footer" id="contact">
       <div className="container footer__grid">
@@ -73,15 +81,17 @@ export default function Footer() {
           <ul className="footer__contact">
             <li>
               <Phone width={16} height={16} />
-              <a href="tel:+94770000000">+94 77 000 0000</a>
+              <a href={phone?.href ?? 'tel:+94770000000'}>{phone?.value ?? '+94 77 000 0000'}</a>
             </li>
             <li>
               <Mail width={16} height={16} />
-              <a href="mailto:hello@prathibalanka.lk">hello@prathibalanka.lk</a>
+              <a href={email?.href ?? 'mailto:hello@prathibalanka.lk'}>
+                {email?.value ?? 'hello@prathibalanka.lk'}
+              </a>
             </li>
             <li>
               <MapPin width={16} height={16} />
-              <span>Colombo, Sri Lanka</span>
+              <span>{office?.value ?? 'Colombo, Sri Lanka'}</span>
             </li>
           </ul>
           <ul className="footer__links">
@@ -100,7 +110,12 @@ export default function Footer() {
 
       <div className="container footer__bottom">
         <span>© {new Date().getFullYear()} PrathibaLanka. All rights reserved.</span>
-        <span className="footer__meta">Placeholder contact details - update before launch.</span>
+        <div className="footer__bottom-meta">
+          <span className="footer__meta">Placeholder contact details - update before launch.</span>
+          <Link className="footer__admin" to="/admin">
+            Admin sign in
+          </Link>
+        </div>
       </div>
     </footer>
   )

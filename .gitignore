@@ -2,7 +2,15 @@ node_modules
 dist
 dist-ssr
 .render-check
+.seed
+.import
 *.local
 .vite
 .DS_Store
 *.log
+
+# Playwright
+test-results
+playwright-report
+blob-report
+.playwright

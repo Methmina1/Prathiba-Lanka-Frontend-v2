@@ -2,69 +2,49 @@ import { Link } from 'react-router-dom'
 import PageHero from '../components/layout/PageHero'
 import EnquiryForm from '../components/plan/EnquiryForm'
 import Reveal from '../components/ui/Reveal'
-import Scenery from '../components/ui/Scenery'
 import { ArrowRight, Clock, Mail, MapPin, Phone } from '../components/ui/Icons'
+import PHOTOS from '../data/photos'
+import { usePageContent } from '../hooks/usePageContent'
+import { api } from '../api/client'
 
-const DETAILS = [
-  {
-    icon: Phone,
-    label: 'Call or WhatsApp',
-    value: '+94 77 000 0000',
-    href: 'tel:+94770000000',
-    note: 'Answered 08:00 - 21:00 Sri Lanka time',
-  },
-  {
-    icon: Mail,
-    label: 'Email',
-    value: 'hello@prathibalanka.lk',
-    href: 'mailto:hello@prathibalanka.lk',
-    note: 'Replies within one working day',
-  },
-  {
-    icon: MapPin,
-    label: 'Office',
-    value: 'Colombo, Sri Lanka',
-    note: 'Visits by appointment',
-  },
-  {
-    icon: Clock,
-    label: 'Response time',
-    value: 'Under 24 hours',
-    note: 'Usually the same afternoon',
-  },
-]
+const ICONS = { phone: Phone, mail: Mail, map: MapPin, clock: Clock }
 
 export default function Contact() {
+  // Everything on this page is editable in the admin console; see usePageContent.
+  const { content } = usePageContent('contact')
+  const { hero, cards, aside } = content
+
   return (
     <main className="page-enter">
       <PageHero
-        eyebrow="Contact"
-        title="Talk to us"
-        lede="Tell us roughly when you are coming and what you would like to see. A consultant replies with a draft itinerary and a price."
+        eyebrow={hero.eyebrow}
+        title={hero.title}
+        lede={hero.lede}
         crumbs={[{ label: 'Contact' }]}
-        scenery="coast"
+        image={hero.image ? api.mediaUrl(hero.image) : PHOTOS.pageHero.contact}
+        scenery={hero.scenery}
       />
 
       <section className="section">
         <div className="container">
           <div className="grid grid--4 contact-cards">
-            {DETAILS.map((detail, index) => {
-              const Icon = detail.icon
+            {(cards ?? []).map((card, index) => {
+              const Icon = ICONS[card.icon] ?? Phone
               return (
-                <Reveal key={detail.label} delay={index * 90}>
+                <Reveal key={card.label} delay={index * 90}>
                   <div className="card contact-card">
                     <span className="contact-card__icon">
                       <Icon width={18} height={18} />
                     </span>
-                    <span className="contact-card__label">{detail.label}</span>
-                    {detail.href ? (
-                      <a className="contact-card__value" href={detail.href}>
-                        {detail.value}
+                    <span className="contact-card__label">{card.label}</span>
+                    {card.href ? (
+                      <a className="contact-card__value" href={card.href}>
+                        {card.value}
                       </a>
                     ) : (
-                      <strong className="contact-card__value">{detail.value}</strong>
+                      <strong className="contact-card__value">{card.value}</strong>
                     )}
-                    <p>{detail.note}</p>
+                    <p>{card.note}</p>
                   </div>
                 </Reveal>
               )
@@ -78,11 +58,8 @@ export default function Contact() {
 
             <Reveal delay={120} className="contact-aside">
               <div className="card contact-panel">
-                <h3>Already sent a request?</h3>
-                <p>
-                  Every enquiry gets an eight-character PIN. Use it to follow the progress of your
-                  booking at any time - no account needed.
-                </p>
+                <h3>{aside.heading}</h3>
+                <p>{aside.text}</p>
                 <Link className="btn btn--cta btn--sweep btn--block" to="/plan#track">
                   Track a booking
                   <ArrowRight width={15} height={15} />
@@ -90,10 +67,10 @@ export default function Contact() {
               </div>
 
               <div className="card contact-panel contact-panel--map">
-                <Scenery variant="hills" ratio="16 / 9" />
+                <img src={PHOTOS.contactMap} alt="" loading="lazy" />
                 <div className="contact-panel__map-label">
                   <MapPin width={15} height={15} />
-                  Colombo, Sri Lanka
+                  {aside.mapLabel}
                 </div>
               </div>
             </Reveal>

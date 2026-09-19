@@ -74,7 +74,10 @@
 .navbar__inner {
   display: flex;
   align-items: center;
-  gap: var(--space-5);
+  /* A deliberate minimum between the logo, the links and the buttons. The nav is pushed right by its
+   * own auto margin, but when the bar is tight - a narrow laptop, or a browser at 125% - that margin
+   * collapses to nothing and this gap is all that keeps the links off the logo. */
+  gap: var(--space-7);
   min-height: var(--header-height);
 }
 
@@ -133,7 +136,9 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0.65rem 0.85rem;
+  /* Trimmed from 0.85rem: the seven links were filling the bar edge to edge, leaving the nav no
+   * room to sit away from the logo. */
+  padding: 0.65rem 0.72rem;
   color: var(--text-invert-muted);
   font-size: 0.68rem;
   font-weight: 500;
@@ -145,8 +150,8 @@
 .nav__link::after {
   content: '';
   position: absolute;
-  left: 0.85rem;
-  right: 0.85rem;
+  left: 0.72rem;
+  right: 0.72rem;
   bottom: 0.4rem;
   height: 1px;
   background: var(--gold-400);
@@ -211,6 +216,14 @@
 
 .navbar__actions .btn {
   white-space: nowrap;
+}
+
+/* With the full nav showing, the bar uses its last gutter of space: the links and the button sit a
+ * little further right, while the logo stays exactly where it is. */
+@media (min-width: 1081px) {
+  .navbar__inner {
+    padding-right: 0;
+  }
 }
 
 .brand__text {
@@ -495,6 +508,17 @@ html.intro-landing .site-header .brand__text {
   animation: drift 14s var(--ease-in-out-soft) forwards;
 }
 
+.hero__slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* the same slow push-in the drawn scenes had, so the hero still breathes */
+.hero__slide.is-active img {
+  animation: drift 18s var(--ease-in-out-soft) forwards;
+}
+
 .hero__scrim {
   position: absolute;
   inset: 0;
@@ -697,11 +721,18 @@ html.intro-landing .site-header .brand__text {
   box-shadow: var(--shadow-lg);
 }
 
-.philosophy__frame svg {
+.philosophy__frame svg,
+.philosophy__frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
   transition: transform 1.2s var(--ease-out-soft);
 }
 
-.philosophy__media:hover .philosophy__frame svg {
+.philosophy__media:hover .philosophy__frame svg,
+.philosophy__media:hover .philosophy__frame img {
   transform: scale(1.04);
 }
 
@@ -783,8 +814,17 @@ html.intro-landing .site-header .brand__text {
 
 .section-cta {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
   margin-top: var(--space-7);
+  text-align: center;
+}
+
+.section-cta__note {
+  max-width: 46ch;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 /* ================================================================ packages */
@@ -801,6 +841,10 @@ html.intro-landing .site-header .brand__text {
 
 .package-card__media > svg,
 .package-card__media > img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
   transition: transform 1.1s var(--ease-out-soft);
 }
 
@@ -837,10 +881,175 @@ html.intro-landing .site-header .brand__text {
   font-size: 1.35rem;
 }
 
+/* Three lines on the card; the whole description is on the journey page. The rate-sheet imports
+   carry the hotels, the accommodation tier and the inclusions, which is far more than a card can
+   hold, and the cards have to stay the same height next to each other. */
 .package-card__text {
+  display: -webkit-box;
   flex: 1;
+  overflow: hidden;
   color: var(--text-body);
   font-size: 0.9rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+}
+
+/* Opens the written-up version of the journey in the dialog. */
+.package-card__story {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--gold-300);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.package-card__story svg {
+  transition: transform var(--dur) var(--ease-out-soft);
+}
+
+.package-card__story:hover {
+  color: var(--gold-200);
+}
+
+.package-card__story:hover svg {
+  transform: translateX(5px);
+}
+
+/* ================================================================ story dialog */
+
+.story-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: rgb(4 14 26 / 78%);
+  backdrop-filter: blur(6px);
+  animation: story-fade var(--dur) var(--ease-out-soft);
+}
+
+.story {
+  display: flex;
+  flex-direction: column;
+  width: min(720px, 100%);
+  max-height: min(86vh, 900px);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-alt);
+  box-shadow: 0 40px 90px rgb(2 8 16 / 55%);
+  animation: story-rise var(--dur) var(--ease-out-soft);
+}
+
+.story__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-6) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
+.story__heading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.story__heading h2 {
+  font-size: 1.7rem;
+}
+
+.story__meta {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.story__close {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: none;
+  color: var(--text-body);
+  cursor: pointer;
+}
+
+.story__close:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-200);
+}
+
+.story__body {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  overflow-y: auto;
+}
+
+.story__cover {
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  border-radius: var(--radius);
+  object-fit: cover;
+}
+
+.story__body p {
+  color: var(--text-body);
+  line-height: 1.75;
+}
+
+.story__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6) var(--space-6);
+  border-top: 1px solid var(--border);
+}
+
+@keyframes story-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes story-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.99);
+  }
+}
+
+@media (max-width: 640px) {
+  .story-backdrop {
+    padding: 0;
+    place-items: end stretch;
+  }
+
+  .story {
+    width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .story__head,
+  .story__body,
+  .story__foot {
+    padding-inline: var(--space-5);
+  }
 }
 
 .package-card__foot {
@@ -956,6 +1165,14 @@ html.intro-landing .site-header .brand__text {
   transition: transform 1.2s var(--ease-out-soft);
 }
 
+/* a clip keeps its controls, so it never zooms on hover and fills the tile like the pictures do */
+.mosaic__tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
 .mosaic__tile:hover img,
 .mosaic__tile:hover svg {
   transform: scale(1.07);
@@ -999,11 +1216,17 @@ html.intro-landing .site-header .brand__text {
   overflow: hidden;
 }
 
-.journal-card__media > svg {
+.journal-card__media > svg,
+.journal-card__media > img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
   transition: transform 1.1s var(--ease-out-soft);
 }
 
-.journal-card:hover .journal-card__media > svg {
+.journal-card:hover .journal-card__media > svg,
+.journal-card:hover .journal-card__media > img {
   transform: scale(1.05);
 }
 
@@ -1082,6 +1305,36 @@ html.intro-landing .site-header .brand__text {
 .plan__form,
 .plan__track {
   padding: var(--space-6);
+}
+
+/* The account panel sits under both columns: this page is where a visitor signs in or signs up. */
+.plan__account {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-6);
+}
+
+.plan__account h3 {
+  margin-bottom: var(--space-2);
+}
+
+.plan__account p {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.plan__account-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.plan__account-actions .btn {
+  white-space: nowrap;
 }
 
 .plan__hint {
@@ -1358,10 +1611,34 @@ html.intro-landing .site-header .brand__text {
   height: 120%;
   background: radial-gradient(closest-side, rgba(195, 154, 46, 0.2), transparent 70%);
   animation: drift 18s var(--ease-in-out-soft) infinite alternate;
+  z-index: 1;
+}
+
+/* a photograph sits behind the band, darkened so the copy keeps its contrast */
+.cta-band__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.cta-band__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.5;
+}
+
+.cta-band::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(100deg, rgba(6, 9, 8, 0.92) 0%, rgba(6, 9, 8, 0.72) 55%, rgba(6, 9, 8, 0.5) 100%);
 }
 
 .cta-band__inner {
   position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1586,6 +1863,11 @@ html.intro-landing .site-header .brand__text {
   .plan__track {
     padding: var(--space-5);
   }
+  /* one column: the account copy and its buttons stack */
+  .plan__account {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--space-5);
+  }
   .review-card {
     padding: var(--space-5);
   }
@@ -1686,7 +1968,7 @@ html.intro-landing .site-header .brand__text {
 
 /* ================================================================ inner pages */
 
-/* --- page hero with scenery --- */
+/* --- page hero with scenery or a photograph --- */
 .page-hero--media {
   position: relative;
   overflow: hidden;
@@ -1700,6 +1982,13 @@ html.intro-landing .site-header .brand__text {
 .page-hero__media > svg {
   width: 100%;
   height: 100%;
+}
+
+.page-hero__media > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
 }
 
 .page-hero__scrim {
@@ -1809,6 +2098,23 @@ html.intro-landing .site-header .brand__text {
   margin-top: var(--space-7);
 }
 
+/* The written-up description on the journey page: paragraphs with room to breathe. */
+.detail__story {
+  display: grid;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.detail__story p {
+  color: var(--text-body);
+  line-height: 1.8;
+}
+
+.detail__story p:first-child {
+  color: var(--text-heading);
+  font-size: 1.08rem;
+}
+
 .itinerary {
   display: grid;
   gap: var(--space-4);
@@ -1852,10 +2158,12 @@ html.intro-landing .site-header .brand__text {
 }
 
 .detail__strip img,
-.detail__strip svg {
+.detail__strip svg,
+.detail__strip video {
   width: 100%;
   height: 180px;
   object-fit: cover;
+  background: #000;
 }
 
 .detail__strip figcaption {
@@ -1973,11 +2281,17 @@ html.intro-landing .site-header .brand__text {
   overflow: hidden;
 }
 
-.feature-post__media > svg {
+.feature-post__media > svg,
+.feature-post__media > img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
   transition: transform 1.2s var(--ease-out-soft);
 }
 
-.feature-post:hover .feature-post__media > svg {
+.feature-post:hover .feature-post__media > svg,
+.feature-post:hover .feature-post__media > img {
   transform: scale(1.04);
 }
 
@@ -2005,6 +2319,14 @@ html.intro-landing .site-header .brand__text {
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
+}
+
+.post__cover svg,
+.post__cover img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  object-fit: cover;
 }
 
 .prose {
@@ -2224,6 +2546,13 @@ html.intro-landing .site-header .brand__text {
   overflow: hidden;
 }
 
+.contact-panel--map img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
 .contact-panel__map-label {
   position: absolute;
   left: var(--space-4);
@@ -2318,6 +2647,30 @@ html.intro-landing .site-header .brand__text {
 
 .navbar__auth:hover {
   color: var(--gold-300);
+}
+
+/* the discreet way into the staff console, now in the footer */
+.footer__bottom-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.footer__admin {
+  color: var(--text-invert-muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.3rem 0.8rem;
+  transition: color var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft);
+}
+
+.footer__admin:hover {
+  color: var(--gold-200);
+  border-color: var(--gold-500);
 }
 
 .site-header.is-scrolled .navbar__auth {

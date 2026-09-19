@@ -3,14 +3,14 @@ import Scenery from '../ui/Scenery'
 
 /**
  * The header band used by every page except the home page: breadcrumb, eyebrow, title, lede and
- * optional actions, over a duskier version of the illustrated scenery.
+ * optional actions, over a photograph (or the drawn scene when no image is given).
  */
-export default function PageHero({ eyebrow, title, lede, crumbs = [], scenery, children }) {
+export default function PageHero({ eyebrow, title, lede, crumbs = [], scenery, image, children }) {
   return (
-    <section className={`page-hero ${scenery ? 'page-hero--media' : ''}`}>
-      {scenery && (
+    <section className={`page-hero ${scenery || image ? 'page-hero--media' : ''}`}>
+      {(image || scenery) && (
         <div className="page-hero__media" aria-hidden="true">
-          <Scenery variant={scenery} ratio="16 / 9" />
+          {image ? <img src={image} alt="" /> : <Scenery variant={scenery} ratio="16 / 9" />}
           <div className="page-hero__scrim" />
         </div>
       )}

@@ -8,7 +8,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check:render": "vite build --ssr scripts/render-check.jsx --outDir .render-check --logLevel warn && node .render-check/render-check.js"
+    "check:render": "vite build --ssr scripts/render-check.jsx --outDir .render-check --logLevel warn && node .render-check/render-check.js",
+    "test:e2e": "playwright test",
+    "seed": "vite build --ssr scripts/seed-demo-content.jsx --outDir .seed --logLevel warn && node .seed/seed-demo-content.js",
+    "extract:packages": "powershell -ExecutionPolicy Bypass -File scripts/extract-tour-packages.ps1",
+    "import:packages": "vite build --ssr scripts/import-tour-packages.jsx --outDir .import --logLevel warn && node .import/import-tour-packages.js"
   },
   "dependencies": {
     "react": "^19.3.0",
@@ -16,6 +20,7 @@
     "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@vitejs/plugin-react": "^6.1.1",
     "vite": "^8.3.0"
   }

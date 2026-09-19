@@ -3,6 +3,7 @@ import { api } from '../api/client'
 import { fallbackReviews } from '../data/fallback'
 import { useApi } from '../hooks/useApi'
 import PageHero from '../components/layout/PageHero'
+import PHOTOS from '../data/photos'
 import Reveal from '../components/ui/Reveal'
 import { ArrowRight, Star } from '../components/ui/Icons'
 import { formatDate } from '../utils/format'
@@ -27,6 +28,7 @@ export default function ReviewsPage() {
         title="What people said afterwards"
         lede="Unedited notes from travellers who have been out with us. Reviews are written by signed-in customers, one per journey."
         crumbs={[{ label: 'Reviews' }]}
+        image={PHOTOS.pageHero.reviews}
         scenery="safari"
       />
 

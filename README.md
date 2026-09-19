@@ -7,9 +7,9 @@ framework, so the palette and layout stay easy to change.
 
 | Route | Contents |
 |---|---|
-| `/` | Hero carousel, trust badges, philosophy, signature journeys, sustainability, gallery, journal, reviews, FAQ, CTA band |
-| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala` |
-| `/journeys/:id` | One journey: overview, day-by-day itinerary, gallery strip, reviews for that package, sticky quote card |
+| `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), sustainability, gallery, journal, reviews, FAQ, CTA band |
+| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog |
+| `/journeys/:id` | One journey: overview, the full description, day-by-day itinerary, gallery strip, reviews for that package, sticky quote card |
 | `/journal` | Featured story plus the rest of the published posts |
 | `/journal/:id` | Full story, then more from the journal |
 | `/gallery` | Large mosaic of live gallery images, or the illustrated placeholders while it is empty |
@@ -19,6 +19,15 @@ framework, so the palette and layout stay easy to change.
 | `/plan` | **Plan your journey**: enquiry form (`POST /api/contact`), PIN tracker (`GET /api/bookings/track`), how-it-works steps |
 | `/login`, `/register` | Customer sign in and sign up (`POST /api/auth/login`, `POST /api/auth/register`); the JWT is kept in localStorage |
 | `/account` | Signed-in customers: their bookings (`GET /api/customer/bookings`), a new booking request (`POST /api/bookings/request`) and a review form (`POST /api/reviews`) |
+| `/admin` | **Staff console.** Overview: pending/confirmed counts, live packages, new enquiries, recent bookings |
+| `/admin/bookings` | Every booking with status filter, confirm (price + date) and reject |
+| `/admin/queries` | Enquiries with a "new only" filter and a reply box that emails the sender |
+| `/admin/packages` | Journey CRUD, activate/deactivate, delete |
+| `/admin/journal` | Story CRUD, publish/unpublish, delete |
+| `/admin/gallery` | Images and short clips on the public gallery, linked to a journey if you like |
+| `/admin/media` | **Media library**: upload images and short videos, see the path each is served from, delete |
+| `/admin/content` | **About and Contact pages**: every heading, paragraph, list entry and contact card, including the footer details |
+| `/admin/reviews` | Moderation: read every review, remove one from the public page |
 | `*` | 404 |
 
 Planning and booking-tracking live only on `/plan`; every "Plan your trip" / "Request" button routes
@@ -26,6 +35,24 @@ there. The header link `/plan#track` lands with the cursor already in the PIN fi
 
 Every page works without the backend: detail routes fall back to the matching sample record and the
 lists fall back to `src/data/fallback.js`, with a notice explaining which one you are seeing.
+
+## Who signs in
+
+`/login` is for two different people, decided by the role the backend returns in the JWT:
+
+| Role | Sees | Cannot |
+|---|---|---|
+| `ROLE_CUSTOMER` | `/account` - own bookings, new booking request, review form | reach `/admin` |
+| `ROLE_ADMIN` | `/admin` - the staff console | hold a booking or post a review (the backend rejects both with 403) |
+
+The admin console is reached from the small **Admin sign in** link in the site footer. There is no
+self-service admin signup: accounts come from `app.bootstrap-admin.*` in the backend
+(`admin@test.com` / `Admin@12345` by default).
+
+`/admin/**` is guarded on the client too - `components/admin/AdminLayout.jsx` sends a signed-out
+visitor to `/login?next=<path>` and shows "Admin access required" for a customer session - but the
+real enforcement is `SecurityConfig`: every `/api/admin/**` call needs `ROLE_ADMIN`, so a customer
+token gets 403 whatever the UI does.
 
 ## Requirements
 
@@ -53,11 +80,34 @@ VITE_API_BASE_URL=https://api.example.com
 ```bash
 npm run build         # production build -> dist/
 npm run preview       # serve the build on http://localhost:4173
-npm run check:render  # renders /, /plan and the 404 route in Node and asserts their content
+npm run check:render  # renders all 24 routes in Node and asserts their content
+npm run test:e2e      # drives the built site in Chromium (Playwright)
+npm run seed          # load the demo content into a running backend (optional)
+npm run extract:packages   # rate sheet (.xlsx) -> packages.json
+npm run import:packages    # packages.json -> a running backend (see "The package catalogue")
 ```
 
-`check:render` is the useful one: it fails on undefined components or broken props, and it enforces
-that the planning/tracking panels have not leaked back onto the home page.
+`check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
+stubbed admin session) with `renderToString`, so an undefined component, a bad hook or a broken prop
+fails the build without a browser. It also checks the two access rules - a customer session on
+`/admin` must show "Admin access required" and a signed-out one must render no console at all -
+asserts that the photographs the site ships with are still referenced by the pages that use them, and
+enforces that the planning/tracking panels have not leaked back onto the home page.
+
+`test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
+serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
+so it needs no backend. Twenty-three tests across three files:
+
+| File | Covers |
+|---|---|
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
+| `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
+| `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer |
+
+The dashboard test exists because the console shipped with a layout bug that a Node render cannot see:
+the stat cards' label, figure and breakdown are spans, and with no layout on the card they sat on one
+line and overlapped. The suite also caught the content editor blanking the screen when switching
+sections, which is fixed.
 
 ## API usage
 
@@ -71,6 +121,87 @@ that the planning/tracking panels have not leaked back onto the home page.
 | PIN tracker (`/plan`) | `GET /api/bookings/track?pin=` - public |
 | Sign in / sign up | `POST /api/auth/login`, `POST /api/auth/register` |
 | `/account` | `GET /api/customer/bookings`, `POST /api/bookings/request`, `POST /api/reviews` - all send the bearer token |
+| `/admin` | `GET /api/admin/bookings`, `GET /api/admin/packages`, `GET /api/admin/queries`, `GET /api/reviews` |
+| `/admin/bookings` | `GET /api/admin/bookings?status=`, `PATCH /api/admin/bookings/{id}/confirm`, `PATCH /api/admin/bookings/{id}/reject` |
+| `/admin/queries` | `GET /api/admin/queries?onlyNew=true`, `PATCH /api/admin/queries/{id}/respond` |
+| `/admin/packages` | `GET|POST /api/admin/packages`, `PUT /api/admin/packages/{id}`, `PATCH .../deactivate`, `DELETE /api/admin/packages/{id}` |
+| `/admin/journal` | `GET|POST /api/admin/journal`, `PUT /api/admin/journal/{id}`, `PATCH .../publish`, `PATCH .../unpublish`, `DELETE /api/admin/journal/{id}` |
+| `/admin/gallery` | `POST /api/admin/gallery`, `PUT /api/admin/gallery/{id}`, `DELETE /api/admin/gallery/{id}` |
+| `/admin/media` | `GET|POST /api/admin/media` (multipart), `GET /api/admin/media/limits`, `DELETE /api/admin/media/{id}` |
+| `/admin/content` | `GET /api/admin/content`, `PUT /api/admin/content/{section}` |
+| `/admin/reviews` | `DELETE /api/admin/reviews/{id}` |
+| About + Contact pages, footer | `GET /api/content/about`, `GET /api/content/contact` - public; the page falls back to `src/data/pageContent.js` if the API is silent |
+
+Every admin call goes through `src/api/admin.js`, which attaches the bearer token; the client never
+caches lists, so each mutation reloads the table it changed.
+
+**Uploads.** `src/components/admin/MediaPicker.jsx` is the shared "choose a file" dialog: it uploads
+through `POST /api/admin/media` and hands the picked asset back as `{ url, mediaType }`. Stored files
+are relative paths (`/media/<name>`), so `api.mediaUrl(path)` in `src/api/client.js` prefixes the API
+origin before anything is rendered - without it an `<img src="/media/...">` would resolve against the
+front-end origin and 404. Photographs that ship with the site (`/images/sl/...`) are already
+resolvable and are returned untouched by the same helper.
+
+**Seeding.** `npm run seed` loads the demo content into a running backend *through the admin API* -
+every photograph is uploaded to the media library and every journal post and gallery item is created
+the way a member of staff would create it, so all of it stays editable in the console. It is safe to
+re-run (journal posts are matched on title, gallery items on their file), and it takes an optional
+base URL: `npm run seed -- http://localhost:8080`. Journeys are not seeded from here - the catalogue
+is the agency's own, and it is loaded from the rate sheet (below).
+
+## The package catalogue
+
+The journeys on the site are the agency's real ones, and they come from the rate workbook - one
+overview sheet plus one sheet per package, each with the day-by-day itinerary, the hotel table and
+the base price. Two commands turn it into records, both of which talk to the backend through the same
+admin API the console uses, so everything they write stays editable in Admin → Packages:
+
+```bash
+npm run extract:packages -- -Workbook "..\SriLanka_TourPackages.xlsx" -Out packages.json
+npm run import:packages -- packages.json --prune
+```
+
+`extract:packages` is a PowerShell script (`scripts/extract-tour-packages.ps1`) that unzips the
+workbook and reads the sheets directly, so it needs no Excel and no extra dependency. The package
+sheets win wherever they disagree with the overview - they are the ones carrying the itinerary and the
+hotels - and the overview is only used for the accommodation tier. `import:packages` matches on title,
+so re-running it updates what is already there instead of duplicating it; `--prune` deletes the
+packages the sheet no longer lists (unlinking their gallery photographs first, since the backend
+refuses to delete a journey the gallery still points at).
+
+| Rate sheet | Package record |
+|---|---|
+| package name | `title` |
+| Experience (`Cultural & Heritage`, …) | `destination` - the pill on the card and the eyebrow on the detail page |
+| Days | `durationDays`, and one numbered step per itinerary line |
+| Base price | `price` |
+| Day-by-day rows | `itinerary`, one line per day |
+| Locations row, day rows, hotel table, accommodation tier | the description, in full, when the copy file has nothing for that package |
+
+### Written copy
+
+The words on the cards are not the sheet's words. `data/package-copy.json` holds, for each journey:
+
+| Field | Where it appears |
+|---|---|
+| `summary` | the card on the home and journeys pages, and the lede at the top of the journey page - two lines, no more |
+| `story` | the popup behind **Read the full description** on the journeys page, and the "About this journey" section of the journey page. Three or four paragraphs, separated by a blank line |
+| `cover` | a file in `public/images/sl`, uploaded to the media library on the first import and linked as the journey's cover |
+
+The importer merges that with the sheet: facts (route, durations, prices, hotels, day-by-day steps)
+come from the workbook, prose comes from the copy file, and a package the copy file does not mention
+keeps a generated description made from the sheet's own facts and gets no long one. The copy is
+written for the site rather than lifted from any source document, and it is editable in
+Admin → Packages → *Full description* afterwards like every other field.
+
+Note on the numbers: the two price columns in the workbook disagree (the overview lists 550-2100 for
+the 13 tours, each package sheet lists 650-6500). The importer uses the package sheet, and prints the
+overview figure it did not use, so the difference is visible on every run rather than silent.
+
+**Covers.** Each of the thirteen journeys has a photograph, chosen from the picture library for the
+part of the island that journey is about (the leopard for the Yala-heavy tours, the tea estates for
+the hill-country ones, the fort and the dancer for the heritage ones). They are ordinary media
+library entries, so swapping one is a two-click job in Admin → Packages.
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
@@ -89,6 +220,11 @@ emerald as a secondary note:
 Contrast: gold is 7.56:1 on ink and 7.29:1 with ink text on it, but only 2.48:1 as text on ivory -
 so gold text is never placed on light backgrounds (buttons use ink text on gold). Change the palette
 in this one file and the whole site follows.
+
+**Admin console.** `src/styles/admin.css` is a separate, deliberately corporate theme - a navy
+`#0f1f3d` sidebar, `#1d4ed8` primary actions, `#f4f6f9` canvas and white cards - and everything it
+defines is scoped under `.admin`, so the marketing palette and the staff palette cannot leak into
+each other. Body text is 16.4:1 and white-on-primary 6.4:1.
 
 **Motion.** `--dur*` and `--ease-out-soft` in the same file drive every transition. On top of that:
 a scroll-progress bar, `<Reveal>` (IntersectionObserver fade/lift with stagger), a slow drift on the
@@ -112,30 +248,80 @@ because of it.
 
 ```
 src/
-  api/client.js            fetch wrapper (base URL, timeouts, typed errors) + every endpoint used
+  api/client.js            fetch wrapper (base URL, timeouts, typed errors) + every public endpoint
+  api/admin.js             every /api/admin/** call the console makes
   hooks/useApi.js          list loader with loading / live / fallback states
   hooks/useResource.js     single-record loader (loading / ready / missing / error)
-  utils/format.js          price, date and paragraph helpers
+  utils/format.js          price, date, paragraph and line helpers
   data/fallback.js         sample journeys, journal posts, reviews, FAQ copy
+  data/pageContent.js      default copy for the editable About/Contact pages
+  data/photos.js           the photographs that ship with the site, by slot
+  data/package-copy.json   the written summary, full description and cover for each journey
+  auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
+  hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens
   styles/base.css          reset, type, buttons, grid, reveal/motion utilities
   styles/components.css    section and page styles
+  styles/admin.css         staff console theme (scoped to .admin)
   components/layout/       Header, Footer, PageHero, SplashIntro
   components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
+  components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills),
+                           MediaPicker, useAdmin
   components/sections/     Home page sections
-  components/ui/           Icons, Scenery, PackageCard, Reveal, ScrollProgress
+  components/ui/           Icons, Scenery, PackageCard, StoryDialog, Reveal, ScrollProgress,
+                           MediaFigure, CoverImage
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
-                           GalleryPage, ReviewsPage, About, Contact, PlanPage, NotFound
+                           GalleryPage, ReviewsPage, About, Contact, PlanPage, Login, Register,
+                           Account, NotFound
+  pages/admin/             Overview, Bookings, Queries, Packages, Journal, Gallery, Media, Content,
+                           Reviews
+scripts/
+  render-check.jsx         renders every route and asserts its content
+  seed-demo-content.jsx    loads the demo content through the admin API
+  extract-tour-packages.ps1  rate workbook (.xlsx) -> packages.json, no Excel needed
+  import-tour-packages.jsx   packages.json -> packages through the admin API
+  optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
+tests/e2e/
+  fixtures.js              mocked API + session seeding
+  public.spec.js           hero, home layout, story dialog, journey page, covers
+  admin.spec.js            access rules, all nine screens, dashboard layout
+  mobile.spec.js           phone header, drawer, no sideways scroll
 ```
 
-## Images
+## Photographs
 
-No external image dependencies: scenes are drawn as SVG by `components/ui/Scenery.jsx` (temple,
-safari, tea, coast, train, hills). Drop photography into `public/images/` and swap a `<Scenery />`
-for an `<img />` when you have it - the gallery already renders live `imageUrl` values from the API.
+The site carries its own photographs in `public/images/sl`, and everything that is content-managed
+carries an uploaded one instead. Which is which:
+
+| Where | Comes from | Changed by |
+|---|---|---|
+| Home hero carousel, page header bands, the "fewer places" panel, the CTA band, the contact map panel, the 404 page | `public/images/sl/*.jpg`, mapped slot by slot in `src/data/photos.js` | replacing the file, or editing that map (a developer change) |
+| Journey cards and journey headers | the package's `imageUrl`, seeded per journey by `npm run import:packages` from `data/package-copy.json` | Admin → Packages → Cover image (media library) |
+| Journal cards, featured story, story cover | the post's `coverImageUrl` | Admin → Journal → Cover image (media library) |
+| Gallery, home gallery strip | gallery items (image or short video) | Admin → Gallery, files from Admin → Media library |
+| About and Contact header bands and the About story panel | `hero.image` / `story.image` in the page content | Admin → About and Contact (media library) |
+| Journey page "from the road" strip | gallery items linked to that journey | Admin → Gallery → link to a package |
+
+Nothing is decorative filler: every managed slot falls back to a photograph that ships with the site
+(`components/ui/CoverImage.jsx`, `src/data/photos.js`) when no upload has been chosen, and to the drawn
+scenes in `components/ui/Scenery.jsx` when there is no photograph at all.
+
+**The originals.** `public/images/Sri lanka` holds the full-resolution photographs the site was built
+from (1-13 MB each - the media endpoint would refuse anything over 10 MB anyway). They are not served:
+`scripts/optimize-images.ps1` turns them into web-sized copies, which is where everything in
+`public/images/sl` came from. `public/images/sl/SOURCES.txt` lists which original each slot was
+exported from, so a photo can be traced back, re-exported at another size, or credited.
+
+```bash
+powershell -ExecutionPolicy Bypass -File scripts/optimize-images.ps1 `
+    -Source "public/images/Sri lanka" -Destination ".image-work"
+```
+
+That writes `<name>-lg.jpg` (1920px, quality 82 - headers and covers) and `<name>-sm.jpg` (900px,
+quality 78 - tiles and cards) per photo, applies the EXIF orientation to the pixels and drops the rest
+of the metadata, so no camera GPS data ships with the site.
 
 ## Not built yet
 
-The admin dashboard (`/api/admin/**` already covers packages, journal, gallery, queries and booking
-confirmations) and password reset / profile editing. Payment is out of scope by design - a booking
-is a request that a consultant confirms.
+Password reset and profile editing. Payment is out of scope by design - a booking is a request that
+a consultant confirms.

@@ -6,8 +6,9 @@ import { useResource } from '../hooks/useResource'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
+import MediaFigure from '../components/ui/MediaFigure'
 import { ArrowRight, Calendar, Check, MapPin, Phone, Star, Users } from '../components/ui/Icons'
-import { formatDate, formatDays, formatPrice, toParagraphs } from '../utils/format'
+import { firstSentence, formatDate, formatDays, formatPrice, toLines, toParagraphs } from '../utils/format'
 
 const SCENERY = ['temple', 'safari', 'tea', 'coast', 'train', 'hills']
 
@@ -75,7 +76,10 @@ export default function JourneyDetail() {
 
   const scenery = pkg.scenery ?? SCENERY[Number(pkg.packageId) % SCENERY.length] ?? 'hills'
   const price = formatPrice(pkg.price)
-  const itinerary = toParagraphs(pkg.itinerary)
+  // One line per day, not one paragraph per blank line: a 20-day itinerary stored as 20 lines has
+  // to become 20 steps. The write-up is the other way round - paragraphs, split on blank lines.
+  const itinerary = toLines(pkg.itinerary)
+  const story = toParagraphs(pkg.longDescription)
   const shownReviews = reviews.length > 0 ? reviews : isSample ? fallbackReviews.slice(0, 2) : []
 
   return (
@@ -83,8 +87,11 @@ export default function JourneyDetail() {
       <PageHero
         eyebrow={pkg.destination ?? 'Journey'}
         title={pkg.title}
-        lede={pkg.description}
+        // The lede is the opening line; the whole description - hotels, accommodation tier and
+        // inclusions included - follows under "About this journey".
+        lede={firstSentence(pkg.description)}
         crumbs={[{ label: 'Journeys', to: '/journeys' }, { label: pkg.title }]}
+        image={pkg.imageUrl ? api.mediaUrl(pkg.imageUrl) : undefined}
         scenery={scenery}
       />
 
@@ -99,7 +106,16 @@ export default function JourneyDetail() {
 
             <Reveal>
               <h2>About this journey</h2>
-              <p className="lede">{pkg.description}</p>
+              {/* The full write-up when there is one; the one-line summary otherwise. */}
+              {story.length > 0 ? (
+                <div className="detail__story">
+                  {story.map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
+              ) : (
+                <p className="lede">{pkg.description}</p>
+              )}
             </Reveal>
 
             {itinerary.length > 0 && (
@@ -107,7 +123,7 @@ export default function JourneyDetail() {
                 <h3 className="detail__subhead">Day by day</h3>
                 <ul className="itinerary">
                   {itinerary.map((line, index) => (
-                    <li key={line}>
+                    <li key={index}>
                       <span className="itinerary__step">{String(index + 1).padStart(2, '0')}</span>
                       <p>{line}</p>
                     </li>
@@ -122,7 +138,7 @@ export default function JourneyDetail() {
                 <div className="detail__strip">
                   {gallery.slice(0, 3).map((image) => (
                     <figure key={image.imageId}>
-                      <img src={image.imageUrl} alt={image.caption ?? pkg.title} loading="lazy" />
+                      <MediaFigure item={image} alt={image.caption ?? pkg.title} />
                       {image.caption && <figcaption>{image.caption}</figcaption>}
                     </figure>
                   ))}

@@ -21,6 +21,14 @@ export function formatDays(days) {
   return `${days} ${Number(days) === 1 ? 'day' : 'days'}`
 }
 
+/** 1536000 -> "1.5 MB" */
+export function formatBytes(bytes) {
+  if (!bytes && bytes !== 0) return null
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  if (bytes >= 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${bytes} B`
+}
+
 /** Splits a textarea-style body into paragraphs for rendering. */
 export function toParagraphs(text) {
   if (!text) return []
@@ -28,4 +36,29 @@ export function toParagraphs(text) {
     .split(/\n{2,}|\r\n\r\n/)
     .map((part) => part.trim())
     .filter(Boolean)
+}
+
+/**
+ * Splits a body that is written one entry per line - the day-by-day itinerary, where every line is
+ * a day. Blank lines are dropped, and a single newline is the only separator.
+ */
+export function toLines(text) {
+  if (!text) return []
+  return String(text)
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
+/**
+ * The opening sentence of a longer description, for the places that need one line rather than a
+ * paragraph (a hero lede, a card's standfirst). Text with no full stop is cut at the limit instead.
+ */
+export function firstSentence(text, limit = 180) {
+  if (!text) return ''
+  const flat = String(text).replace(/\s+/g, ' ').trim()
+  const stop = flat.search(/\.(\s|$)/)
+  const sentence = stop === -1 ? flat : flat.slice(0, stop + 1)
+  if (sentence.length <= limit) return sentence
+  return `${flat.slice(0, limit - 1).trimEnd()}\u2026`
 }

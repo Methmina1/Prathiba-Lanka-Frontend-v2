@@ -3,7 +3,8 @@ import { api } from '../../api/client'
 import { fallbackJournal } from '../../data/fallback'
 import { useApi } from '../../hooks/useApi'
 import Reveal from '../ui/Reveal'
-import Scenery from '../ui/Scenery'
+import CoverImage from '../ui/CoverImage'
+import PHOTOS from '../../data/photos'
 import { ArrowRight } from '../ui/Icons'
 
 function formatDate(value) {
@@ -12,8 +13,6 @@ function formatDate(value) {
   if (Number.isNaN(date.getTime())) return null
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
-
-const FALLBACK_SCENERY = ['coast', 'temple', 'tea', 'safari', 'train', 'hills']
 
 export default function Journal() {
   const { data: posts } = useApi(() => api.getPublishedJournal(), fallbackJournal)
@@ -34,7 +33,11 @@ export default function Journal() {
             <Reveal key={post.journalId} delay={index * 110}>
               <Link className="card journal-card" to={`/journal/${post.journalId}`}>
               <div className="journal-card__media">
-                <Scenery variant={post.scenery ?? FALLBACK_SCENERY[index % 6]} ratio="16 / 10" />
+                <CoverImage
+                  src={post.coverImageUrl}
+                  fallback={PHOTOS.journalFallback[index % PHOTOS.journalFallback.length]}
+                  alt={post.title}
+                />
               </div>
               <div className="journal-card__body">
                 <span className="journal-card__date">{formatDate(post.publishedAt) ?? 'Draft'}</span>

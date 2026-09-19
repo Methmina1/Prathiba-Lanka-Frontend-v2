@@ -5,14 +5,18 @@
  */
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
 
-async function request(path, { timeoutMs = 6000, ...options } = {}) {
+export async function request(path, { timeoutMs = 6000, ...options } = {}) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
+    // FormData must set its own Content-Type, otherwise the multipart boundary is lost.
+    const isUpload = typeof FormData !== 'undefined' && options.body instanceof FormData
     const response = await fetch(`${BASE_URL}${path}`, {
       ...options,
       signal: controller.signal,
-      headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
+      headers: isUpload
+        ? { ...(options.headers ?? {}) }
+        : { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
     })
 
     const text = await response.text()
@@ -33,6 +37,18 @@ async function request(path, { timeoutMs = 6000, ...options } = {}) {
 export const api = {
   baseUrl: BASE_URL,
 
+  /**
+   * Resolves a stored image reference for the browser. Uploaded files are stored as a path
+   * (/media/<name>) so they survive a change of host, and the browser needs the API origin in front
+   * of them - the front end is served from its own origin. Anything else (a photograph that ships
+   * with the site, or a full URL) is already resolvable, so it is returned untouched.
+   */
+  mediaUrl: (path) => {
+    if (!path) return path
+    if (/^https?:\/\//i.test(path)) return path
+    return path.startsWith('/media/') ? `${BASE_URL}${path}` : path
+  },
+
   // catalogue
   getPackages: () => request('/api/packages'),
   getPackage: (id) => request(`/api/packages/${id}`),
@@ -50,6 +66,9 @@ export const api = {
   // public actions
   submitQuery: (payload) => request('/api/contact', { method: 'POST', body: JSON.stringify(payload) }),
   trackBooking: (pin) => request(`/api/bookings/track?pin=${encodeURIComponent(pin)}`),
+
+  // editable page content (public read; the admin console writes it)
+  getPageContent: (section) => request(`/api/content/${section}`),
 
   // customer actions (need a bearer token)
   login: (email, password) =>

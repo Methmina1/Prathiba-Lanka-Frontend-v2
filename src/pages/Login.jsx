@@ -36,9 +36,9 @@ export default function Login() {
   return (
     <main className="page-enter">
       <PageHero
-        eyebrow="Customers"
+        eyebrow="Accounts"
         title="Sign in"
-        lede="Sign in to request bookings, follow their progress and leave a review afterwards."
+        lede="Customers sign in to request bookings, follow their progress and leave a review. Staff sign in here too, and land in the admin console."
         crumbs={[{ label: 'Sign in' }]}
       />
 

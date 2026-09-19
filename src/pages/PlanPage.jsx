@@ -3,6 +3,7 @@ import EnquiryForm from '../components/plan/EnquiryForm'
 import TrackBooking from '../components/plan/TrackBooking'
 import TrustBar from '../components/sections/TrustBar'
 import Reveal from '../components/ui/Reveal'
+import { useAuth } from '../auth/AuthContext'
 import { ArrowRight } from '../components/ui/Icons'
 
 const STEPS = [
@@ -12,6 +13,9 @@ const STEPS = [
 ]
 
 export default function PlanPage() {
+  const { session, email, signOut } = useAuth()
+  const isAdmin = session?.role === 'ROLE_ADMIN'
+
   return (
     <main className="page-enter">
       <section className="page-hero">
@@ -40,6 +44,48 @@ export default function PlanPage() {
             </Reveal>
             <Reveal delay={140} variant="reveal--right">
               <TrackBooking />
+            </Reveal>
+
+            <Reveal delay={200}>
+              <div className="card plan__account">
+                <div>
+                  <span className="eyebrow">Your account</span>
+                  <h3>{session ? `Signed in as ${email ?? 'your account'}` : 'Already travelling with us?'}</h3>
+                  <p>
+                    {session
+                      ? 'Your requests, confirmed dates and reviews are all on your account page.'
+                      : 'An account keeps your requests, confirmed dates and reviews in one place. It is optional - the forms above work without one.'}
+                  </p>
+                </div>
+
+                <div className="plan__account-actions">
+                  {session ? (
+                    <>
+                      <Link className="btn btn--cta btn--sweep" to={isAdmin ? '/admin' : '/account'}>
+                        {isAdmin ? 'Staff dashboard' : 'Go to my account'}
+                        <ArrowRight width={15} height={15} />
+                      </Link>
+                      <button
+                        type="button"
+                        className="btn btn--ghost"
+                        onClick={() => signOut()}
+                      >
+                        Sign out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link className="btn btn--cta btn--sweep" to="/login">
+                        Sign in
+                        <ArrowRight width={15} height={15} />
+                      </Link>
+                      <Link className="link-arrow" to="/register">
+                        Create an account
+                      </Link>
+                    </>
+                  )}
+                </div>
+              </div>
             </Reveal>
           </div>
         </div>

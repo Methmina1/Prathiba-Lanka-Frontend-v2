@@ -1,38 +1,35 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import Scenery from '../ui/Scenery'
 import { ArrowRight } from '../ui/Icons'
+import PHOTOS from '../../data/photos'
 
+/** Slide order matches the photographs in src/data/photos.js: coast, wildlife, culture, sunsets. */
 const SLIDES = [
   {
-    scenery: 'hills',
-    eyebrow: 'Sri Lanka',
-    title: 'The emerald isle, unhurried',
-    text: 'Private journeys for travellers who would rather see four places properly than fourteen badly.',
-    cta: { label: 'Explore journeys', to: '/#journeys' },
+    eyebrow: 'The coast',
+    title: 'Turquoise water, warm the whole year',
+    text: 'Shallow reef bays, fishing boats at first light, and sand that stays quiet even in season.',
+    cta: { label: 'See the coast journeys', to: '/journeys?destination=galle' },
   },
   {
-    scenery: 'temple',
-    eyebrow: 'Cultural Triangle',
-    title: 'Sacred summits, stone cities',
-    text: 'Sigiriya before the heat, Dambulla at noon, Polonnaruwa by bicycle and Kandy as the light goes.',
-    cta: { label: 'Cultural journeys', to: '/#journeys' },
-  },
-  {
-    scenery: 'safari',
     eyebrow: 'Wildlife',
-    title: 'Leopards at first light',
-    text: 'Dawn drives in Yala, the great elephant gathering at Minneriya, whales off the south coast in season.',
-    cta: { label: 'Safari journeys', to: '/#journeys' },
+    title: 'Leopards, herds and real wilderness',
+    text: 'Dawn drives in Yala and Wilpattu, the elephant gathering at Minneriya, forest that was never cleared.',
+    cta: { label: 'See the wildlife journeys', to: '/journeys?destination=yala' },
   },
   {
-    scenery: 'tea',
-    eyebrow: 'Hill Country',
-    title: 'Mist, tea and slow trains',
-    text: 'The Kandy to Ella line, planter bungalows, and mornings that smell of eucalyptus and rain.',
-    cta: { label: 'Hill country journeys', to: '/#journeys' },
+    eyebrow: 'Culture',
+    title: 'Two thousand years, still standing',
+    text: 'Rock fortresses, cave temples and the sacred city of Kandy, read properly by a guide who lives here.',
+    cta: { label: 'See the cultural journeys', to: '/journeys?destination=cultural' },
   },
-]
+  {
+    eyebrow: 'Golden hour',
+    title: 'Evenings that end in gold',
+    text: 'The west coast turns amber around six, and there is nowhere better to be than the water\u2019s edge.',
+    cta: { label: 'See every journey', to: '/journeys' },
+  },
+].map((slide, index) => ({ ...slide, image: PHOTOS.hero[index] }))
 
 export default function Hero() {
   const [index, setIndex] = useState(0)
@@ -57,7 +54,7 @@ export default function Hero() {
       <div className="hero__media" aria-hidden="true">
         {SLIDES.map((item, i) => (
           <div className={`hero__slide ${i === index ? 'is-active' : ''}`} key={item.title}>
-            <Scenery variant={item.scenery} ratio="16 / 9" />
+            <img src={item.image} alt="" loading={i === 0 ? 'eager' : 'lazy'} />
           </div>
         ))}
         <div className="hero__scrim" />

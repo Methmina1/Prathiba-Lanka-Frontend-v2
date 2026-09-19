@@ -1,9 +1,15 @@
 import { Link } from 'react-router-dom'
+import PHOTOS from '../data/photos'
 
 export default function NotFound() {
   return (
     <main className="page-enter">
-      <section className="page-hero">
+      <section className="page-hero page-hero--media">
+        <div className="page-hero__media" aria-hidden="true">
+          <img src={PHOTOS.notFound} alt="" />
+          <div className="page-hero__scrim" />
+        </div>
+
         <div className="container page-hero__inner">
           <span className="eyebrow eyebrow--onDark">404</span>
           <h1 className="display">This path leads nowhere</h1>

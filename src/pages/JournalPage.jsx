@@ -4,11 +4,10 @@ import { fallbackJournal } from '../data/fallback'
 import { useApi } from '../hooks/useApi'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
-import Scenery from '../components/ui/Scenery'
+import CoverImage from '../components/ui/CoverImage'
+import PHOTOS from '../data/photos'
 import { ArrowRight } from '../components/ui/Icons'
 import { formatDate } from '../utils/format'
-
-const SCENERY = ['coast', 'temple', 'tea', 'safari', 'train', 'hills']
 
 export default function JournalPage() {
   const { data: posts, status } = useApi(() => api.getPublishedJournal(), fallbackJournal)
@@ -21,6 +20,7 @@ export default function JournalPage() {
         title="Stories from the island"
         lede="Seasonal advice, small histories and the sort of detail that only helps once you are here."
         crumbs={[{ label: 'Journal' }]}
+        image={PHOTOS.pageHero.journal}
         scenery="hills"
       />
 
@@ -37,7 +37,7 @@ export default function JournalPage() {
             <Reveal>
               <Link className="feature-post" to={`/journal/${featured.journalId}`}>
                 <div className="feature-post__media">
-                  <Scenery variant={featured.scenery ?? 'coast'} ratio="16 / 10" />
+                  <CoverImage src={featured.coverImageUrl} fallback={PHOTOS.journalFallback[0]} alt={featured.title} />
                 </div>
                 <div className="feature-post__body">
                   <span className="journal-card__date">
@@ -60,9 +60,10 @@ export default function JournalPage() {
                 <Reveal key={post.journalId} delay={index * 90}>
                   <Link className="card journal-card" to={`/journal/${post.journalId}`}>
                     <div className="journal-card__media">
-                      <Scenery
-                        variant={post.scenery ?? SCENERY[index % SCENERY.length]}
-                        ratio="16 / 10"
+                      <CoverImage
+                        src={post.coverImageUrl}
+                        fallback={PHOTOS.journalFallback[(index + 1) % PHOTOS.journalFallback.length]}
+                        alt={post.title}
                       />
                     </div>
                     <div className="journal-card__body">
