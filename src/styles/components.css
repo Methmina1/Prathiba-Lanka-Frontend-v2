@@ -1192,22 +1192,6 @@ html.intro-landing .site-header .brand__text {
   color: var(--gold-200);
 }
 
-.island__credit {
-  margin: 0;
-  color: var(--text-faint);
-  font-size: 0.72rem;
-}
-
-.island__credit a {
-  color: var(--text-faint);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.island__credit a:hover {
-  color: var(--gold-300);
-}
-
 @media (max-width: 900px) {
   .island {
     grid-template-columns: minmax(0, 1fr);

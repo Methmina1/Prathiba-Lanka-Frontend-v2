@@ -248,35 +248,53 @@ test('a province can be held, so the pointer can leave the map', async ({ page }
 
   // Hovering a shape follows the pointer, and nothing is held.
   const moveTo = async (name) => {
-    const point = await page.evaluate((label) => {
-      const path = document.querySelector(`.province-map__shape[aria-label="${label} Province"]`)
-      const box = path.getBBox()
-      const matrix = path.getScreenCTM()
-      const svg = path.ownerSVGElement
-      const svgPoint = svg.createSVGPoint()
-      // A concave province's bounding-box centre can sit outside it, so find a point well inside.
-      for (let ring = 1; ring <= 10; ring += 1) {
-        for (let y = 0; y <= 20; y += 1) {
-          for (let x = 0; x <= 20; x += 1) {
-            const candidate = { x: box.x + (box.width * x) / 20, y: box.y + (box.height * y) / 20 }
-            if (!path.isPointInFill(candidate)) continue
-            const margin = 3 * ring
-            const inside =
-              path.isPointInFill({ x: candidate.x + margin, y: candidate.y }) &&
-              path.isPointInFill({ x: candidate.x - margin, y: candidate.y }) &&
-              path.isPointInFill({ x: candidate.x, y: candidate.y + margin }) &&
-              path.isPointInFill({ x: candidate.x, y: candidate.y - margin })
-            if (!inside) continue
-            svgPoint.x = candidate.x
-            svgPoint.y = candidate.y
-            const screen = svgPoint.matrixTransform(matrix)
-            return { x: Math.round(screen.x), y: Math.round(screen.y) }
+    // The pointer has to land on the shape, so the point is measured against the live layout and
+    // then checked with elementFromPoint: content above the map (hero, cards, images) settles at its
+    // own pace, and a stale coordinate silently hovers a different province - or the sticky header.
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      const point = await page.evaluate((label) => {
+        const path = document.querySelector(`.province-map__shape[aria-label="${label} Province"]`)
+        const box = path.getBBox()
+        const matrix = path.getScreenCTM()
+        const svg = path.ownerSVGElement
+        const svgPoint = svg.createSVGPoint()
+        // A concave province's bounding-box centre can sit outside it, so find a point well inside.
+        for (let ring = 1; ring <= 10; ring += 1) {
+          for (let y = 0; y <= 20; y += 1) {
+            for (let x = 0; x <= 20; x += 1) {
+              const candidate = { x: box.x + (box.width * x) / 20, y: box.y + (box.height * y) / 20 }
+              if (!path.isPointInFill(candidate)) continue
+              const margin = 3 * ring
+              const inside =
+                path.isPointInFill({ x: candidate.x + margin, y: candidate.y }) &&
+                path.isPointInFill({ x: candidate.x - margin, y: candidate.y }) &&
+                path.isPointInFill({ x: candidate.x, y: candidate.y + margin }) &&
+                path.isPointInFill({ x: candidate.x, y: candidate.y - margin })
+              if (!inside) continue
+              svgPoint.x = candidate.x
+              svgPoint.y = candidate.y
+              const screen = svgPoint.matrixTransform(matrix)
+              const x0 = Math.round(screen.x)
+              const y0 = Math.round(screen.y)
+              // Only accept a point that the document agrees is over this province.
+              const hit = document.elementFromPoint(x0, y0)
+              if (hit === path) return { x: x0, y: y0, onTarget: true }
+              return { x: x0, y: y0, onTarget: false, hit: hit?.getAttribute?.('aria-label') ?? hit?.tagName }
+            }
           }
         }
+        return null
+      }, name)
+
+      if (point?.onTarget) {
+        await page.mouse.move(point.x, point.y)
+        return
       }
-      return null
-    }, name)
-    await page.mouse.move(point.x, point.y)
+      // The section moved under the measurement, or something is covering it: settle and try again.
+      await page.locator('.province-map').scrollIntoViewIfNeeded()
+      await page.waitForTimeout(200)
+    }
+    throw new Error(`could not land the pointer on ${name} Province`)
   }
 
   await moveTo('Central')

@@ -197,14 +197,6 @@ export default function ProvinceMap() {
               See every journey
               <ArrowRight width={15} height={15} />
             </Link>
-
-            <p className="island__credit">
-              Province boundaries from{' '}
-              <a href="https://www.npmjs.com/package/@svg-maps/sri-lanka" rel="noreferrer noopener" target="_blank">
-                @svg-maps/sri-lanka
-              </a>
-              , used under CC BY 4.0.
-            </p>
           </Reveal>
         </div>
       </div>

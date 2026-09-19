@@ -174,8 +174,17 @@ The reference is [@svg-maps/sri-lanka](https://www.npmjs.com/package/@svg-maps/s
 districts, CC BY 4.0, originally from [MapSVG](https://mapsvg.com/maps/sri-lanka). Districts are
 grouped into the nine provinces, and each province's districts are joined into one path - which has
 to be done carefully, because `m 44.4,578.9 2.6,0.07` is an absolute moveto followed by a *relative*
-lineto, so a joined path needs the moveto rewritten rather than its letter upper-cased. The credit
-line under the map is what the licence asks for; keep it.
+lineto, so a joined path needs the moveto rewritten rather than its letter upper-cased.
+
+> **Attribution.** CC BY 4.0 asks for credit wherever the work is shown, and the map used to carry a
+> line saying so under the panel. That line has since been removed, at the client's request, so the
+> site currently shows no credit. The licence has not changed: this file and the header of the
+> generated `src/data/provinces.js` still record where the geometry came from, which is the right
+> thing to do but is not the same as crediting it in the product. Two ways to square it, if it
+> matters: put a one-line credit back (a `.island__credit` paragraph under the panel, or the small
+> print in the footer), or rebuild the map from a public-domain source - Natural Earth's admin-1
+> boundaries are public domain and carry no attribution condition - and change `REFERENCE_URL` in
+> the script.
 
 The map data is 58 KB of path coordinates in the bundle. It is worth it: the alternative is a
 picture of a map that cannot follow the palette, cannot be pointed at, and cannot be corrected.
