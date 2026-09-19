@@ -21,6 +21,12 @@ const packages = [
     maxCapacity: 12,
     status: 'ACTIVE',
     description: 'Sigiriya at sunrise and the cave temples of Dambulla.',
+    // One line per day, the way the admin form and the rate-sheet importer write it.
+    itinerary: [
+      'Arrive in Colombo and transfer to Sigiriya.',
+      'Sigiriya rock at first light, then the Dambulla cave temples.',
+      'Polonnaruwa by bicycle, with the afternoon free by the tank.',
+    ].join('\n'),
     imageUrl: photo('seed-package-heritage.jpg'),
   },
   {

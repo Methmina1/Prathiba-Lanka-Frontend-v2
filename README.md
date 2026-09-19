@@ -83,6 +83,8 @@ npm run preview       # serve the build on http://localhost:4173
 npm run check:render  # renders all 24 routes in Node and asserts their content
 npm run test:e2e      # drives the built site in Chromium (Playwright)
 npm run seed          # load the demo content into a running backend (optional)
+npm run extract:packages   # rate sheet (.xlsx) -> packages.json
+npm run import:packages    # packages.json -> a running backend (see "The package catalogue")
 ```
 
 `check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
@@ -98,7 +100,7 @@ so it needs no backend. Twenty tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page, the About and 404 photography |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the About and 404 photography |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer |
 
@@ -141,10 +143,45 @@ front-end origin and 404. Photographs that ship with the site (`/images/sl/...`)
 resolvable and are returned untouched by the same helper.
 
 **Seeding.** `npm run seed` loads the demo content into a running backend *through the admin API* -
-every photograph is uploaded to the media library and every package, journal post and gallery item is
-created the way a member of staff would create it, so all of it stays editable in the console. It is
-safe to re-run (records are matched on title, gallery items on their file), and it takes an optional
-base URL: `npm run seed -- http://localhost:8080`.
+every photograph is uploaded to the media library and every journal post and gallery item is created
+the way a member of staff would create it, so all of it stays editable in the console. It is safe to
+re-run (journal posts are matched on title, gallery items on their file), and it takes an optional
+base URL: `npm run seed -- http://localhost:8080`. Journeys are not seeded from here - the catalogue
+is the agency's own, and it is loaded from the rate sheet (below).
+
+## The package catalogue
+
+The journeys on the site are the agency's real ones, and they come from the rate workbook - one
+overview sheet plus one sheet per package, each with the day-by-day itinerary, the hotel table and
+the base price. Two commands turn it into records, both of which talk to the backend through the same
+admin API the console uses, so everything they write stays editable in Admin → Packages:
+
+```bash
+npm run extract:packages -- -Workbook "..\SriLanka_TourPackages.xlsx" -Out packages.json
+npm run import:packages -- packages.json --prune
+```
+
+`extract:packages` is a PowerShell script (`scripts/extract-tour-packages.ps1`) that unzips the
+workbook and reads the sheets directly, so it needs no Excel and no extra dependency. The package
+sheets win wherever they disagree with the overview - they are the ones carrying the itinerary and the
+hotels - and the overview is only used for the accommodation tier. `import:packages` matches on title,
+so re-running it updates what is already there instead of duplicating it; `--prune` deletes the
+packages the sheet no longer lists (unlinking their gallery photographs first, since the backend
+refuses to delete a journey the gallery still points at).
+
+| Rate sheet | Package record |
+|---|---|
+| package name | `title` |
+| Experience (`Cultural & Heritage`, …) | `destination` - the pill on the card and the eyebrow on the detail page |
+| Days | `durationDays`, and one numbered step per itinerary line |
+| Base price | `price` |
+| Day-by-day rows | `itinerary`, one line per day |
+| Locations row, day rows, hotel table, accommodation tier | the description, in full |
+| - | `imageUrl` is left empty on purpose: covers are chosen in Admin → Packages, and the card falls back to a drawn scene until one is |
+
+Note on the numbers: the two price columns in the workbook disagree (the overview lists 550-2100 for
+the 13 tours, each package sheet lists 650-6500). The importer uses the package sheet, and prints the
+overview figure it did not use, so the difference is visible on every run rather than silent.
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
@@ -219,6 +256,8 @@ src/
 scripts/
   render-check.jsx         renders every route and asserts its content
   seed-demo-content.jsx    loads the demo content through the admin API
+  extract-tour-packages.ps1  rate workbook (.xlsx) -> packages.json, no Excel needed
+  import-tour-packages.jsx   packages.json -> packages through the admin API
   optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
 tests/e2e/
   fixtures.js              mocked API + session seeding

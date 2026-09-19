@@ -3,6 +3,7 @@ dist
 dist-ssr
 .render-check
 .seed
+.import
 *.local
 .vite
 .DS_Store

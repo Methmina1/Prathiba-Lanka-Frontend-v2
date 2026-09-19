@@ -37,3 +37,15 @@ export function toParagraphs(text) {
     .map((part) => part.trim())
     .filter(Boolean)
 }
+
+/**
+ * Splits a body that is written one entry per line - the day-by-day itinerary, where every line is
+ * a day. Blank lines are dropped, and a single newline is the only separator.
+ */
+export function toLines(text) {
+  if (!text) return []
+  return String(text)
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+}

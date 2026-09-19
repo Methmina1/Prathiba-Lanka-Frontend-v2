@@ -95,6 +95,12 @@ test('a journey detail page opens from a card', async ({ page }) => {
   await page.locator('.package-card h3 a').first().click()
   await expect(page.locator('h1')).toHaveText('Classical Heritage')
   await expect(page.locator('.detail__main')).toContainText('About this journey')
+
+  // the itinerary is one line per day, so three lines are three numbered steps and not one blob
+  const steps = page.locator('.itinerary li')
+  await expect(steps).toHaveCount(3)
+  await expect(steps.first()).toContainText('Arrive in Colombo')
+  await expect(steps.last()).toContainText('Polonnaruwa by bicycle')
 })
 
 test('the About page shows the photo that ships with the site', async ({ page }) => {

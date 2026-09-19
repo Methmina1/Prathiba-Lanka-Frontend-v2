@@ -8,8 +8,13 @@
  *     npm run seed                      # http://localhost:8080
  *     npm run seed -- http://host:8080  # another instance
  *
- * It is safe to re-run: packages are matched on title, journal posts on title, and gallery items
- * are skipped when the same media file is already in the gallery.
+ * It seeds the journal, the gallery and the About/Contact photographs. The travel packages are NOT
+ * seeded from here: the catalogue is the agency's real one, and it comes from the rate sheet -
+ * `npm run extract:packages -- -Workbook <book.xlsx>` writes packages.json and
+ * `npm run import:packages -- packages.json --prune` loads it (see README).
+ *
+ * It is safe to re-run: journal posts are matched on title, and gallery items are skipped when the
+ * same media file is already in the gallery.
  */
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
@@ -22,84 +27,6 @@ const photoDir = join(here, '..', 'public', 'images', 'sl')
 
 const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? 'admin@test.com'
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? 'Admin@12345'
-
-/** Journeys, promo copy and covers. The words match the sample content the site ships with. */
-const PACKAGES = [
-  {
-    title: 'Classical Heritage',
-    destination: 'Cultural Triangle',
-    durationDays: 8,
-    price: 1290,
-    maxCapacity: 12,
-    photo: 'seed-package-heritage.jpg',
-    description:
-      'Sigiriya at sunrise, the cave temples of Dambulla, the ancient city of Polonnaruwa and the lake at Kandy.',
-    itinerary: [
-      'Arrive in Colombo and transfer to Sigiriya; evening at leisure.',
-      'Sigiriya rock at first light, then the Dambulla cave temples.',
-      'Polonnaruwa by bicycle, with the afternoon free by the tank.',
-      'Drive to Kandy via Matale; evening at the temple of the tooth.',
-      'Kandy to Nuwara Eliya through the tea country.',
-      'A slow day in the hills: factory walk and a planter bungalow.',
-      'Return towards the coast, with the evening in Negombo.',
-      'Transfer to the airport.',
-    ].join('\n'),
-  },
-  {
-    title: 'Wild Heart',
-    destination: 'Yala & Minneriya',
-    durationDays: 6,
-    price: 1080,
-    maxCapacity: 8,
-    photo: 'seed-package-wildlife.jpg',
-    description:
-      'Dawn game drives for leopards and sloth bears, then the great elephant gathering on the Minneriya tank.',
-    itinerary: [
-      'Arrive and transfer to Tissamaharama.',
-      'Yala before dawn; siesta, then an afternoon drive.',
-      'Second morning in Yala, then on to Ella.',
-      'The hill country: tea, waterfalls and the Nine Arch bridge.',
-      'Drive north to Habarana for the Minneriya gathering.',
-      'Minneriya at dusk, then transfer to the airport.',
-    ].join('\n'),
-  },
-  {
-    title: 'Mist & Tea',
-    destination: 'Hill Country',
-    durationDays: 5,
-    price: 940,
-    maxCapacity: 10,
-    photo: 'seed-package-hillcountry.jpg',
-    description:
-      'The Kandy to Ella line, tea factory walks, Horton Plains at first light and cool nights in a planter bungalow.',
-    itinerary: [
-      'Kandy: the lake, the temple and the botanical gardens.',
-      'The train to Ella, observation carriage, reserved seats.',
-      'Horton Plains at first light, World\u2019s End before the mist.',
-      'Tea factory and a walk through the estates around Ella.',
-      'Ella to Colombo by road, with a stop at the St Clair falls.',
-    ].join('\n'),
-  },
-  {
-    title: 'Southern Serenity',
-    destination: 'Galle & Mirissa',
-    durationDays: 7,
-    price: 1150,
-    maxCapacity: 14,
-    photo: 'seed-package-coast.jpg',
-    description:
-      'A Dutch fort, whale-watching off Mirissa, stilt fishermen at dusk and slow mornings on a quiet stretch of coast.',
-    itinerary: [
-      'Arrive and drive south to Bentota.',
-      'Bentota river at dawn, then on to Galle.',
-      'The fort on foot, with the afternoon on the ramparts.',
-      'Galle to Mirissa; whale-watching booked for the morning.',
-      'Whales at first light, the rest of the day on the beach.',
-      'Free day: surf lesson, or a tuk-tuk to Weligama.',
-      'Transfer to the airport.',
-    ].join('\n'),
-  },
-]
 
 const JOURNAL = [
   {
@@ -216,6 +143,11 @@ const GALLERY = [
   'seed-gallery-09.jpg', 'seed-gallery-10.jpg', 'seed-gallery-11.jpg', 'seed-gallery-12.jpg',
   'seed-gallery-13.jpg', 'seed-gallery-14.jpg', 'seed-gallery-15.jpg', 'seed-gallery-16.jpg',
   'seed-gallery-17.jpg', 'seed-gallery-18.jpg',
+
+  // The four photographs the sample journeys used to be covered by. They are unlinked now that the
+  // catalogue is the agency's own, and two of them also fill the About and Contact frames.
+  'seed-package-heritage.jpg', 'seed-package-wildlife.jpg',
+  'seed-package-hillcountry.jpg', 'seed-package-coast.jpg',
 ]
 
 /** Photos for the editable About/Contact pages, so those are staff-managed too. */
@@ -262,33 +194,6 @@ const upload = async (fileName, title) => {
   return asset
 }
 
-// ---------------------------------------------------------------- packages
-const existingPackages = await adminApi.listPackages(token)
-const packageIds = {}
-
-for (const spec of PACKAGES) {
-  const asset = await upload(spec.photo, `${spec.title} cover`)
-  const payload = {
-    title: spec.title,
-    destination: spec.destination,
-    durationDays: spec.durationDays,
-    price: spec.price,
-    maxCapacity: spec.maxCapacity,
-    description: spec.description,
-    itinerary: spec.itinerary,
-    imageUrl: asset.url,
-    status: 'ACTIVE',
-  }
-
-  const match = existingPackages.find((pkg) => pkg.title === spec.title)
-  const saved = match
-    ? await adminApi.updatePackage(token, match.packageId, payload)
-    : await adminApi.createPackage(token, payload)
-
-  packageIds[spec.title] = saved.packageId
-  console.log(`  package  ${match ? 'updated' : 'created'}  ${saved.title} (${saved.packageId}) -> ${asset.url}`)
-}
-
 // ---------------------------------------------------------------- journal
 const existingPosts = await adminApi.listJournal(token)
 
@@ -313,27 +218,6 @@ for (const spec of JOURNAL) {
 // ---------------------------------------------------------------- gallery
 const existingGallery = await api.getGallery()
 const usedUrls = new Set(existingGallery.map((item) => item.imageUrl))
-
-// One photograph per journey, linked, so the journey page has a "from the road" strip.
-// Matched on the package rather than on the file, so a library holding two copies of a photograph
-// cannot produce a second gallery item for the same journey.
-const linkedPackages = new Set(existingGallery.filter((item) => item.packageId).map((item) => item.packageId))
-for (const [title, packageId] of Object.entries(packageIds)) {
-  const asset = await upload(PACKAGES.find((p) => p.title === title).photo, `${title} on the road`)
-  if (linkedPackages.has(packageId) || usedUrls.has(asset.url)) {
-    console.log(`  gallery  skipped   ${title} (already present)`)
-    continue
-  }
-  await adminApi.uploadImage(token, {
-    imageUrl: asset.url,
-    caption: null,
-    packageId,
-    mediaType: 'IMAGE',
-  })
-  usedUrls.add(asset.url)
-  linkedPackages.add(packageId)
-  console.log(`  gallery  linked    ${title} (${packageId}) -> ${asset.url}`)
-}
 
 for (const photo of GALLERY) {
   const asset = await upload(photo, null)
