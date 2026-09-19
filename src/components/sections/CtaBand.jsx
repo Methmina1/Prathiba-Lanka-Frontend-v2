@@ -1,9 +1,18 @@
 import { Link } from 'react-router-dom'
 import Reveal from '../ui/Reveal'
-import { ArrowRight, Phone, WhatsApp } from '../ui/Icons'
+import { ArrowRight, Mail, Phone, WhatsApp } from '../ui/Icons'
 import PHOTOS from '../../data/photos'
+import { CONTACT_FALLBACK } from '../../data/social'
+import { usePageContent } from '../../hooks/usePageContent'
 
 export default function CtaBand() {
+  // The same contact cards the Contact page and the footer read, so the number here is the real one
+  // - and while there is no number, the button is not shown at all.
+  const { content } = usePageContent('contact')
+  const cards = content.cards ?? []
+  const phone = cards.find((card) => card.href?.startsWith('tel:') && card.value)
+  const phoneValue = phone?.value ?? CONTACT_FALLBACK.phone
+
   return (
     <section className="cta-band">
       <div className="cta-band__media" aria-hidden="true">
@@ -20,10 +29,17 @@ export default function CtaBand() {
             Begin your journey
             <ArrowRight width={16} height={16} />
           </Link>
-          <a className="btn btn--onDark" href="tel:+94770000000">
-            <Phone width={15} height={15} />
-            +94 77 000 0000
-          </a>
+          {phoneValue ? (
+            <a className="btn btn--onDark" href={phone?.href ?? `tel:${phoneValue.replace(/\s/g, '')}`}>
+              <Phone width={15} height={15} />
+              {phoneValue}
+            </a>
+          ) : (
+            <a className="btn btn--onDark" href={`mailto:${CONTACT_FALLBACK.email}`}>
+              <Mail width={15} height={15} />
+              Email us
+            </a>
+          )}
         </Reveal>
       </div>
 

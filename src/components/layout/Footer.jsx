@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Facebook, Instagram, Mail, MapPin, Phone, WhatsApp } from '../ui/Icons'
+import { Facebook, Instagram, Mail, MapPin, Phone } from '../ui/Icons'
+import { CONTACT_FALLBACK, SOCIAL_LINKS } from '../../data/social'
 import { usePageContent } from '../../hooks/usePageContent'
 
 const DISCOVER = [
@@ -18,12 +19,14 @@ const JOURNEYS = [
   { label: 'Southern Coast', to: '/journeys?destination=galle' },
 ]
 
+const SOCIAL_ICONS = { facebook: Facebook, instagram: Instagram }
+
 export default function Footer() {
   // The same contact details the Contact page shows, so editing them once updates both.
   const { content } = usePageContent('contact')
   const cards = content.cards ?? []
-  const phone = cards.find((card) => card.href?.startsWith('tel:'))
-  const email = cards.find((card) => card.href?.startsWith('mailto:'))
+  const phone = cards.find((card) => card.href?.startsWith('tel:') && card.value)
+  const email = cards.find((card) => card.href?.startsWith('mailto:') && card.value)
   const office = cards.find((card) => card.icon === 'map')
 
   return (
@@ -42,15 +45,21 @@ export default function Footer() {
             driven by guides who know the back roads.
           </p>
           <div className="footer__social">
-            <a href="/#" aria-label="Facebook">
-              <Facebook />
-            </a>
-            <a href="/#" aria-label="Instagram">
-              <Instagram />
-            </a>
-            <a href="/#" aria-label="WhatsApp">
-              <WhatsApp />
-            </a>
+            {SOCIAL_LINKS.map((social) => {
+              const Icon = SOCIAL_ICONS[social.id]
+              return (
+                <a
+                  key={social.id}
+                  href={social.href}
+                  aria-label={social.handle}
+                  title={social.label}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                >
+                  <Icon />
+                </a>
+              )
+            })}
           </div>
         </div>
 
@@ -79,19 +88,24 @@ export default function Footer() {
         <div className="footer__col">
           <h4>Talk to us</h4>
           <ul className="footer__contact">
-            <li>
-              <Phone width={16} height={16} />
-              <a href={phone?.href ?? 'tel:+94770000000'}>{phone?.value ?? '+94 77 000 0000'}</a>
-            </li>
+            {/* No number yet: the line goes rather than showing a placeholder nobody can dial. */}
+            {(phone?.value ?? CONTACT_FALLBACK.phone) ? (
+              <li>
+                <Phone width={16} height={16} />
+                <a href={phone?.href ?? `tel:${CONTACT_FALLBACK.phone.replace(/\s/g, '')}`}>
+                  {phone?.value ?? CONTACT_FALLBACK.phone}
+                </a>
+              </li>
+            ) : null}
             <li>
               <Mail width={16} height={16} />
-              <a href={email?.href ?? 'mailto:hello@prathibalanka.lk'}>
-                {email?.value ?? 'hello@prathibalanka.lk'}
+              <a href={email?.href ?? `mailto:${CONTACT_FALLBACK.email}`}>
+                {email?.value ?? CONTACT_FALLBACK.email}
               </a>
             </li>
             <li>
               <MapPin width={16} height={16} />
-              <span>{office?.value ?? 'Colombo, Sri Lanka'}</span>
+              <span>{office?.value ?? CONTACT_FALLBACK.office}</span>
             </li>
           </ul>
           <ul className="footer__links">
@@ -111,7 +125,6 @@ export default function Footer() {
       <div className="container footer__bottom">
         <span>© {new Date().getFullYear()} PrathibaLanka. All rights reserved.</span>
         <div className="footer__bottom-meta">
-          <span className="footer__meta">Placeholder contact details - update before launch.</span>
           <Link className="footer__admin" to="/admin">
             Admin sign in
           </Link>

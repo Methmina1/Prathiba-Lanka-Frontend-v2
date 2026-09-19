@@ -25,8 +25,19 @@ import { adminApi } from '../src/api/admin.js'
 const here = dirname(fileURLToPath(import.meta.url))
 const photoDir = join(here, '..', 'public', 'images', 'sl')
 
-const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL ?? 'admin@test.com'
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? 'Admin@12345'
+const ADMIN_EMAIL =
+  process.env.PRATHIBALANKA_ADMIN_EMAIL ?? process.env.SEED_ADMIN_EMAIL ?? process.env.BOOTSTRAP_ADMIN_EMAIL ?? 'prathibhalankavoyages@gmail.com'
+const ADMIN_PASSWORD =
+  process.env.PRATHIBALANKA_ADMIN_PASSWORD ?? process.env.SEED_ADMIN_PASSWORD ?? process.env.BOOTSTRAP_ADMIN_PASSWORD ?? ''
+
+if (!ADMIN_PASSWORD) {
+  console.error(
+    'No admin password.\n' +
+      'Set BOOTSTRAP_ADMIN_PASSWORD (the variable the backend creates the admin account from),\n' +
+      'or SEED_ADMIN_PASSWORD, and run again.',
+  )
+  process.exit(1)
+}
 
 const JOURNAL = [
   {

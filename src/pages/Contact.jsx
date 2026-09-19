@@ -28,27 +28,30 @@ export default function Contact() {
       <section className="section">
         <div className="container">
           <div className="grid grid--4 contact-cards">
-            {(cards ?? []).map((card, index) => {
-              const Icon = ICONS[card.icon] ?? Phone
-              return (
-                <Reveal key={card.label} delay={index * 90}>
-                  <div className="card contact-card">
-                    <span className="contact-card__icon">
-                      <Icon width={18} height={18} />
-                    </span>
-                    <span className="contact-card__label">{card.label}</span>
-                    {card.href ? (
-                      <a className="contact-card__value" href={card.href}>
-                        {card.value}
-                      </a>
-                    ) : (
-                      <strong className="contact-card__value">{card.value}</strong>
-                    )}
-                    <p>{card.note}</p>
-                  </div>
-                </Reveal>
-              )
-            })}
+            {/* A card with nothing in it is not a card: the phone stays hidden until a number is set. */}
+            {(cards ?? [])
+              .filter((card) => card.value)
+              .map((card, index) => {
+                const Icon = ICONS[card.icon] ?? Phone
+                return (
+                  <Reveal key={card.label} delay={index * 90}>
+                    <div className="card contact-card">
+                      <span className="contact-card__icon">
+                        <Icon width={18} height={18} />
+                      </span>
+                      <span className="contact-card__label">{card.label}</span>
+                      {card.href ? (
+                        <a className="contact-card__value" href={card.href}>
+                          {card.value}
+                        </a>
+                      ) : (
+                        <strong className="contact-card__value">{card.value}</strong>
+                      )}
+                      <p>{card.note}</p>
+                    </div>
+                  </Reveal>
+                )
+              })}
           </div>
 
           <div className="contact-split">

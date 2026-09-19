@@ -85,19 +85,14 @@ export const CONTACT_DEFAULTS = {
     lede: 'Tell us roughly when you are coming and what you would like to see. A consultant replies with a draft itinerary and a price.',
     scenery: 'coast',
   },
+  // A card with an empty value cannot be saved (the content validator requires one), so "no phone
+  // number yet" means no phone card: add it back from Admin -> Contact when there is a number.
   cards: [
-    {
-      icon: 'phone',
-      label: 'Call or WhatsApp',
-      value: '+94 77 000 0000',
-      href: 'tel:+94770000000',
-      note: 'Answered 08:00 - 21:00 Sri Lanka time',
-    },
     {
       icon: 'mail',
       label: 'Email',
-      value: 'hello@prathibalanka.lk',
-      href: 'mailto:hello@prathibalanka.lk',
+      value: 'prathibhalankavoyages@gmail.com',
+      href: 'mailto:prathibhalankavoyages@gmail.com',
       note: 'Replies within one working day',
     },
     {

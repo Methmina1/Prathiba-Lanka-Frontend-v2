@@ -2,12 +2,14 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { fallbackPackages, fallbackReviews } from '../data/fallback'
+import { CONTACT_FALLBACK } from '../data/social'
+import { usePageContent } from '../hooks/usePageContent'
 import { useResource } from '../hooks/useResource'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
 import MediaFigure from '../components/ui/MediaFigure'
-import { ArrowRight, Calendar, Check, MapPin, Phone, Star, Users } from '../components/ui/Icons'
+import { ArrowRight, Calendar, Check, Mail, MapPin, Phone, Star, Users } from '../components/ui/Icons'
 import { firstSentence, formatDate, formatDays, formatPrice, toLines, toParagraphs } from '../utils/format'
 
 const SCENERY = ['temple', 'safari', 'tea', 'coast', 'train', 'hills']
@@ -53,6 +55,12 @@ export default function JourneyDetail() {
 
   const gallery = useRelatedList(status === 'ready', () => api.getGalleryByPackage(id), id)
   const reviews = useRelatedList(status === 'ready', () => api.getReviewsByPackage(id), id)
+
+  // The quote card shows whichever contact detail the agency actually publishes.
+  const { content: contact } = usePageContent('contact')
+  const contactCards = contact.cards ?? []
+  const phone = contactCards.find((card) => card.href?.startsWith('tel:') && card.value)
+  const email = contactCards.find((card) => card.href?.startsWith('mailto:') && card.value)
 
   if (!pkg) {
     return (
@@ -235,10 +243,19 @@ export default function JourneyDetail() {
                 day.
               </p>
 
-              <a className="quote-card__phone" href="tel:+94770000000">
-                <Phone width={15} height={15} />
-                +94 77 000 0000
-              </a>
+              {/* The agency's real contact details, from the same cards the contact page edits.
+                  There is no published phone number yet, so this falls back to email. */}
+              {phone?.value ? (
+                <a className="quote-card__phone" href={phone.href}>
+                  <Phone width={15} height={15} />
+                  {phone.value}
+                </a>
+              ) : (
+                <a className="quote-card__phone" href={`mailto:${email?.value ?? CONTACT_FALLBACK.email}`}>
+                  <Mail width={15} height={15} />
+                  {email?.value ?? CONTACT_FALLBACK.email}
+                </a>
+              )}
             </div>
 
             <div className="card quote-card quote-card--soft">
