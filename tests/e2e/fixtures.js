@@ -73,10 +73,13 @@ const gallery = [
   { imageId: 2, imageUrl: photo('tile-2.jpg'), caption: 'Hills', mediaType: 'IMAGE', uploadedAt: '2026-09-19T10:01:00' },
 ]
 
+// A response for the mocked API only, so the review cards have something to render in a browser
+// test. The site itself ships no sample reviews: with a real backend and an empty table, the reviews
+// pages show their empty state.
 const reviews = [
   {
     reviewId: 1,
-    customerName: 'Anna & Piet',
+    customerName: 'Test Traveller',
     rating: 5,
     comment: 'The train to Ella was the highlight.',
     packageTitle: 'Mist & Tea',

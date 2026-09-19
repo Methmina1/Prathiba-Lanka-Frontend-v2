@@ -274,6 +274,12 @@ library entries, so swapping one is a two-click job in Admin → Packages.
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
 needs a real session - so `/account` sends signed-out visitors to `/login?next=/account`.
 
+**Reviews are the exception.** There is no sample review in the fallbacks, and the home strip and
+`/reviews` show an empty state until real ones arrive. A review is a claim that a named person
+travelled with the agency and said something about it; writing those, even behind a "sample" notice,
+is not ours to do. The browser tests still serve one from their mocked API (`tests/e2e/fixtures.js`,
+which never ships) so the review cards themselves stay covered.
+
 ## Design system
 
 `src/styles/theme.css` holds every token. The palette is deep ink + metallic gold with the logo's
@@ -320,7 +326,7 @@ src/
   hooks/useApi.js          list loader with loading / live / fallback states
   hooks/useResource.js     single-record loader (loading / ready / missing / error)
   utils/format.js          price, date, paragraph and line helpers
-  data/fallback.js         sample journeys, journal posts, reviews, FAQ copy
+  data/fallback.js         sample journeys, journal posts, FAQ copy (no sample reviews - see below)
   data/pageContent.js      default copy for the editable About/Contact pages
   data/photos.js           the photographs that ship with the site, by slot
   data/package-copy.json   the written summary, full description and cover for each journey

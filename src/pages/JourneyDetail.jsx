@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
-import { fallbackPackages, fallbackReviews } from '../data/fallback'
+import { fallbackPackages } from '../data/fallback'
 import { CONTACT_FALLBACK } from '../data/social'
 import { usePageContent } from '../hooks/usePageContent'
 import { useResource } from '../hooks/useResource'
@@ -88,7 +88,6 @@ export default function JourneyDetail() {
   // to become 20 steps. The write-up is the other way round - paragraphs, split on blank lines.
   const itinerary = toLines(pkg.itinerary)
   const story = toParagraphs(pkg.longDescription)
-  const shownReviews = reviews.length > 0 ? reviews : isSample ? fallbackReviews.slice(0, 2) : []
 
   return (
     <main className="page-enter">
@@ -171,11 +170,11 @@ export default function JourneyDetail() {
 
             <Reveal delay={140}>
               <h3 className="detail__subhead">Travellers who took this journey</h3>
-              {shownReviews.length === 0 ? (
+              {reviews.length === 0 ? (
                 <p className="muted">No reviews for this journey yet.</p>
               ) : (
                 <div className="grid grid--2">
-                  {shownReviews.slice(0, 2).map((review) => (
+                  {reviews.slice(0, 2).map((review) => (
                     <figure className="card review-card" key={review.reviewId}>
                       <div className="review-card__stars" aria-label={`${review.rating} out of 5`}>
                         {[1, 2, 3, 4, 5].map((value) => (
