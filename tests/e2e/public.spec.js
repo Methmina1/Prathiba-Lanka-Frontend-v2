@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { collectPageErrors, mockApi } from './fixtures'
+import { ADMIN_SESSION, CUSTOMER_SESSION, collectPageErrors, mockApi, signIn } from './fixtures'
 
 test.beforeEach(async ({ page }) => {
   await mockApi(page)
@@ -58,6 +58,34 @@ test('the header offers no sign-in link, and the footer carries the staff link',
   await expect(header.locator('.navbar__actions .btn')).toHaveText('Plan your trip')
 
   await expect(page.locator('.site-footer a.footer__admin')).toHaveText('Admin sign in')
+})
+
+test('the header never says who is signed in, and signing out leaves', async ({ page }) => {
+  await signIn(page, CUSTOMER_SESSION)
+  await page.goto('/')
+
+  const header = page.locator('.site-header')
+  // A way into the account, and a way out - never the address, and never the name behind it.
+  await expect(header.locator('.navbar__auth')).toHaveText('Account')
+  await expect(header).not.toContainText('traveller')
+  await expect(header).not.toContainText('@')
+
+  await header.getByRole('button', { name: 'Sign out' }).click()
+
+  await expect(page).toHaveURL(/\/$/)
+  await expect(header.locator('.navbar__account')).toHaveCount(0)
+  await expect(header.locator('.navbar__actions .btn')).toHaveText('Plan your trip')
+  expect(await page.evaluate(() => window.localStorage.getItem('prathibalanka.session'))).toBeNull()
+})
+
+test('an administrator gets the console, not their address, in the header', async ({ page }) => {
+  await signIn(page, ADMIN_SESSION)
+  await page.goto('/')
+
+  const header = page.locator('.site-header')
+  await expect(header.locator('.navbar__auth')).toHaveText('Console')
+  await expect(header).not.toContainText('admin@test.com')
+  await expect(header.getByRole('button', { name: 'Sign out' })).toBeVisible()
 })
 
 test('the plan page is where a visitor signs in', async ({ page }) => {

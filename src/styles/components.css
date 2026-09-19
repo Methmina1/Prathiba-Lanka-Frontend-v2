@@ -2927,7 +2927,17 @@ html.intro-landing .site-header .brand__text {
 
 /* ================================================================ account area */
 
+/* Who is signed in, and how to get out. The name is deliberately absent from the bar. */
+.navbar__account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .navbar__auth {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   color: var(--text-invert-muted);
   font-size: 0.66rem;
   font-weight: 500;
@@ -2938,6 +2948,39 @@ html.intro-landing .site-header .brand__text {
 
 .navbar__auth:hover {
   color: var(--gold-300);
+}
+
+.navbar__signout {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-invert-faint);
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease-out-soft);
+}
+
+.navbar__signout:hover {
+  color: var(--gold-300);
+}
+
+.navbar__signout:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+/* Below the drawer's breakpoint the account and its sign-out live in the drawer, spelled out, where
+   there is room for them. Left in the bar as well they crowded the logo against the menu button.
+   This has to sit after the base rules above - same specificity, so order decides. */
+@media (max-width: 1080px) {
+  .navbar__account {
+    display: none;
+  }
 }
 
 /* the discreet way into the staff console, now in the footer */

@@ -54,6 +54,16 @@ export function Lock(props) {
   )
 }
 
+/** The way into an account, without printing whose account it is. */
+export function User(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.9 20.4a7.1 7.1 0 0 1 14.2 0" />
+    </svg>
+  )
+}
+
 export function Clock(props) {
   return (
     <svg {...base} {...props}>

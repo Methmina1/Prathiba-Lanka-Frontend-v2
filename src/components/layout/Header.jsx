@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ChevronDown, Close, Menu } from '../ui/Icons'
+import { ChevronDown, Close, Menu, User } from '../ui/Icons'
 import { useAuth } from '../../auth/AuthContext'
 
 const NAV = [
@@ -30,7 +30,18 @@ export default function Header() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { session, email, isAdmin, mayBook, signOut } = useAuth()
+  const { session, isAdmin, mayBook, signOut } = useAuth()
+
+  /**
+   * Signing out is a way out of the account, not just a state change: the account and console pages
+   * need a session, so staying on one would bounce straight to the login form. Home is the honest
+   * place to land, and `replace` keeps the signed-in page out of the history.
+   */
+  const signOutToHome = () => {
+    setOpen(false)
+    signOut()
+    navigate('/', { replace: true })
+  }
 
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY <= 4)
@@ -85,11 +96,23 @@ export default function Header() {
           </nav>
 
           <div className="navbar__actions">
-            {/* Signed-out visitors sign in from the plan page; the bar stays navigation + the CTA. */}
+            {/* Who is signed in is not shown here: the bar is a public page, and the name or the
+                address is nobody else's business. A way into the account, and a way out, is. */}
             {session && (
-              <Link className="navbar__auth" to={isAdmin ? '/admin' : '/account'}>
-                {email ? email.split('@')[0] : isAdmin ? 'Admin' : 'Account'}
-              </Link>
+              <div className="navbar__account">
+                <Link
+                  className="navbar__auth"
+                  to={isAdmin ? '/admin' : '/account'}
+                  aria-label={isAdmin ? 'Staff console' : 'Your account'}
+                  title={isAdmin ? 'Staff console' : 'Your account'}
+                >
+                  <User width={16} height={16} />
+                  <span>{isAdmin ? 'Console' : 'Account'}</span>
+                </Link>
+                <button type="button" className="navbar__signout" onClick={signOutToHome}>
+                  Sign out
+                </button>
+              </div>
             )}
             {/* Staff do not book trips, so the booking call to action is not shown to them. */}
             {mayBook && (
@@ -125,17 +148,9 @@ export default function Header() {
           {session && (
             <>
               <Link to={isAdmin ? '/admin' : '/account'} onClick={() => setOpen(false)}>
-                {isAdmin ? 'Staff dashboard' : 'My account'}
+                {isAdmin ? 'Staff console' : 'My account'}
               </Link>
-              <button
-                type="button"
-                className="mobile-menu__track"
-                onClick={() => {
-                  setOpen(false)
-                  signOut()
-                  navigate('/', { replace: true })
-                }}
-              >
+              <button type="button" className="mobile-menu__track" onClick={signOutToHome}>
                 Sign out
               </button>
             </>

@@ -45,6 +45,15 @@ lists fall back to `src/data/fallback.js`, with a notice explaining which one yo
 | `ROLE_CUSTOMER` | `/account` - own bookings, new booking request, review form | reach `/admin` |
 | `ROLE_ADMIN` | `/admin` - the staff console | book a trip or post a review |
 
+**The header never says who is signed in.** It shows a *User* icon with *Account* (or *Console* for
+staff) and a *Sign out* button - no name, no address, because the bar is on every public page and
+whose account it is is nobody else's business. Signing out clears the session, drops the console or
+account link, and puts the visitor back on the home page; the account and console pages need a
+session, so staying on one would only bounce them to the login form. Below the drawer's breakpoint
+the account and its sign-out live in the drawer instead, where there is room to spell them out.
+The token itself stays valid until it expires (24h by default) - logging out ends the session in this
+browser rather than revoking the JWT, which is what a stateless token means.
+
 An administrator is staff, so the booking flow is closed to them twice over: the backend refuses
 `/api/bookings/request`, `/api/customer/bookings` and `POST /api/reviews` with a 403 for an admin
 token (`@PreAuthorize("hasRole('CUSTOMER')")` on the controllers), and the site does not offer the
