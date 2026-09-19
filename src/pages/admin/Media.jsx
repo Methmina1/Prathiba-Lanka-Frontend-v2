@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { api } from '../../api/client'
 import { adminApi } from '../../api/admin'
 import { useAuth } from '../../auth/AuthContext'
 import { Notice, Segmented, Toolbar } from '../../components/admin/AdminUI'
@@ -126,9 +127,13 @@ export default function AdminMedia() {
             <div className="adm-media-card" key={asset.mediaId}>
               <div className="adm-media-card__thumb">
                 {asset.mediaType === 'VIDEO' ? (
-                  <video src={asset.url} controls muted preload="metadata" />
+                  <video src={api.mediaUrl(asset.url)} controls muted preload="metadata" />
                 ) : (
-                  <img src={asset.url} alt={asset.title ?? asset.originalName} loading="lazy" />
+                  <img
+                    src={api.mediaUrl(asset.url)}
+                    alt={asset.title ?? asset.originalName}
+                    loading="lazy"
+                  />
                 )}
               </div>
               <div className="adm-media-card__body">

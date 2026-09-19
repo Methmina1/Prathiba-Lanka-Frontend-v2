@@ -121,6 +121,34 @@ test('the sidebar moves between screens and the console keeps its own chrome', a
   await expect(page.locator('.site-footer')).toHaveCount(0)
 })
 
+test('media previews ask the API for the file, not the site', async ({ page }) => {
+  await signIn(page, ADMIN_SESSION)
+
+  // An uploaded file is stored as a path (/media/<name>). Rendered as-is it resolves against the
+  // front end's own origin, which has never held the file - every thumbnail silently fails to load.
+  // This shipped broken once: the media screen and the package image picker both used the raw path.
+  await page.goto('/admin/media')
+  const tile = page.locator('.adm-media-card__thumb img')
+  await expect(tile).toHaveCount(1)
+  await expect(tile).toHaveAttribute('src', /^https?:\/\/[^/]+\/media\//)
+
+  // the same tile inside the picker, reached the way staff reach it: Admin -> Packages -> Edit -> Library
+  await page.goto('/admin/packages')
+  await page.locator('.adm-table tbody tr').first().getByRole('button', { name: /edit/i }).click()
+  await page.locator('.adm-dialog').getByRole('button', { name: /library/i }).click()
+
+  const picked = page.locator('.adm-media__thumb img')
+  await expect(picked).toHaveCount(1)
+  await expect(picked).toHaveAttribute('src', /^https?:\/\/[^/]+\/media\//)
+
+  // and picking one puts it in the preview and in the form, ready to save
+  await page.locator('.adm-media').first().click()
+  await expect(page.locator('.adm-preview')).toHaveAttribute('src', /^https?:\/\/[^/]+\/media\//)
+  await expect(page.locator('.adm-dialog input[maxlength="255"]')).toHaveValue(
+    '/media/11111111-1111-1111-1111-111111111111.jpg',
+  )
+})
+
 test('the page content editor shows both sections and their fields', async ({ page }) => {
   await signIn(page, ADMIN_SESSION)
   await page.goto('/admin/content')
