@@ -6,7 +6,7 @@ credited. Slot names describe the place they fill, not the photograph, so replac
 one-file job - and everything under seed-* can also be swapped from the admin console instead.
 
 hero-1                   <- anupa-uthsara-czCVCfj_O4A-unsplash.jpg
-hero-2                   <- anupa-uthsara-5Np6ZsLDVIM-unsplash.jpg
+hero-2                   <- don-kaveen-93IYznJPkOA-unsplash.jpg
 hero-3                   <- zoshua-colah-Wj11_YgLuTc-unsplash.jpg
 hero-4                   <- sarmat-batagov-alqbSR-1uYk-unsplash.jpg
 page-journeys            <- large-vecteezy_sri-lankan-leopard_7975795_large.jpg
@@ -63,5 +63,6 @@ and can be uploaded from the admin console whenever you want them:
   juho-s-uDk9n1yKxTw-unsplash.jpg               (hero-3 in the first pass)
   tomas-malik-UL23OjMTHXE-unsplash.jpg          (hero-4 in the first pass)
   udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg   (hero-4 in the second pass)
+  anupa-uthsara-5Np6ZsLDVIM-unsplash.jpg        (gallery, then hero-2)
 
 Everything else in ../Sri lanka has not been placed yet. In total 49 of the 114 originals are in use.
