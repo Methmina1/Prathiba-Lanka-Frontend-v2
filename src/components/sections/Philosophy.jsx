@@ -23,7 +23,7 @@ export default function Philosophy() {
           </div>
           <div className="philosophy__badge">
             <strong>Since 2014</strong>
-            <span>Arranging journeys from Colombo</span>
+            <span>Arranging journeys from Kurunagala</span>
           </div>
         </Reveal>
 

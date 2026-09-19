@@ -15,7 +15,7 @@ export const ABOUT_DEFAULTS = {
     heading: 'Fewer places. Longer looks.',
     lede: 'We started with one vehicle and a list of places we loved. That has not really changed: we still plan every journey by hand, and we still send people to the guesthouses we would send our own families to.',
     badgeTitle: 'Since 2014',
-    badgeText: 'Arranging journeys from Colombo',
+    badgeText: 'Arranging journeys from Kurunagala',
     scenery: 'tea',
     points: [
       {
@@ -56,7 +56,7 @@ export const ABOUT_DEFAULTS = {
     items: [
       {
         year: '2014',
-        title: 'A single vehicle in Colombo',
+        title: 'A single vehicle in Kurunagala',
         text: 'Two guides, one van and a notebook of favourite guesthouses along the south coast.',
       },
       {
@@ -98,7 +98,7 @@ export const CONTACT_DEFAULTS = {
     {
       icon: 'map',
       label: 'Office',
-      value: 'Colombo, Sri Lanka',
+      value: 'Kurunagala, Sri Lanka',
       note: 'Visits by appointment',
     },
     {
@@ -111,7 +111,7 @@ export const CONTACT_DEFAULTS = {
   aside: {
     heading: 'Already sent a request?',
     text: 'Every enquiry gets an eight-character PIN. Use it to follow the progress of your booking at any time - no account needed.',
-    mapLabel: 'Colombo, Sri Lanka',
+    mapLabel: 'Kurunagala, Sri Lanka',
   },
 }
 

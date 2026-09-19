@@ -29,7 +29,7 @@ export const SOCIAL_LINKS = [
 export const CONTACT_FALLBACK = {
   email: 'prathibhalankavoyages@gmail.com',
   phone: '',
-  office: 'Colombo, Sri Lanka',
+  office: 'Kurunagala, Sri Lanka',
 }
 
 export default SOCIAL_LINKS
