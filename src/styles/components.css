@@ -872,10 +872,18 @@ html.intro-landing .site-header .brand__text {
   font-size: 1.35rem;
 }
 
+/* Three lines on the card; the whole description is on the journey page. The rate-sheet imports
+   carry the hotels, the accommodation tier and the inclusions, which is far more than a card can
+   hold, and the cards have to stay the same height next to each other. */
 .package-card__text {
+  display: -webkit-box;
   flex: 1;
+  overflow: hidden;
   color: var(--text-body);
   font-size: 0.9rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 .package-card__foot {

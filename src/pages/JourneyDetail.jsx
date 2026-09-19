@@ -8,7 +8,7 @@ import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
 import MediaFigure from '../components/ui/MediaFigure'
 import { ArrowRight, Calendar, Check, MapPin, Phone, Star, Users } from '../components/ui/Icons'
-import { formatDate, formatDays, formatPrice, toLines } from '../utils/format'
+import { firstSentence, formatDate, formatDays, formatPrice, toLines } from '../utils/format'
 
 const SCENERY = ['temple', 'safari', 'tea', 'coast', 'train', 'hills']
 
@@ -86,7 +86,9 @@ export default function JourneyDetail() {
       <PageHero
         eyebrow={pkg.destination ?? 'Journey'}
         title={pkg.title}
-        lede={pkg.description}
+        // The lede is the opening line; the whole description - hotels, accommodation tier and
+        // inclusions included - follows under "About this journey".
+        lede={firstSentence(pkg.description)}
         crumbs={[{ label: 'Journeys', to: '/journeys' }, { label: pkg.title }]}
         image={pkg.imageUrl ? api.mediaUrl(pkg.imageUrl) : undefined}
         scenery={scenery}

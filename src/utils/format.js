@@ -49,3 +49,16 @@ export function toLines(text) {
     .map((line) => line.trim())
     .filter(Boolean)
 }
+
+/**
+ * The opening sentence of a longer description, for the places that need one line rather than a
+ * paragraph (a hero lede, a card's standfirst). Text with no full stop is cut at the limit instead.
+ */
+export function firstSentence(text, limit = 180) {
+  if (!text) return ''
+  const flat = String(text).replace(/\s+/g, ' ').trim()
+  const stop = flat.search(/\.(\s|$)/)
+  const sentence = stop === -1 ? flat : flat.slice(0, stop + 1)
+  if (sentence.length <= limit) return sentence
+  return `${flat.slice(0, limit - 1).trimEnd()}\u2026`
+}
