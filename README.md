@@ -98,11 +98,22 @@ VITE_API_BASE_URL=https://api.example.com
 npm run build         # production build -> dist/
 npm run preview       # serve the build on http://localhost:4173
 npm run check:render  # renders all 24 routes in Node and asserts their content
-npm run test:e2e      # drives the built site in Chromium (Playwright)
+npm run test:e2e      # drives the built site in Chromium against a mocked API (Playwright)
+npm run test:roles    # drives the real site against a real backend, as each role
 npm run seed          # load the demo content into a running backend (optional)
 npm run extract:packages   # rate sheet (.xlsx) -> packages.json
 npm run import:packages    # packages.json -> a running backend (see "The package catalogue")
 ```
+
+Five suites cover the project between them, from the outside in:
+
+| Suite | Needs | Covers |
+|---|---|---|
+| `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 160 checks |
+| `mvn test` (backend repo) | nothing | the Spring context, the mail configuration |
+| `npm run check:render` | nothing | all 24 routes in Node: undefined components, bad hooks, broken props |
+| `npm run test:e2e` | nothing (API mocked) | 30 browser tests: layout, clicks, navigation |
+| `npm run test:roles` | a running API + `BOOTSTRAP_ADMIN_PASSWORD` | 21 end-to-end journeys through the real UI and the real database, one per role |
 
 `check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
 stubbed admin session) with `renderToString`, so an undefined component, a bad hook or a broken prop
@@ -111,9 +122,31 @@ fails the build without a browser. It also checks the two access rules - a custo
 asserts that the photographs the site ships with are still referenced by the pages that use them, and
 enforces that the planning/tracking panels have not leaked back onto the home page.
 
+### The live role suite
+
+`npm run test:roles` is the one that answers "does the whole thing actually work?". It drives the
+dev server with a real backend behind it, walking the site as the three people who use it:
+
+| Role | What it does |
+|---|---|
+| a visitor | reads every public page, searches the catalogue, opens a journey and a story, sends an enquiry, tracks an unknown PIN, registers an account, is kept out of `/account` and `/admin` |
+| a customer | signs in, requests a journey and gets a PIN, tracks it, leaves a review, finds it on the public reviews page, is refused the console, signs out |
+| a member of staff | signs in to the dashboard, **confirms the customer's booking** (which the customer then sees, with the agreed price), answers the visitor's enquiry, creates/edits/deactivates a package, writes/publishes/unpublishes/deletes a story, uploads a file and puts it in the gallery, edits the contact page and sees it on the public site, removes the customer's review, is refused the booking flow by the API, signs out |
+
+It writes to the database it points at, so every record it creates carries a run marker (`E2E<id>`,
+generated once per run by `scripts/live-roles.mjs` and handed to every worker through the
+environment) and is deleted again at the end of the run - the cleanup prints what it removed, and
+`PRATHIBALANKA_SKIP_CLEANUP=1` keeps everything for inspection. Workers are restarted after a
+failure, which is why nothing is remembered in memory between tests: each one looks its data up by
+the marker, so a single step can also be re-run on its own:
+
+```bash
+npm run test:roles -- -g "confirms the booking"
+```
+
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Twenty-four tests across three files:
+so it needs no backend. Thirty tests across three files:
 
 | File | Covers |
 |---|---|
@@ -374,12 +407,15 @@ scripts/
   extract-tour-packages.ps1  rate workbook (.xlsx) -> packages.json, no Excel needed
   import-tour-packages.jsx   packages.json -> packages through the admin API
   build-province-map.mjs   public/map + reference districts -> src/data/provinces.js
+  live-roles.mjs           runs the live role suite with one run id for the whole run
   optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
 tests/e2e/
   fixtures.js              mocked API + session seeding
   public.spec.js           hero, home layout, story dialog, journey page, covers
   admin.spec.js            access rules, all nine screens, dashboard layout
   mobile.spec.js           phone header, drawer, no sideways scroll
+tests/live/
+  roles.spec.js            the real UI against a real backend, per role (npm run test:roles)
 ```
 
 ## Photographs

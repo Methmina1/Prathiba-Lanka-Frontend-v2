@@ -7,7 +7,7 @@ export default function Login() {
   const { signIn } = useAuth()
   const navigate = useNavigate()
   const [params] = useSearchParams()
-  const next = params.get('next') ?? '/account'
+  const requested = params.get('next')
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [state, setState] = useState({ status: 'idle', message: '' })
@@ -18,8 +18,12 @@ export default function Login() {
     event.preventDefault()
     setState({ status: 'sending', message: '' })
     try {
-      await signIn(form.email, form.password)
-      navigate(next, { replace: true })
+      const login = await signIn(form.email, form.password)
+      // Where to land depends on who just signed in: staff belong in the console, customers in their
+      // account. Without this an admin signing in from this page landed on /account, which is the
+      // customer area and answers an admin token with 403s.
+      const landing = requested ?? (login?.role === 'ROLE_ADMIN' ? '/admin' : '/account')
+      navigate(landing, { replace: true })
     } catch (error) {
       setState({
         status: 'error',

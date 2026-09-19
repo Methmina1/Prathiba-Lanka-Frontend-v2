@@ -17,7 +17,7 @@ const EMPTY_BOOKING = { packageId: '', numTravelers: 2, preferredTravelDate: '',
 const EMPTY_REVIEW = { packageId: '', rating: 5, comment: '' }
 
 export default function Account() {
-  const { session, token, email, signOut } = useAuth()
+  const { session, token, email, isAdmin, ready, signOut } = useAuth()
   const navigate = useNavigate()
 
   const [bookings, setBookings] = useState([])
@@ -30,10 +30,17 @@ export default function Account() {
   const [review, setReview] = useState(EMPTY_REVIEW)
   const [reviewState, setReviewState] = useState({ status: 'idle', message: '' })
 
-  // the account page is customer-only
+  // The account page is customer-only: signed-out visitors sign in, staff are sent to their console
+  // (an admin token has no bookings to list, and the customer endpoints answer it with 403).
+  //
+  // `ready` matters: the session is read from localStorage in an effect, and a child's effects run
+  // before the provider's, so without it this guard fired on the first render - bouncing a signed-in
+  // customer to the login form every time they opened or reloaded this page.
   useEffect(() => {
+    if (!ready) return
     if (!session) navigate('/login?next=/account', { replace: true })
-  }, [session, navigate])
+    else if (isAdmin) navigate('/admin', { replace: true })
+  }, [ready, session, isAdmin, navigate])
 
   useEffect(() => {
     if (!token) return undefined
