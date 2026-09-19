@@ -19,7 +19,7 @@ page-plan                <- egle-sidaraviciute-LEXwGzfwhNk-unsplash.jpg
 philosophy               <- anupa-uthsara-c66cO4rwTBI-unsplash.jpg
 about-story              <- aerial-shot-rice-hills-surrounded-by-greens-trees.jpg
 cta-band                 <- pexels-ravin-nalin-363892964-35970549.jpg
-contact-map              <- filiz-elaerts-XtAI_ChO4sk-unsplash.jpg
+contact-map              <- sk-wNEsfSgJ0wI-unsplash.jpg
 not-found                <- shyaman-prasad-nDrkDvdC9kU-unsplash.jpg
 tile-1                   <- akhila-kanampella-VgYMZgWBQNQ-unsplash.jpg
 tile-2                   <- chaminda-keragala-Hp2LhkqyHww-unsplash.jpg
@@ -65,5 +65,6 @@ and can be uploaded from the admin console whenever you want them:
   tomas-malik-UL23OjMTHXE-unsplash.jpg          (hero-4 in the first pass)
   udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg   (hero-4 in the second pass)
   anupa-uthsara-5Np6ZsLDVIM-unsplash.jpg        (gallery, then hero-2)
+  filiz-elaerts-XtAI_ChO4sk-unsplash.jpg        (the contact page panel)
 
 Everything else in ../Sri lanka has not been placed yet. In total 50 of the 114 originals are in use.
