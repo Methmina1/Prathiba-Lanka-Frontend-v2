@@ -227,7 +227,8 @@ scenes in `components/ui/Scenery.jsx` when there is no photograph at all.
 **The originals.** `public/images/Sri lanka` holds the full-resolution photographs the site was built
 from (1-13 MB each - the media endpoint would refuse anything over 10 MB anyway). They are not served:
 `scripts/optimize-images.ps1` turns them into web-sized copies, which is where everything in
-`public/images/sl` came from.
+`public/images/sl` came from. `public/images/sl/SOURCES.txt` lists which original each slot was
+exported from, so a photo can be traced back, re-exported at another size, or credited.
 
 ```bash
 powershell -ExecutionPolicy Bypass -File scripts/optimize-images.ps1 `

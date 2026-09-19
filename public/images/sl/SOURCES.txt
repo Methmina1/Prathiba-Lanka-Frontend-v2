@@ -1,0 +1,64 @@
+﻿Where each photograph in this folder came from.
+
+The files here are web-sized copies (scripts/optimize-images.ps1) of the originals in
+../Sri lanka. This list exists so a slot can be traced back, re-exported at a different size, or
+credited. Slot names describe the place they fill, not the photograph, so replacing one is a
+one-file job - and everything under seed-* can also be swapped from the admin console instead.
+
+hero-1                   <- anupa-uthsara-czCVCfj_O4A-unsplash.jpg
+hero-2                   <- anupa-uthsara-5Np6ZsLDVIM-unsplash.jpg
+hero-3                   <- zoshua-colah-Wj11_YgLuTc-unsplash.jpg
+hero-4                   <- tommaso-delton-_sFOJHDmO6A-unsplash.jpg
+page-journeys            <- large-vecteezy_sri-lankan-leopard_7975795_large.jpg
+page-journal             <- norman-meyer-5rNFa-GRsuY-unsplash.jpg
+page-gallery             <- hendrik-cornelissen-jpTT_SAU034-unsplash.jpg
+page-reviews             <- nadun-ranasinghe-Crx7Ktg5LgY-unsplash.jpg
+page-about               <- lasath-jayawardana-_55fuWx9-iM-unsplash.jpg
+page-contact             <- dulana-kodithuwakku-YxpO2BAI7lQ-unsplash.jpg
+page-plan                <- egle-sidaraviciute-LEXwGzfwhNk-unsplash.jpg
+philosophy               <- anupa-uthsara-c66cO4rwTBI-unsplash.jpg
+about-story              <- aerial-shot-rice-hills-surrounded-by-greens-trees.jpg
+cta-band                 <- pexels-ravin-nalin-363892964-35970549.jpg
+contact-map              <- filiz-elaerts-XtAI_ChO4sk-unsplash.jpg
+not-found                <- shyaman-prasad-nDrkDvdC9kU-unsplash.jpg
+tile-1                   <- akhila-kanampella-VgYMZgWBQNQ-unsplash.jpg
+tile-2                   <- chaminda-keragala-Hp2LhkqyHww-unsplash.jpg
+tile-3                   <- dilani-wickramanayake-16FXoeP7unQ-unsplash.jpg
+tile-4                   <- jalitha-hewage-Dw2QYtzSNn0-unsplash.jpg
+tile-5                   <- jayasahan-hansana-qxFfPt_2OjI-unsplash.jpg
+tile-6                   <- my-journal-kdVahzrXhUg-unsplash.jpg
+journal-1                <- udara-karunarathna-PPGM2ZpCrzc-unsplash.jpg
+journal-2                <- yves-alarie-yaGheETUSK4-unsplash.jpg
+journal-3                <- y-yu--cjtJMf5X_w-unsplash.jpg
+seed-package-heritage    <- christoph-theisinger-9PPYa3LK6II-unsplash.jpg
+seed-package-wildlife    <- large-vecteezy_sri-lankan-leopard_7975795_large.jpg
+seed-package-hillcountry <- hans-peter-traunig-oZ0bM6cNeD0-unsplash.jpg
+seed-package-coast       <- ben-o-bro-5xNhXCAhSbk-unsplash.jpg
+seed-journal-season      <- bhanuka-gamage-tilu7pgvRN8-unsplash.jpg
+seed-journal-sigiriya    <- erik-esly-ZWdrM9IBBIE-unsplash.jpg
+seed-journal-tea         <- izuru-kannagara-UeSfcl4xreE-unsplash.jpg
+seed-gallery-01          <- adil-murshed-uZLvoR-gkBg-unsplash.jpg
+seed-gallery-02          <- agnieszka-stankiewicz-FXdq4CCcRuw-unsplash.jpg
+seed-gallery-03          <- anastasiia-malai-zihIH7Blzbs-unsplash.jpg
+seed-gallery-04          <- anton-lecock-TPtaNsBOW9Q-unsplash.jpg
+seed-gallery-05          <- sarmat-batagov-DghoT9FCG0w-unsplash.jpg
+seed-gallery-06          <- ramesh-ranasinghe-KzUBox4l1ZM-unsplash.jpg
+seed-gallery-07          <- arif-rasheed-mm-D2F_XbKg-unsplash.jpg
+seed-gallery-08          <- birendra-padmaperuma-jB7TbGrC1xM-unsplash.jpg
+seed-gallery-09          <- branislav-rodman-kl3dPajQc2c-unsplash.jpg
+seed-gallery-10          <- chathura-anuradha-subasinghe-OIjCavGXql0-unsplash.jpg
+seed-gallery-11          <- daniele-franchi-zOZUrhMw2ZQ-unsplash.jpg
+seed-gallery-12          <- gabor-kozmon-McNcJVrqByM-unsplash.jpg
+seed-gallery-13          <- hendrik-cornelissen-lTC-4cz8whA-unsplash.jpg
+seed-gallery-14          <- isuru-ranasinha-X6WqnHHCCQA-unsplash.jpg
+seed-gallery-15          <- javier-saint-jean-r4pIcB2reug-unsplash.jpg
+seed-gallery-16          <- kultar-ruprai-g44CSKqUPuA-unsplash.jpg
+seed-gallery-17          <- lucas-klein-I73t54WLa0Q-unsplash.jpg
+seed-gallery-18          <- matt-dany-AN0ESciHPSQ-unsplash.jpg
+
+Photographs still unused from the original set (available to upload in the console):
+  pexels-dtravel-vlog-1025192350-27913876.jpg   (was hero-1)
+  ranmali-kirinde-K42AU4q-Ew0-unsplash.jpg      (was hero-2)
+  juho-s-uDk9n1yKxTw-unsplash.jpg               (was hero-3)
+  tomas-malik-UL23OjMTHXE-unsplash.jpg          (was hero-4)
+  ...and the rest of ../Sri lanka.
