@@ -1,0 +1,36 @@
+# Line endings.
+#
+# Git normalises text files to LF in the repository; these rules decide what a checkout gets back.
+# The files a Linux shell, nginx or Docker reads have to be LF even in a Windows working copy: a CRLF
+# in a Dockerfile turns a "\" line continuation into a literal character and breaks the build, and a
+# CRLF in an .envsh leaves a carriage return on the end of every value the entrypoint sets.
+#
+# Anything not listed is normalised by `* text=auto`, which leaves binaries such as the photographs
+# alone.
+
+* text=auto
+
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.ps1 text eol=lf
+*.mjs text eol=lf
+
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+*.sh text eol=lf
+*.envsh text eol=lf
+*.conf text eol=lf
+*.template text eol=lf
+*.yml text eol=lf
+
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.avif binary
+*.gif binary

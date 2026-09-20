@@ -1,0 +1,25 @@
+#!/bin/sh
+# Fail with a sentence instead of an nginx stack trace.
+#
+# The image's entrypoint (docker-entrypoint.sh) *sources* every executable *.envsh in
+# /docker-entrypoint.d before it renders the templates, so the value changed below is still in the
+# environment when 20-envsubst-on-templates.sh substitutes ${BACKEND_URL}. Two things to know before
+# editing this file: a script without the executable bit is ignored in silence (the Dockerfile
+# chmods it), and `set -e`/`set -u` here would apply to the entrypoint's own shell for the rest of
+# the start-up, which is why this file sets neither.
+
+if [ -z "${BACKEND_URL:-}" ]; then
+  echo "ERROR: BACKEND_URL is not set." >&2
+  echo "       It is where nginx forwards /api and /media. Examples:" >&2
+  echo "         Railway (same project): http://backend.railway.internal:8080" >&2
+  echo "         Railway (public URL):   https://your-api.up.railway.app" >&2
+  echo "         Local container:        http://host.docker.internal:8080" >&2
+  exit 1
+fi
+
+# proxy_pass with a trailing slash would produce requests to //api/..., which some servers answer
+# and some do not. Strip it here rather than leaving it to whoever sets the variable.
+BACKEND_URL="${BACKEND_URL%/}"
+export BACKEND_URL
+
+echo "nginx: /api and /media are proxied to ${BACKEND_URL}"

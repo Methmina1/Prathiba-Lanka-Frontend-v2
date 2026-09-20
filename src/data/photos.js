@@ -8,7 +8,8 @@
  *
  * Files are named after the slot rather than the photo: to swap one, replace the file, or point the
  * slot at a different file here. The originals the site was built from are in
- * public/images/Sri lanka, and scripts/optimize-images.ps1 produces web-sized copies of them.
+ * images-originals/Sri lanka - deliberately outside public/, which Vite copies verbatim into the
+ * build - and scripts/optimize-images.ps1 produces the web-sized copies that ship.
  */
 export const PHOTOS = {
   /**

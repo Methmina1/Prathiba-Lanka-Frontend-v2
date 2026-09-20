@@ -354,6 +354,56 @@ a scroll-progress bar, `<Reveal>` (IntersectionObserver fade/lift with stagger),
 active hero slide, hover zooms on card imagery, a gold sweep on CTA buttons, and animated nav
 underlines. Everything collapses under `prefers-reduced-motion: reduce`.
 
+## Deployment
+
+The front end ships as an nginx image that serves the built bundle **and** proxies `/api` and
+`/media` to the backend:
+
+```bash
+docker build -t prathibalanka-web .
+docker run -p 8080:80 -e BACKEND_URL=http://host.docker.internal:8080 prathibalanka-web
+```
+
+`VITE_API_BASE_URL` is baked in at build time and is `/` in the image, which makes every request
+same-origin: the browser only ever talks to this origin, so there is no CORS to configure and no
+mixed-content risk, and the backend's address can change without rebuilding the bundle.
+
+| Setting | When | Purpose |
+|---|---|---|
+| `VITE_API_BASE_URL` | build (`--build-arg`) | API base. `/` — the image default — means same-origin through the proxy |
+| `BACKEND_URL` | runtime | Where nginx forwards `/api` and `/media`. Defaults to `http://backend.railway.internal:8080` |
+| `PORT` | runtime | Port nginx listens on. Railway injects it; 80 otherwise |
+
+### Railway
+
+Two services from two repositories — this one and the API:
+
+1. *New → GitHub repo → this repository*. Railway builds the `Dockerfile`; `railway.json` sets the
+   builder, the `/healthz` health check and the restart policy.
+2. Add a public domain (*Settings → Networking → Generate Domain*). That is the address the agency
+   uses; the API needs no public domain of its own.
+3. Set `BACKEND_URL` to the API service, one of:
+   - `http://<api-service>.railway.internal:8080` — private networking inside the project, no egress;
+   - `https://<api-service>.up.railway.app` — if the API has (or gets) a public domain.
+
+   The default assumes that service is called `backend`, and the port has to be the one the API
+   listens on. nginx resolves this at start-up, so if the API's address changes, restart this
+   service.
+
+`nginx/default.conf.template` is rendered on every container start (`${PORT}`, `${BACKEND_URL}`), so
+the image never needs rebuilding when the backend moves. `nginx/05-check-backend-url.envsh` is sourced
+before that rendering: it fails with an explanation rather than an nginx stack trace when
+`BACKEND_URL` is missing or empty, strips a trailing slash from it, and prints the address it will
+use. It is an `.envsh` because the nginx entrypoint *sources* those (so its changes reach `envsubst`)
+and ignores a script that is not executable — which is why the Dockerfile chmods it.
+
+The rest of the config is the set of decisions that make the built site behave: gzip; security
+headers; `client_max_body_size 70m`, which has to stay at or above the backend's multipart limit or
+an upload is rejected with a 413; a one-year immutable cache for Vite's hashed `/assets/*`;
+`no-store` for `index.html`, so a deploy cannot leave a browser requesting the previous build's
+assets; a 30-day cache for `/media/*`, whose filenames are per-upload UUIDs; and the SPA fallback,
+so `/journeys` and `/admin/...` reach the app instead of 404ing.
+
 ## Continuous integration
 
 `.github/workflows/ci.yml`:
@@ -361,6 +411,8 @@ underlines. Everything collapses under `prefers-reduced-motion: reduce`.
 | Job | When | What |
 |---|---|---|
 | `Build & render check` | PRs into `main`, pushes to `main`/`user-updates` | `npm ci`, `npm run build`, `npm run check:render`, uploads `dist` |
+| `Browser tests (Playwright)` | same | installs Chromium and runs `npm run test:e2e` (30 tests, API mocked); uploads the report on failure |
+| `Docker image serves the site` | same | builds the nginx image, starts it, and checks `/healthz`, the SPA fallback for a deep link, a hashed asset, and that an empty `BACKEND_URL` stops it with an explanation |
 | `Deploy to GitHub Pages` | push to `main`, opt-in | builds with the Pages base path and publishes |
 
 The deploy job only runs when the repository variable `DEPLOY_PAGES` is `true` and Pages is enabled
@@ -416,6 +468,13 @@ tests/e2e/
   mobile.spec.js           phone header, drawer, no sideways scroll
 tests/live/
   roles.spec.js            the real UI against a real backend, per role (npm run test:roles)
+
+# repository root
+Dockerfile                 production image: vite build, then nginx serving dist/
+nginx/                     the server config, rendered at start-up (see Deployment)
+railway.json               builder, health check and restart policy for the Railway service
+public/                    served as-is: logo, photographs, province map images, robots.txt
+images-originals/          full-resolution source photographs - never published (see Photographs)
 ```
 
 ## Photographs
@@ -436,15 +495,19 @@ Nothing is decorative filler: every managed slot falls back to a photograph that
 (`components/ui/CoverImage.jsx`, `src/data/photos.js`) when no upload has been chosen, and to the drawn
 scenes in `components/ui/Scenery.jsx` when there is no photograph at all.
 
-**The originals.** `public/images/Sri lanka` holds the full-resolution photographs the site was built
-from (1-13 MB each - the media endpoint would refuse anything over 10 MB anyway). They are not served:
+**The originals.** `images-originals/Sri lanka` holds the full-resolution photographs the site was
+built from (1-13 MB each - the media endpoint would refuse anything over 10 MB anyway). It is at the
+repository root, **not** under `public/`, and that distinction is the whole point: Vite copies
+everything in `public/` into the build verbatim, so an originals folder left there would be published
+at a guessable URL, would add 330 MB to every deploy and to the nginx image, and would ship camera
+EXIF the web-sized copies deliberately drop. Nothing is served from it:
 `scripts/optimize-images.ps1` turns them into web-sized copies, which is where everything in
 `public/images/sl` came from. `public/images/sl/SOURCES.txt` lists which original each slot was
 exported from, so a photo can be traced back, re-exported at another size, or credited.
 
 ```bash
 powershell -ExecutionPolicy Bypass -File scripts/optimize-images.ps1 `
-    -Source "public/images/Sri lanka" -Destination ".image-work"
+    -Source "images-originals/Sri lanka" -Destination ".image-work"
 ```
 
 That writes `<name>-lg.jpg` (1920px, quality 82 - headers and covers) and `<name>-sm.jpg` (900px,

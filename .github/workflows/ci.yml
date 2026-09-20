@@ -36,6 +36,18 @@ jobs:
       - name: Build
         run: npm run build
 
+      # Vite copies public/ into the build verbatim, so anything parked there ships. The
+      # full-resolution originals live in images-originals/ for exactly this reason: if one is ever
+      # moved back, the build gets 330 MB heavier and the photographs become public.
+      - name: The build carries the site and not the photo archive
+        run: |
+          test ! -e "dist/images/Sri lanka" \
+            || { echo "::error::the full-resolution originals are being published"; exit 1; }
+          SIZE=$(du -sm dist | cut -f1)
+          echo "dist is ${SIZE} MB"
+          test "$SIZE" -lt 100 \
+            || { echo "::error::dist is ${SIZE} MB - something that does not belong is in public/"; exit 1; }
+
       # Renders all 24 routes in Node (public + admin, plus both admin access rules): fails on
       # undefined components, broken props, or if the planning/tracking panels leak back onto the
       # home page.
@@ -88,6 +100,59 @@ jobs:
             test-results/
           retention-days: 7
           if-no-files-found: ignore
+
+  # The artifact Railway actually runs. nginx renders its configuration at start-up, so this proves
+  # the template, the /healthz endpoint the platform polls, the SPA fallback that makes a deep link
+  # work, and that a missing BACKEND_URL stops the container with a sentence rather than a stack
+  # trace.
+  docker-image:
+    name: Docker image serves the site
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build the image
+        run: docker build -t prathibalanka-web:ci .
+
+      - name: Start it
+        run: docker run -d --name web -p 8080:80 -e BACKEND_URL=http://127.0.0.1:9 prathibalanka-web:ci
+
+      - name: Health endpoint
+        run: |
+          for i in $(seq 1 20); do
+            if curl -sf http://localhost:8080/healthz; then
+              echo "answering after ${i} checks"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::/healthz never answered"
+          docker logs web
+          exit 1
+
+      - name: The app is served, deep links included
+        run: |
+          curl -sf http://localhost:8080/ | grep -q 'id="root"'
+          curl -sf http://localhost:8080/journeys | grep -q 'id="root"'
+          ASSET=$(curl -sf http://localhost:8080/ | grep -o '/assets/[^"]*' | head -1)
+          test -n "$ASSET" || { echo "::error::no hashed asset in index.html"; exit 1; }
+          curl -sfo /dev/null "http://localhost:8080${ASSET}"
+          echo "index.html, the SPA fallback and ${ASSET} all answered."
+
+      - name: A missing BACKEND_URL fails with an explanation
+        run: |
+          if timeout 60 docker run --rm -e BACKEND_URL= prathibalanka-web:ci > /tmp/no-backend.log 2>&1; then
+            echo "::error::the image started with no BACKEND_URL"; exit 1
+          fi
+          grep -q 'BACKEND_URL is not set' /tmp/no-backend.log || { cat /tmp/no-backend.log; exit 1; }
+          echo "Refused to start, and said why."
+
+      - name: Container log
+        if: always()
+        run: docker logs web || true
 
   # Opt-in deployment. Enable once the repository has Pages turned on and the variable
   # DEPLOY_PAGES=true is set (Settings -> Secrets and variables -> Actions -> Variables).

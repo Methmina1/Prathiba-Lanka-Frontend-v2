@@ -1,0 +1,28 @@
+# Build context for the front end image. Source directories stay (Vite reads src/ and public/);
+# everything listed here is either reinstalled inside the image or is local test output.
+
+node_modules/
+dist/
+
+# The full-resolution photographs the site was built from: 330 MB that only
+# scripts/optimize-images.ps1 reads. public/images/sl holds the web-sized copies that do ship.
+images-originals/
+.image-work/
+
+# Local builds of the SSR scripts and the test run they produce.
+.render-check/
+.seed/
+.import/
+test-results/
+playwright-report/
+blob-report/
+
+.git/
+.github/
+.idea/
+*.iml
+
+README.md
+
+.env
+.env.*
