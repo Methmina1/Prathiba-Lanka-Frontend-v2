@@ -32,20 +32,37 @@ const ROUTES = {
     '/images/sl/hero-2.webp',
     '/images/sl/hero-3.jpg',
     '/images/sl/hero-4.jpg',
-    '/images/sl/philosophy.jpg',
+    // the "fewer places" frame, which now uses a scrapbook photograph
+    '/images/sl/seed-gallery-17.jpg',
     '/images/sl/cta-band.jpg',
     '/images/sl/tile-1.jpg',
   ],
   '/journeys': ['Signature journeys', 'Search by destination', '/images/sl/page-journeys.jpg'],
   // the sample data ships with the app, so detail routes render without a backend
   '/journeys/demo-1': ['Classical Heritage', 'About this journey', 'Request this journey'],
-  '/journal': ['Stories from the island', 'Read the story', '/images/sl/journal-1.jpg'],
+  // the province map moved here from the home page: the panel opens on the province in the middle
+  '/journal': [
+    'Stories from the island',
+    'Read the story',
+    '/images/sl/journal-1.jpg',
+    'Nine provinces, one island',
+    'Central Province',
+  ],
   '/journal/demo-1': ['When to visit Sri Lanka', 'All stories', '/images/sl/journal-1.jpg'],
-  '/gallery': ['Where the journeys go', 'Nothing has been uploaded yet', '/images/sl/tile-1.jpg'],
+  // the scrapbook board numbers every print ("Nº" and the number are separate text nodes in the
+  // server render, so only the marker can be matched)
+  '/gallery': ['Where the journeys go', 'Nothing has been uploaded yet', '/images/sl/tile-1.jpg', 'Nº'],
   // No sample reviews ship with the app, so the page renders its empty state without a backend.
-  '/reviews': ['What people said afterwards', 'No reviews yet'],
+  '/reviews': ['What people said afterwards', 'No reviews yet', 'Sign in to write a review'],
   '/about': ['Arranged by people who live here', 'How we got here', '/images/sl/about-story.jpg'],
-  '/contact': ['Talk to us', 'Track a booking', '/images/sl/contact-map.jpg'],
+  // the social accounts, straight from src/data/social.js
+  '/contact': [
+    'Talk to us',
+    'Track a booking',
+    '/images/sl/contact-map.jpg',
+    'Come along between journeys',
+    '@prathibha_lanka_voyeages',
+  ],
   '/plan': ['Plan your journey', 'Request a journey', 'Track a booking', 'Sign in', 'Create an account'],
   '/login': ['Sign in', 'Create an account'],
   '/register': ['Create an account', 'At least 8 characters'],

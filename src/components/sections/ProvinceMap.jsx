@@ -6,7 +6,7 @@ import { MAP_SOURCE, MAP_VIEW_BOX, PROVINCES } from '../../data/provinces'
 import { PROVINCE_COPY } from '../../data/provinceCopy'
 import { journeysInProvince } from '../../data/provincePlaces'
 import { useApi } from '../../hooks/useApi'
-import { formatDays, formatPrice } from '../../utils/format'
+import { formatDays } from '../../utils/format'
 import { ArrowRight, Lock, MapPin } from '../ui/Icons'
 import Reveal from '../ui/Reveal'
 
@@ -54,9 +54,9 @@ export default function ProvinceMap() {
           <span className="eyebrow">The island</span>
           <h2>Nine provinces, one island</h2>
           <p className="lede">
-            Every journey we run crosses at least three of them. Point at the map to see what each
-            province is known for, and which journeys go through it - click one to hold it there
-            while you read.
+            Every story above happened somewhere on this map, and every journey we run crosses at
+            least three of the provinces. Point at one to see what it is known for and which journeys
+            go through it - click it to hold it there while you read.
           </p>
         </Reveal>
 
@@ -142,7 +142,6 @@ export default function ProvinceMap() {
                 {journeys.length > 0 ? (
                   <ul className="island__journey-list">
                     {journeys.slice(0, LISTED).map(({ pkg, days }) => {
-                      const price = formatPrice(pkg.price)
                       const length = formatDays(pkg.durationDays)
                       return (
                         <li key={pkg.packageId}>
@@ -151,7 +150,7 @@ export default function ProvinceMap() {
                             <span className="island__journey-meta">
                               {[
                                 days > 0 && length ? `${days} of ${length} here` : length,
-                                price ? `from ${price}` : 'price on request',
+                                pkg.destination,
                               ]
                                 .filter(Boolean)
                                 .join(' · ')}

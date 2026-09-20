@@ -62,3 +62,23 @@ test('the console stacks on a phone and the sidebar becomes a drawer', async ({ 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   expect(overflow, 'the console scrolls horizontally').toBeLessThanOrEqual(1)
 })
+
+test('the pages with new layout beyond a grid still fit the phone', async ({ page }) => {
+  // The scrapbook prints and the social cards are rotated, which is exactly the kind of thing that
+  // pokes out of the viewport, and the journal now carries the province map below its stories.
+  for (const path of ['/gallery', '/contact', '/journal']) {
+    await page.goto(path)
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    )
+    expect(overflow, `${path} scrolls horizontally`).toBeLessThanOrEqual(1)
+  }
+
+  // And the prints themselves are still inside the page on one column.
+  await page.goto('/gallery')
+  const firstPrint = page.locator('.scrapbook__card').first()
+  await expect(firstPrint).toBeVisible()
+  const print = await firstPrint.boundingBox()
+  expect(print.x).toBeGreaterThanOrEqual(0)
+  expect(print.x + print.width).toBeLessThanOrEqual(390)
+})

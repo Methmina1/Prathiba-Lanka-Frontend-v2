@@ -5,6 +5,7 @@ import { useApi } from '../hooks/useApi'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
 import CoverImage from '../components/ui/CoverImage'
+import ProvinceMap from '../components/sections/ProvinceMap'
 import PHOTOS from '../data/photos'
 import { ArrowRight } from '../components/ui/Icons'
 import { formatDate } from '../utils/format'
@@ -91,6 +92,10 @@ export default function JournalPage() {
           )}
         </div>
       </section>
+
+      {/* The province map lives here rather than on the home page: it is something to read, and the
+          stories above are the reason to look at it. Everything else on this page is unchanged. */}
+      <ProvinceMap />
     </main>
   )
 }

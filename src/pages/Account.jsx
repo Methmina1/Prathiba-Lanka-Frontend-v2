@@ -60,6 +60,13 @@ export default function Account() {
     }
   }, [token])
 
+  // Links from the reviews pages arrive as /account#review. Without this the visitor lands at the top
+  // of the page and has to find the form themselves.
+  useEffect(() => {
+    if (!ready || window.location.hash !== '#review') return
+    document.getElementById('review')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [ready])
+
   async function submitBooking(event) {
     event.preventDefault()
     setBookingState({ status: 'sending', message: '' })
@@ -258,7 +265,7 @@ export default function Account() {
             </Reveal>
 
             <Reveal delay={140}>
-              <form className="card auth-card" onSubmit={submitReview}>
+              <form className="card auth-card" id="review" onSubmit={submitReview}>
                 <h3>Leave a review</h3>
                 <p className="plan__hint">One review per journey - it appears on the reviews page straight away.</p>
 

@@ -129,7 +129,6 @@ test.describe('a visitor who has not signed in', () => {
     await page.goto('/')
     await expect(page.locator('.hero h1')).toBeVisible()
     await expect(page.locator('#journeys .package-card')).toHaveCount(6)
-    await expect(page.locator('#island .province-map__shape')).toHaveCount(9)
     await expect(page.locator('.navbar__actions a[href="/plan"]')).toHaveCount(1)
     await expect(page.locator('.navbar__account')).toHaveCount(0)
 
@@ -157,18 +156,25 @@ test.describe('a visitor who has not signed in', () => {
     await page.goto(await firstCard.getAttribute('href'))
 
     await expect(page.locator('.detail__story p').first()).toBeVisible()
-    await expect(page.locator('.itinerary li').first()).toBeVisible()
+    const days = page.locator('.days__item')
+    await expect(days.first()).toBeVisible()
+    // The agency's itineraries are written as "stop → stop → stop", so the first day opens into the
+    // stops it is made of rather than one paragraph.
+    await expect(days.first().locator('.days__steps li').first()).toBeVisible()
+    expect(await days.first().locator('.days__steps li').count()).toBeGreaterThan(1)
     expect(await page.locator('.quote-card a[href="/plan"]').count()).toBeGreaterThan(0)
 
     await page.goto('/journal')
     // the featured post is the link itself, not a card with a link inside it
     const featured = page.locator('a.feature-post')
     await expect(featured).toBeVisible()
+    // the province map lives on this page, below the stories
+    await expect(page.locator('#island .province-map__shape')).toHaveCount(9)
     await page.goto(await featured.getAttribute('href'))
     await expect(page.locator('h1')).toBeVisible()
 
     await page.goto('/gallery')
-    await expect(page.locator('.mosaic__tile').first()).toBeVisible()
+    await expect(page.locator('.scrapbook__item').first()).toBeVisible()
 
     await page.goto('/reviews')
     await expect(page.locator('h1')).toContainText('What people said')
@@ -487,7 +493,9 @@ test.describe('a member of staff', () => {
 
     const visitor = await anotherVisitor(page)
     await visitor.goto('/gallery')
-    await expect(visitor.locator('.mosaic__tile').first()).toBeVisible()
+    // the gallery is the scrapbook board now: the item just added is one of the prints
+    await expect(visitor.locator('.scrapbook__item').first()).toBeVisible()
+    await expect(visitor.locator('.scrapbook__hand').filter({ hasText: `E2E ${RUN} gallery` })).toBeVisible()
     await visitor.close()
 
     // put the gallery item and the file back

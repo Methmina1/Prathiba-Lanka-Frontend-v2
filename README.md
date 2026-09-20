@@ -7,18 +7,18 @@ framework, so the palette and layout stay easy to change.
 
 | Route | Contents |
 |---|---|
-| `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), the province map, sustainability, gallery, journal, reviews, FAQ, CTA band |
-| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog |
-| `/journeys/:id` | One journey: overview, the full description, day-by-day itinerary, gallery strip, reviews for that package, sticky quote card |
-| `/journal` | Featured story plus the rest of the published posts |
+| `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), sustainability, gallery, journal, reviews, FAQ, CTA band |
+| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog. **No prices** — see below |
+| `/journeys/:id` | One journey: overview, the full description, the day-by-day itinerary as a dropdown, gallery strip, reviews for that package (with a way to add one), sticky quote card |
+| `/journal` | Featured story, the rest of the published posts, then **the province map** and its province details (moved here from the home page) |
 | `/journal/:id` | Full story, then more from the journal |
-| `/gallery` | Large mosaic of live gallery images, or the illustrated placeholders while it is empty |
-| `/reviews` | Average score, rating distribution and every review |
+| `/gallery` | The scrapbook board: every live gallery image or clip as a print with tape, a handwritten caption and its number |
+| `/reviews` | Average score, rating distribution, every review, and the way to the review form for a signed-in customer |
 | `/about` | Our story, the four things we hold to, milestones timeline |
-| `/contact` | Phone/email/office cards, the enquiry form, a link to the PIN tracker |
+| `/contact` | Contact cards, the enquiry form, a link to the PIN tracker, and a band of the agency's social accounts |
 | `/plan` | **Plan your journey**: enquiry form (`POST /api/contact`), PIN tracker (`GET /api/bookings/track`), how-it-works steps |
 | `/login`, `/register` | Customer sign in and sign up (`POST /api/auth/login`, `POST /api/auth/register`); the JWT is kept in localStorage |
-| `/account` | Signed-in customers: their bookings (`GET /api/customer/bookings`), a new booking request (`POST /api/bookings/request`) and a review form (`POST /api/reviews`) |
+| `/account` | Signed-in customers: their bookings (`GET /api/customer/bookings`), a new booking request (`POST /api/bookings/request`) and the review form (`POST /api/reviews`), which answers to `/account#review` |
 | `/admin` | **Staff console.** Overview: pending/confirmed counts, live packages, new enquiries, recent bookings |
 | `/admin/bookings` | Every booking with status filter, confirm (price + date) and reject |
 | `/admin/queries` | Enquiries with a "new only" filter and a reply box that emails the sender |
@@ -112,7 +112,7 @@ Five suites cover the project between them, from the outside in:
 | `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 161 checks |
 | `mvn test` (backend repo) | nothing | the Spring context, the mail configuration |
 | `npm run check:render` | nothing | all 24 routes in Node: undefined components, bad hooks, broken props |
-| `npm run test:e2e` | nothing (API mocked) | 30 browser tests: layout, clicks, navigation |
+| `npm run test:e2e` | nothing (API mocked) | 35 browser tests: layout, clicks, navigation |
 | `npm run test:roles` | a running API + `BOOTSTRAP_ADMIN_PASSWORD` | 21 end-to-end journeys through the real UI and the real database, one per role |
 
 `check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
@@ -146,13 +146,13 @@ npm run test:roles -- -g "confirms the booking"
 
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Thirty tests across three files:
+so it needs no backend. Thirty-four tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the province map (nine shapes that tile the island at Sri Lanka's proportions, choosing one, and holding one so the pointer can leave it), the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the province map on the journal page** (nine shapes that tile the island at Sri Lanka's proportions, choosing one, and holding one so the pointer can leave it), **the scrapbook gallery** (prints tilted, handwritten captions, straightening under the pointer), **the contact page's social band** (the two accounts, their labels and the tilt on the cards), **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
-| `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer |
+| `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer, and no sideways scroll on the pages whose layout is not a plain grid (the scrapbook, the contact social band, the journal with the map) |
 
 The dashboard test exists because the console shipped with a layout bug that a Node render cannot see:
 the stat cards' label, figure and breakdown are spans, and with no layout on the card they sat on one
@@ -201,9 +201,11 @@ is the agency's own, and it is loaded from the rate sheet (below).
 
 ## The province map
 
-Under the journeys on the home page, the nine provinces are drawn in their real positions, so the
+On the journal page, after the stories, the nine provinces are drawn in their real positions, so the
 outline they make is Sri Lanka. Pointing at a province (or picking it from the list) names it, gives
-its capital, its districts and a line about what is there.
+its capital, its districts and a line about what is there, and lists the journeys whose itineraries
+go through it. It used to sit under the journeys on the home page; it moved because it is something
+to read rather than a shop window, and the journal is where somebody is already reading.
 
 The geometry is generated, never hand-written - a map is a factual claim, and a province drawn in
 the wrong place is worse than no map at all:
@@ -315,6 +317,15 @@ Note on the numbers: the two price columns in the workbook disagree (the overvie
 the 13 tours, each package sheet lists 650-6500). The importer uses the package sheet, and prints the
 overview figure it did not use, so the difference is visible on every run rather than silent.
 
+**No prices are published.** The price is still stored on every package, imported from the workbook
+and edited in the console, and the staff console still shows it (Admin → Packages, and the figure an
+admin agrees when confirming a booking). What the site does not do any more is *print* one: the
+cards, the journey page, the full-description dialog and the province map's journey list all leave it
+out, because a "from" figure on a card is a number nobody is actually offered - every journey is
+costed against the traveller's own dates, party and hotels. Where a price used to be, the journey
+page's quote card now says how pricing works. `tests/e2e/public.spec.js` fails if a `$` reappears on
+a card or on a journey page.
+
 **Covers.** Each of the thirteen journeys has a photograph, chosen from the picture library for the
 part of the island that journey is about (the leopard for the Yala-heavy tours, the tea estates for
 the hill-country ones, the fort and the dancer for the heritage ones). They are ordinary media
@@ -329,6 +340,14 @@ needs a real session - so `/account` sends signed-out visitors to `/login?next=/
 travelled with the agency and said something about it; writing those, even behind a "sample" notice,
 is not ours to do. The browser tests still serve one from their mocked API (`tests/e2e/fixtures.js`,
 which never ships) so the review cards themselves stay covered.
+
+**How a customer writes one.** The form is on `/account` (`#review`), and `ReviewCallToAction` is the
+single door to it: signed-in customers go straight there, visitors are sent to sign in first, staff
+are not offered it at all (the endpoint wants `ROLE_CUSTOMER`). Both the home strip and the reviews
+page used to send people to `/plan`, which holds the enquiry form and the PIN tracker and no review
+form whatsoever - so "Travelled with us? Tell us about it" led somewhere the review could not be
+written. The home strip points a visitor at `/reviews` rather than at a sign-in form, because the home
+page deliberately offers no sign-in link.
 
 ## Design system
 
@@ -353,6 +372,22 @@ each other. Body text is 16.4:1 and white-on-primary 6.4:1.
 a scroll-progress bar, `<Reveal>` (IntersectionObserver fade/lift with stagger), a slow drift on the
 active hero slide, hover zooms on card imagery, a gold sweep on CTA buttons, and animated nav
 underlines. Everything collapses under `prefers-reduced-motion: reduce`.
+
+**The scrapbook.** The gallery page (`/gallery`) is a board rather than a grid: each photograph is a
+print in a paper border with a strip of tape over one corner, a tilt from a `--tilt` custom property
+set per position with `nth-child`, a caption in the handwriting face (`--font-hand`, Caveat, loaded
+with the other two families in `index.html`) and a hand-pressed `Nº` under it. Hovering straightens
+the print and lifts it, and the number is the photograph's place in the gallery, not decoration. The
+tilt lives on the inner `<figure>` and never on the element `<Reveal>` animates, because both would
+be writing to `transform`. Only captions that exist are printed - an upload with no caption gets its
+number and nothing invented.
+
+**The contact page.** It is the one page allowed to move: two soft lights drift behind the cards and
+the form, a dashed thread travels slowly behind the row of contact cards, those cards lift with a
+pulsing ring on hover, the office marker pulses on the map and the map itself drifts, and the social
+band at the bottom (`src/data/social.js`, the same accounts the footer uses) presents each profile as
+a tilted card with the brand colour as a soft glow behind it - never as text, because blue or pink on
+ink is not readable. All of it is scoped to `.contact-page` and all of it is CSS.
 
 ## Deployment
 
@@ -439,15 +474,15 @@ src/
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens
   styles/base.css          reset, type, buttons, grid, reveal/motion utilities
-  styles/components.css    section and page styles
+  styles/components.css    section and page styles (including the scrapbook and the contact effects)
   styles/admin.css         staff console theme (scoped to .admin)
   components/layout/       Header, Footer, PageHero, SplashIntro
   components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
   components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills),
                            MediaPicker, useAdmin
-  components/sections/     Home page sections (including ProvinceMap)
-  components/ui/           Icons, Scenery, PackageCard, StoryDialog, Reveal, ScrollProgress,
-                           MediaFigure, CoverImage
+  components/sections/     Home page sections (ProvinceMap is rendered by the journal page)
+  components/ui/           Icons, Scenery, PackageCard, StoryDialog, DayAccordion, ReviewCallToAction,
+                           Reveal, ScrollProgress, MediaFigure, CoverImage
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
                            GalleryPage, ReviewsPage, About, Contact, PlanPage, Login, Register,
                            Account, NotFound

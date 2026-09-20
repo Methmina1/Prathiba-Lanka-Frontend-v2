@@ -114,8 +114,10 @@ test('journeys, journal and gallery render their covers from the API', async ({ 
   await expect(page.locator('.journal-card__media img').first()).toHaveAttribute('src', '/images/sl/hero-2.webp')
 
   await page.goto('/gallery')
-  await expect(page.locator('.mosaic__tile')).toHaveCount(2)
-  await expect(page.locator('.mosaic__tile img').first()).toBeVisible()
+  // the scrapbook wall: one print per gallery row, each with its number written under it
+  await expect(page.locator('.scrapbook__item')).toHaveCount(2)
+  await expect(page.locator('.scrapbook__item img').first()).toBeVisible()
+  await expect(page.locator('.scrapbook__no').first()).toHaveText('Nº 01')
 })
 
 test('a journey detail page opens from a card', async ({ page }) => {
@@ -124,11 +126,28 @@ test('a journey detail page opens from a card', async ({ page }) => {
   await expect(page.locator('h1')).toHaveText('Classical Heritage')
   await expect(page.locator('.detail__main')).toContainText('About this journey')
 
-  // the itinerary is one line per day, so three lines are three numbered steps and not one blob
-  const steps = page.locator('.itinerary li')
-  await expect(steps).toHaveCount(3)
-  await expect(steps.first()).toContainText('Arrive in Colombo')
-  await expect(steps.last()).toContainText('Polonnaruwa by bicycle')
+  // The itinerary is one line per day and every day is a dropdown: three lines, three days.
+  const days = page.locator('.days__item')
+  await expect(days).toHaveCount(3)
+  await expect(days.first().locator('.days__button')).toContainText('Day 01')
+  await expect(days.first().locator('.days__button')).toContainText('Arrive in Colombo')
+
+  // The first day starts open; the rest stay closed until they are asked for.
+  await expect(days.first().locator('.days__panel-inner')).toBeVisible()
+  await expect(days.last().locator('.days__panel-inner')).toBeHidden()
+  await expect(days.last().locator('.days__panel-inner')).toContainText('Polonnaruwa by bicycle')
+
+  await days.last().locator('.days__button').click()
+  await expect(days.last().locator('.days__panel-inner')).toBeVisible()
+  await expect(days.last().locator('.days__button')).toHaveAttribute('aria-expanded', 'true')
+
+  // And "Open all days" opens every one of them at once.
+  await page.getByRole('button', { name: 'Open all days' }).click()
+  await expect(days.nth(1).locator('.days__panel-inner')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Close all days' })).toBeVisible()
+
+  // No price is published anywhere on the page.
+  expect(await page.locator('.detail__side').innerText()).not.toContain('$')
 })
 
 test('the home page shows two rows of three journeys and a way to the rest', async ({ page }) => {
@@ -172,21 +191,30 @@ test('a journey card opens the full description in a dialog', async ({ page }) =
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
 })
 
-test('the journey page prints the full write-up and the itinerary steps', async ({ page }) => {
+test('the journey page prints the full write-up and the itinerary days', async ({ page }) => {
   await page.goto('/journeys')
   await page.locator('.package-card h3 a').first().click()
 
   await expect(page.locator('.detail__story p')).toHaveCount(2)
   await expect(page.locator('.detail__story p').first()).toContainText('Eight days through the old kingdoms')
-  await expect(page.locator('.itinerary li')).toHaveCount(3)
+  await expect(page.locator('.days__item')).toHaveCount(3)
 
-  // the header lede is the one-line summary, not the whole write-up
+  // The header lede is the one-line summary, not the whole write-up
   await expect(page.locator('.page-hero__inner p')).toHaveText('Sigiriya at sunrise and the cave temples of Dambulla.')
 })
 
-test('the home page draws Sri Lanka out of its nine provinces', async ({ page }) => {
+test('no journey card shows a price', async ({ page }) => {
+  await page.goto('/journeys')
+  await expect(page.locator('.package-card').first()).toBeVisible()
+
+  const cards = await page.locator('.package-card').allInnerTexts()
+  const withPrices = cards.filter((text) => text.includes('$') || /from\s+\d/i.test(text))
+  expect(withPrices, `cards still showing a price: ${withPrices.join(' | ')}`).toEqual([])
+})
+
+test('the journal page draws Sri Lanka out of its nine provinces', async ({ page }) => {
   const errors = collectPageErrors(page)
-  await page.goto('/')
+  await page.goto('/journal')
 
   const map = page.locator('#island .province-map')
   await expect(map.locator('path')).toHaveCount(9)
@@ -267,7 +295,7 @@ test('the home page draws Sri Lanka out of its nine provinces', async ({ page })
 })
 
 test('a province can be held, so the pointer can leave the map', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/journal')
   await page.locator('#island').scrollIntoViewIfNeeded()
 
   const card = page.locator('.island__card h3')
@@ -358,4 +386,77 @@ test('a 404 renders the island photograph, not a blank band', async ({ page }) =
   await page.goto('/this-path-does-not-exist')
   await expect(page.locator('h1')).toHaveText('This path leads nowhere')
   await expect(page.locator('.page-hero__media img')).toHaveAttribute('src', '/images/sl/not-found.jpg')
+})
+
+test('a customer is sent to the review form, and a visitor to sign in', async ({ page }) => {
+  // Signed out: the reviews page offers the way in, and it is not /plan any more - that page has the
+  // enquiry form and the PIN tracker, and no review form at all.
+  await page.goto('/reviews')
+  const signedOut = page.getByRole('link', { name: 'Sign in to write a review' })
+  await expect(signedOut).toHaveAttribute('href', '/login?next=/account')
+
+  // Signed in: the same page points straight at the form.
+  await signIn(page, CUSTOMER_SESSION)
+  await page.goto('/reviews')
+  const write = page.getByRole('link', { name: 'Write a review' })
+  await expect(write).toHaveAttribute('href', '/account#review')
+  await write.click()
+
+  // The form is on the account page, and it is the page's own effect that brings it into view.
+  await expect(page).toHaveURL(/\/account#review$/)
+  const form = page.locator('#review')
+  await expect(form).toBeVisible()
+  await expect(form.locator('h3')).toHaveText('Leave a review')
+  await expect(form.getByRole('button', { name: 'Publish review' })).toBeVisible()
+})
+
+test('the gallery is pinned up like a scrapbook', async ({ page }) => {
+  await page.goto('/gallery')
+
+  const prints = page.locator('.scrapbook__card')
+  await expect(prints).toHaveCount(2)
+  await expect(page.locator('.scrapbook__no').first()).toHaveText('Nº 01')
+
+  // Every print hangs at an angle, and the caption is written in the handwriting face.
+  const tilt = await prints.first().evaluate((node) => getComputedStyle(node).transform)
+  expect(tilt, 'a print should be tilted on the board').not.toBe('none')
+
+  const caption = page.locator('.scrapbook__hand').first()
+  await expect(caption).toHaveText('Coast')
+  const family = await caption.evaluate((node) => getComputedStyle(node).fontFamily)
+  expect(family.toLowerCase()).toContain('caveat')
+
+  // Pointing at a print straightens it.
+  await prints.first().hover()
+  await expect
+    .poll(async () => prints.first().evaluate((node) => getComputedStyle(node).transform))
+    .not.toBe(tilt)
+})
+
+test('the contact page carries the social accounts and the motion', async ({ page }) => {
+  await page.goto('/contact')
+
+  // Scoped to the band: the footer links the same two accounts, with the same labels.
+  const band = page.locator('#follow')
+  const facebook = band.getByRole('link', { name: 'Prathibha Lanka Voyages on Facebook' })
+  const instagram = band.getByRole('link', { name: '@prathibha_lanka_voyeages on Instagram' })
+  await expect(facebook).toHaveAttribute('href', 'https://www.facebook.com/share/1KcQJzpSRF/')
+  await expect(instagram).toHaveAttribute('href', 'https://www.instagram.com/prathibha_lanka_voyeages/')
+  await expect(facebook).toHaveAttribute('rel', /noreferrer/)
+  await expect(facebook).toHaveAttribute('target', '_blank')
+  await expect(page.locator('.social-note')).toContainText('A message reaches us faster')
+
+  // The effects layer is really applied: the aurora behind the cards animates, and a social card is
+  // tilted and straightens under the pointer.
+  const drift = await page
+    .locator('.contact-main')
+    .evaluate((node) => getComputedStyle(node, '::before').animationName)
+  expect(drift).toBe('contact-drift-a')
+
+  const tilt = await instagram.evaluate((node) => getComputedStyle(node).transform)
+  expect(tilt, 'the social cards should be tilted').not.toBe('none')
+  await instagram.hover()
+  await expect
+    .poll(async () => instagram.evaluate((node) => getComputedStyle(node).transform))
+    .not.toBe(tilt)
 })

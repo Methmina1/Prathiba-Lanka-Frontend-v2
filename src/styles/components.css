@@ -1343,39 +1343,24 @@ html.intro-landing .site-header .brand__text {
   }
 }
 
+/* The card's footer is now one row: no price is published, so there is no price block on the left
+   to balance against the links on the right. */
 .package-card__foot {
   display: flex;
-  align-items: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3) var(--space-5);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border);
 }
 
-.package-card__price {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.3;
-}
-
-.package-card__price strong {
-  color: var(--gold-200);
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-}
-
-.package-card__price small {
-  color: var(--text-faint);
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
 .package-card__meta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-2);
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
 }
 
 .package-card__meta > span {
@@ -2406,31 +2391,180 @@ html.intro-landing .site-header .brand__text {
   font-size: 1.08rem;
 }
 
-.itinerary {
-  display: grid;
-  gap: var(--space-4);
-  margin: var(--space-5) 0 0;
-  padding: 0;
-  list-style: none;
+/* --- the day-by-day dropdown ---------------------------------------------------------------- */
+/* Each day is a row that opens in place. The panel animates with grid-template-rows 0fr -> 1fr,
+   which is a height transition without JavaScript measuring anything; the inner element carries the
+   overflow so the text is clipped rather than squashed while it grows. */
+.days {
+  margin-top: var(--space-5);
 }
 
-.itinerary li {
+.days__toolbar {
   display: flex;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--border);
 }
 
-.itinerary li:last-child {
-  padding-bottom: 0;
+.days__count {
+  color: var(--text-faint);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.days__toggle-all {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--gold-300);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.days__toggle-all:hover {
+  background: var(--accent-soft);
+  color: var(--gold-200);
+}
+
+.days__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: day;
+}
+
+.days__item {
+  border-bottom: 1px solid var(--border);
+}
+
+.days__item:last-child {
   border-bottom: 0;
 }
 
-.itinerary__step {
-  flex: 0 0 auto;
+.days__heading {
+  margin: 0;
+}
+
+.days__button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4) 0;
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease-out-soft);
+}
+
+.days__button:hover {
+  color: var(--gold-200);
+}
+
+.days__number {
   color: var(--gold-400);
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.days__summary {
+  color: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.days__chevron {
+  color: var(--text-faint);
+  transition: transform var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.days__item.is-open .days__chevron {
+  transform: rotate(180deg);
+  color: var(--gold-400);
+}
+
+.days__item.is-open .days__summary {
+  color: var(--gold-200);
+}
+
+/* Closed panels are visibility:hidden rather than display:none or [hidden]: `display: none` cannot
+   be transitioned from, so the day would snap open; visibility takes the content out of the tab
+   order and the accessibility tree while the height still animates, and the switch is delayed so a
+   closing day finishes collapsing before it disappears. */
+.days__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows var(--dur) var(--ease-out-soft), visibility 0s linear var(--dur);
+}
+
+.days__item.is-open .days__panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows var(--dur) var(--ease-out-soft), visibility 0s;
+}
+
+.days__panel-inner {
+  overflow: hidden;
+}
+
+.days__panel-inner > * {
+  margin-bottom: var(--space-5);
+}
+
+.days__steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 0 0 var(--space-5);
+  list-style: none;
+}
+
+/* The stops a day is strung from, marked with a small gold diamond rather than a bullet. */
+.days__steps li {
+  position: relative;
+  color: var(--text-body);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.days__steps li::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-5) * -1);
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  rotate: 45deg;
+  background: var(--gold-500);
+  opacity: 0.75;
+}
+
+.days__panel p {
+  margin: 0;
+  color: var(--text-body);
+  line-height: 1.75;
+}
+
+/* The empty reviews block on a journey page: one line and, for a customer, the way to change it. */
+.detail__reviews-empty {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  margin-top: var(--space-4);
 }
 
 .detail__strip {
@@ -2491,24 +2625,32 @@ html.intro-landing .site-header .brand__text {
   font-size: 0.9rem;
 }
 
-.quote-card__price {
-  display: flex;
-  flex-direction: column;
+/* No published price: the block says how pricing works instead of naming a figure. */
+.quote-card__quote {
+  display: grid;
+  gap: var(--space-1);
   margin-bottom: var(--space-5);
 }
 
-.quote-card__price strong {
+.quote-card__quote strong {
   color: var(--gold-200);
   font-family: var(--font-display);
-  font-size: 2.2rem;
-  line-height: 1.15;
+  font-size: 1.6rem;
+  line-height: 1.2;
 }
 
-.quote-card__price small {
+.quote-card__quote small {
   color: var(--text-faint);
   font-size: 0.6rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+.quote-card__quote p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
 }
 
 .quote-card__facts {
@@ -2649,9 +2791,199 @@ html.intro-landing .site-header .brand__text {
   border-top: 1px solid var(--border);
 }
 
-/* --- gallery page --- */
-.mosaic--page {
-  grid-auto-rows: 240px;
+/* --- gallery page: the scrapbook board ------------------------------------------------------ */
+/*
+ * The gallery is a board you pin prints to, not a grid of tiles. Each photograph sits in a paper
+ * border with a strip of tape over one corner, a handwritten caption, and a tilt - the angle comes
+ * from a custom property set per position with nth-child, so the wall looks hand-assembled rather
+ * than generated, and hovering a print straightens it and lifts it off the board.
+ *
+ * The tilt is on the inner .scrapbook__card, never on .scrapbook__item: that element is animated by
+ * <Reveal>, and both would be writing to `transform`.
+ */
+.scrapbook-section {
+  position: relative;
+  overflow: hidden;
+}
+
+/* The board itself: warm light from the top, a green cast from the corner where the coast is. */
+.scrapbook-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(195, 154, 46, 0.07), transparent 62%),
+    radial-gradient(90% 60% at 8% 100%, rgba(28, 128, 85, 0.09), transparent 65%);
+  pointer-events: none;
+}
+
+.scrapbook {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-auto-rows: 248px;
+  gap: var(--space-6) var(--space-5);
+}
+
+.scrapbook__item {
+  min-width: 0;
+}
+
+.scrapbook__item.wide {
+  grid-column: span 2;
+}
+
+.scrapbook__item.tall {
+  grid-row: span 2;
+}
+
+.scrapbook__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 10px 10px 0;
+  margin: 0;
+  border-radius: 3px;
+  background: linear-gradient(158deg, #f8f4ea 0%, #eae2d1 100%);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.5);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform var(--dur-slow) var(--ease-out-soft), box-shadow var(--dur-slow) var(--ease-out-soft);
+}
+
+.scrapbook__item:nth-child(4n + 1) .scrapbook__card {
+  --tilt: -1.5deg;
+}
+
+.scrapbook__item:nth-child(4n + 2) .scrapbook__card {
+  --tilt: 1deg;
+}
+
+.scrapbook__item:nth-child(4n + 3) .scrapbook__card {
+  --tilt: -0.7deg;
+}
+
+.scrapbook__item:nth-child(4n) .scrapbook__card {
+  --tilt: 1.7deg;
+}
+
+.scrapbook__item:hover .scrapbook__card,
+.scrapbook__item:focus-within .scrapbook__card {
+  transform: rotate(0deg) translateY(-7px);
+  box-shadow: 0 30px 54px rgba(0, 0, 0, 0.6);
+}
+
+.scrapbook__frame {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  background: var(--ink-950);
+}
+
+.scrapbook__frame img,
+.scrapbook__frame svg,
+.scrapbook__frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.94) contrast(1.03);
+  transition: transform 1.4s var(--ease-out-soft), filter var(--dur) var(--ease-out-soft);
+}
+
+.scrapbook__item:hover .scrapbook__frame img,
+.scrapbook__item:hover .scrapbook__frame svg {
+  transform: scale(1.045);
+  filter: saturate(1.06) contrast(1.03);
+}
+
+/* A clip keeps its controls, so it never scales - the same rule the home strip follows. */
+.scrapbook__frame video {
+  background: #000;
+}
+
+.scrapbook__tape {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  width: 94px;
+  height: 26px;
+  translate: -50% 0;
+  rotate: -4deg;
+  background: linear-gradient(100deg, rgba(223, 193, 120, 0.42), rgba(223, 193, 120, 0.2));
+  border-left: 1px dashed rgba(255, 255, 255, 0.22);
+  border-right: 1px dashed rgba(255, 255, 255, 0.22);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.scrapbook__item:nth-child(even) .scrapbook__tape {
+  left: 26%;
+  rotate: 3.5deg;
+}
+
+.scrapbook__caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 9px 4px 12px;
+}
+
+.scrapbook__hand {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #1f2422;
+  font-family: var(--font-hand);
+  font-size: 1.24rem;
+  line-height: 1.12;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.scrapbook__no {
+  flex: 0 0 auto;
+  color: #6b6455;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.scrapbook__line {
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 1080px) {
+  .scrapbook {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .scrapbook {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: 210px;
+    gap: var(--space-5) var(--space-4);
+  }
+}
+
+@media (max-width: 620px) {
+  /* One print per row: fixed heights stop working, so the frame takes a photographic ratio instead
+     and the wide/tall variants go back to being ordinary prints. */
+  .scrapbook {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+  .scrapbook__item.wide,
+  .scrapbook__item.tall {
+    grid-column: auto;
+    grid-row: auto;
+  }
+  .scrapbook__frame {
+    aspect-ratio: 4 / 3;
+  }
 }
 
 /* --- reviews page --- */
@@ -2867,6 +3199,398 @@ html.intro-landing .site-header .brand__text {
   border-top: 1px solid var(--border);
 }
 
+/* --- contact: the effects layer ------------------------------------------------------------- */
+/*
+ * The contact page is the one page allowed to move. Everything here is scoped to .contact-page so
+ * no other page inherits it, and it is all CSS: the global prefers-reduced-motion block at the end
+ * of this file switches every animation and transition off in one go.
+ */
+.contact-main {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Two soft lights behind the cards and the form, drifting in opposite directions. */
+.contact-main::before,
+.contact-main::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  width: 44vw;
+  height: 44vw;
+  max-width: 600px;
+  max-height: 600px;
+  border-radius: 50%;
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.contact-main::before {
+  top: -14%;
+  left: -12%;
+  background: radial-gradient(circle, rgba(195, 154, 46, 0.16), transparent 68%);
+  animation: contact-drift-a 24s var(--ease-in-out-soft) infinite alternate;
+}
+
+.contact-main::after {
+  right: -16%;
+  bottom: -20%;
+  background: radial-gradient(circle, rgba(28, 128, 85, 0.18), transparent 68%);
+  animation: contact-drift-b 28s var(--ease-in-out-soft) infinite alternate;
+}
+
+.contact-main .container {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes contact-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(7%, 6%, 0) scale(1.12);
+  }
+}
+
+@keyframes contact-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-6%, -7%, 0) scale(1);
+  }
+}
+
+/* The thread the four cards hang from: dashes that travel slowly along it. */
+.contact-cards::before {
+  content: '';
+  position: absolute;
+  top: 38px;
+  right: 7%;
+  left: 7%;
+  height: 1px;
+  background-image: linear-gradient(90deg, var(--border-gold) 0 7px, transparent 7px 15px);
+  background-size: 15px 1px;
+  background-repeat: repeat-x;
+  opacity: 0.45;
+  animation: thread-travel 26s linear infinite;
+}
+
+@keyframes thread-travel {
+  to {
+    background-position: 300px 0;
+  }
+}
+
+.contact-card {
+  position: relative;
+  border-radius: var(--radius);
+  transition: transform var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft),
+    box-shadow var(--dur) var(--ease-out-soft);
+}
+
+.contact-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(120% 130% at 50% 0%, rgba(195, 154, 46, 0.14), transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease-out-soft);
+}
+
+.contact-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-md);
+}
+
+.contact-card:hover::after {
+  opacity: 1;
+}
+
+.contact-card__icon {
+  position: relative;
+  transition: transform var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.contact-card__icon::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 1px solid var(--border-gold);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.contact-card:hover .contact-card__icon {
+  transform: rotate(-6deg) scale(1.06);
+  color: var(--gold-300);
+}
+
+.contact-card:hover .contact-card__icon::after {
+  animation: ring-pulse 1.7s var(--ease-out-soft) infinite;
+}
+
+@keyframes ring-pulse {
+  from {
+    opacity: 0.7;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+.contact-panel--lift,
+.contact-panel--map {
+  transition: transform var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft);
+}
+
+.contact-panel--lift:hover,
+.contact-panel--map:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-gold);
+}
+
+/* A slow drift on the map photograph, so the panel is not a still picture. */
+.contact-panel--map img {
+  animation: map-drift 32s var(--ease-in-out-soft) infinite alternate;
+}
+
+@keyframes map-drift {
+  from {
+    transform: scale(1.02);
+  }
+  to {
+    transform: scale(1.14) translate3d(-2%, -1.5%, 0);
+  }
+}
+
+/* The office marker, pulsing where it sits on that map. */
+.contact-panel__pin {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-400);
+  animation: pin-pulse 2.6s var(--ease-out-soft) infinite;
+}
+
+@keyframes pin-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(210, 172, 78, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(210, 172, 78, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(210, 172, 78, 0);
+  }
+}
+
+/* --- contact: where we post ------------------------------------------------------------------ */
+.contact-social {
+  position: relative;
+  overflow: hidden;
+}
+
+.social-wall {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  align-items: stretch;
+}
+
+.social-wall__cell {
+  min-width: 0;
+}
+
+/* A card per account, tilted like the gallery prints and straightened on hover. The brand colour is
+   only ever a soft light behind the card and a tint on the icon - the type stays ivory, because a
+   blue or pink on ink is not readable. */
+.social-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-4);
+  height: 100%;
+  padding: var(--space-6);
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ivory-100);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform var(--dur-slow) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft),
+    box-shadow var(--dur-slow) var(--ease-out-soft);
+}
+
+.social-wall__cell:nth-child(1) .social-card {
+  --tilt: -1.2deg;
+}
+
+.social-wall__cell:nth-child(2) .social-card {
+  --tilt: 1deg;
+}
+
+.social-card:hover,
+.social-card:focus-visible {
+  transform: rotate(0deg) translateY(-6px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-lg);
+}
+
+.social-card__glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease-out-soft);
+}
+
+.social-card--facebook .social-card__glow {
+  background: radial-gradient(85% 70% at 12% 0%, rgba(24, 119, 242, 0.34), transparent 62%);
+}
+
+.social-card--instagram .social-card__glow {
+  background: radial-gradient(85% 70% at 12% 0%, rgba(225, 48, 108, 0.3), transparent 62%),
+    radial-gradient(60% 55% at 92% 100%, rgba(131, 58, 180, 0.28), transparent 66%);
+}
+
+.social-card:hover .social-card__glow {
+  opacity: 0.85;
+}
+
+.social-card__top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.social-card__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  transition: transform var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.social-card:hover .social-card__icon {
+  transform: rotate(-5deg) scale(1.06);
+}
+
+.social-card--facebook:hover .social-card__icon {
+  color: #9dc0ff;
+}
+
+.social-card--instagram:hover .social-card__icon {
+  color: #ffb4c8;
+}
+
+.social-card__label {
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.social-card__handle {
+  position: relative;
+  align-self: start;
+  color: var(--ivory-100);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.social-card__go {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--gold-300);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.social-card__go svg {
+  transition: transform var(--dur) var(--ease-out-soft);
+}
+
+.social-card:hover .social-card__go svg {
+  transform: translateX(5px);
+}
+
+/* The note beside the accounts, on paper like the gallery prints. */
+.social-note {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-6);
+  border-radius: 3px;
+  background: linear-gradient(158deg, #f8f4ea 0%, #ece4d3 100%);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.45);
+  transform: rotate(1.4deg);
+  transition: transform var(--dur-slow) var(--ease-out-soft), box-shadow var(--dur-slow) var(--ease-out-soft);
+}
+
+.social-note:hover {
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow: 0 30px 54px rgba(0, 0, 0, 0.55);
+}
+
+.social-note strong {
+  color: #1c211f;
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  line-height: 1.15;
+}
+
+.social-note p {
+  margin: 0;
+  color: #40453f;
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+.social-note__pin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f0dcae, #a47f1f 70%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 1080px) {
+  .social-wall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 680px) {
+  .social-wall {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* No thread between cards once they are stacked. */
+  .contact-cards::before {
+    display: none;
+  }
+}
+
 @media (max-width: 1080px) {
   .detail,
   .contact-split {
@@ -2891,9 +3615,6 @@ html.intro-landing .site-header .brand__text {
   .detail__strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .mosaic--page {
-    grid-auto-rows: 190px;
-  }
 }
 
 @media (max-width: 620px) {
@@ -2909,8 +3630,7 @@ html.intro-landing .site-header .brand__text {
   .searchbar .btn {
     flex: 1 1 auto;
   }
-  .detail__strip,
-  .mosaic--page {
+  .detail__strip {
     grid-template-columns: minmax(0, 1fr);
   }
   .timeline {
@@ -3068,6 +3788,12 @@ html.intro-landing .site-header .brand__text {
 
 .account-heading {
   margin-bottom: var(--space-5);
+}
+
+/* Links from the reviews pages arrive as /account#review: the form has to clear the sticky header
+   when the browser (or the page's own effect) scrolls it into view. */
+#review {
+  scroll-margin-top: calc(var(--header-height) + var(--space-5));
 }
 
 .account-grid {

@@ -1,20 +1,20 @@
 import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
-import { useAuth } from '../../auth/AuthContext'
 import { useApi } from '../../hooks/useApi'
 import Reveal from '../ui/Reveal'
-import { ArrowRight, Star } from '../ui/Icons'
+import ReviewCallToAction from '../ui/ReviewCallToAction'
+import { Star } from '../ui/Icons'
 
 /**
  * The reviews strip on the home page.
  *
  * There is no sample content behind this: if the agency has no reviews yet, the section says so and
  * asks for one, rather than filling the space with invented travellers. Reviews come from
- * /api/reviews, and are written by signed-in customers.
+ * /api/reviews, and are written by signed-in customers - ReviewCallToAction is what takes them to
+ * the form.
  */
 export default function Reviews() {
   const { data: reviews } = useApi(() => api.getReviews())
-  const { mayBook } = useAuth()
 
   if (reviews.length === 0) {
     return (
@@ -29,14 +29,14 @@ export default function Reviews() {
             </p>
           </div>
 
-          {mayBook && (
-            <div className="section-cta">
-              <Link className="btn btn--cta btn--sweep" to="/plan">
-                Travelled with us? Tell us about it
-                <ArrowRight width={15} height={15} />
-              </Link>
-            </div>
-          )}
+          {/* A visitor is pointed at the reviews page rather than at a sign-in form: the home page
+              deliberately offers no sign-in link (that lives on /plan), and the reviews page is where
+              the rest of the explanation is. */}
+          <ReviewCallToAction
+            label="Travelled with us? Tell us about it"
+            signedOutTo="/reviews"
+            signedOutLabel="Read the reviews"
+          />
         </div>
       </section>
     )
