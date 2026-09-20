@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { api } from '../api/client'
-import { fallbackReviews } from '../data/fallback'
+import { useAuth } from '../auth/AuthContext'
 import { useApi } from '../hooks/useApi'
 import PageHero from '../components/layout/PageHero'
 import PHOTOS from '../data/photos'
@@ -9,7 +9,9 @@ import { ArrowRight, Star } from '../components/ui/Icons'
 import { formatDate } from '../utils/format'
 
 export default function ReviewsPage() {
-  const { data: reviews, status } = useApi(() => api.getReviews(), fallbackReviews)
+  // No sample reviews behind this: the page shows an empty state until real ones exist.
+  const { data: reviews } = useApi(() => api.getReviews())
+  const { mayBook } = useAuth()
 
   const average =
     reviews.length > 0
@@ -34,13 +36,6 @@ export default function ReviewsPage() {
 
       <section className="section">
         <div className="container">
-          {status === 'fallback' && (
-            <p className="notice">
-              Sample reviews, shown while the review table is empty. Real ones arrive from
-              <code> /api/reviews</code>.
-            </p>
-          )}
-
           {reviews.length > 0 && (
             <Reveal className="rating-summary card">
               <div className="rating-summary__score">
@@ -101,12 +96,14 @@ export default function ReviewsPage() {
             </div>
           )}
 
-          <div className="section-cta">
-            <Link className="btn btn--cta btn--sweep" to="/plan">
-              Travelled with us? Tell us about it
-              <ArrowRight width={15} height={15} />
-            </Link>
-          </div>
+          {mayBook && (
+            <div className="section-cta">
+              <Link className="btn btn--cta btn--sweep" to="/plan">
+                Travelled with us? Tell us about it
+                <ArrowRight width={15} height={15} />
+              </Link>
+            </div>
+          )}
         </div>
       </section>
     </main>

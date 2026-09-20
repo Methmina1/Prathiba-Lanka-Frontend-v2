@@ -13,8 +13,50 @@ const STEPS = [
 ]
 
 export default function PlanPage() {
-  const { session, email, signOut } = useAuth()
+  const { session, email, mayBook, signOut } = useAuth()
   const isAdmin = session?.role === 'ROLE_ADMIN'
+
+  // Staff do not book trips. Rather than showing an administrator the enquiry and tracking forms and
+  // letting the backend refuse them, the page says why and points at the console.
+  if (!mayBook) {
+    return (
+      <main className="page-enter">
+        <section className="page-hero">
+          <div className="container page-hero__inner">
+            <nav className="breadcrumb" aria-label="Breadcrumb">
+              <Link to="/">Home</Link>
+              <span>/</span>
+              <span>Plan your journey</span>
+            </nav>
+            <span className="eyebrow eyebrow--onDark">Staff account</span>
+            <h1 className="display">Booking is for customers</h1>
+            <p>
+              You are signed in as an administrator ({email}). Journeys are requested from a customer
+              account, so this page is not available to staff - the booking and review endpoints
+              refuse an admin token.
+            </p>
+          </div>
+        </section>
+
+        <section className="section">
+          <div className="container empty-state">
+            <h3>Manage the bookings instead</h3>
+            <p>
+              Hold or reject requests, answer enquiries and edit the catalogue from the console. To
+              test the customer side, sign in with a customer account.
+            </p>
+            <Link className="btn btn--cta btn--sweep" to="/admin/bookings">
+              Open the console
+              <ArrowRight width={15} height={15} />
+            </Link>
+            <button type="button" className="btn btn--ghost" onClick={() => signOut()}>
+              Sign out
+            </button>
+          </div>
+        </section>
+      </main>
+    )
+  }
 
   return (
     <main className="page-enter">

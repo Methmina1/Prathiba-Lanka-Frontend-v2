@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from '../ui/Icons'
 import PHOTOS from '../../data/photos'
+import { useAuth } from '../../auth/AuthContext'
 
 /** Slide order matches the photographs in src/data/photos.js: coast, wildlife, culture, sunsets. */
 const SLIDES = [
@@ -43,6 +44,7 @@ export default function Hero() {
   }, [paused])
 
   const slide = SLIDES[index]
+  const { mayBook } = useAuth()
 
   return (
     <section
@@ -70,9 +72,11 @@ export default function Hero() {
               {slide.cta.label}
               <ArrowRight width={16} height={16} />
             </Link>
-            <Link className="btn btn--onDark" to="/plan">
-              Plan a custom trip
-            </Link>
+            {mayBook && (
+              <Link className="btn btn--onDark" to="/plan">
+                Plan a custom trip
+              </Link>
+            )}
           </div>
         </div>
 

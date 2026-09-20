@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
-import { fallbackPackages, fallbackReviews } from '../data/fallback'
+import { fallbackPackages } from '../data/fallback'
+import { CONTACT_FALLBACK } from '../data/social'
+import { useAuth } from '../auth/AuthContext'
+import { usePageContent } from '../hooks/usePageContent'
 import { useResource } from '../hooks/useResource'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
 import MediaFigure from '../components/ui/MediaFigure'
-import { ArrowRight, Calendar, Check, MapPin, Phone, Star, Users } from '../components/ui/Icons'
+import { ArrowRight, Calendar, Check, Mail, MapPin, Phone, Star, Users } from '../components/ui/Icons'
 import { firstSentence, formatDate, formatDays, formatPrice, toLines, toParagraphs } from '../utils/format'
 
 const SCENERY = ['temple', 'safari', 'tea', 'coast', 'train', 'hills']
@@ -54,6 +57,13 @@ export default function JourneyDetail() {
   const gallery = useRelatedList(status === 'ready', () => api.getGalleryByPackage(id), id)
   const reviews = useRelatedList(status === 'ready', () => api.getReviewsByPackage(id), id)
 
+  // The quote card shows whichever contact detail the agency actually publishes.
+  const { mayBook } = useAuth()
+  const { content: contact } = usePageContent('contact')
+  const contactCards = contact.cards ?? []
+  const phone = contactCards.find((card) => card.href?.startsWith('tel:') && card.value)
+  const email = contactCards.find((card) => card.href?.startsWith('mailto:') && card.value)
+
   if (!pkg) {
     return (
       <main className="page-enter">
@@ -80,7 +90,6 @@ export default function JourneyDetail() {
   // to become 20 steps. The write-up is the other way round - paragraphs, split on blank lines.
   const itinerary = toLines(pkg.itinerary)
   const story = toParagraphs(pkg.longDescription)
-  const shownReviews = reviews.length > 0 ? reviews : isSample ? fallbackReviews.slice(0, 2) : []
 
   return (
     <main className="page-enter">
@@ -163,11 +172,11 @@ export default function JourneyDetail() {
 
             <Reveal delay={140}>
               <h3 className="detail__subhead">Travellers who took this journey</h3>
-              {shownReviews.length === 0 ? (
+              {reviews.length === 0 ? (
                 <p className="muted">No reviews for this journey yet.</p>
               ) : (
                 <div className="grid grid--2">
-                  {shownReviews.slice(0, 2).map((review) => (
+                  {reviews.slice(0, 2).map((review) => (
                     <figure className="card review-card" key={review.reviewId}>
                       <div className="review-card__stars" aria-label={`${review.rating} out of 5`}>
                         {[1, 2, 3, 4, 5].map((value) => (
@@ -225,20 +234,40 @@ export default function JourneyDetail() {
                 </li>
               </ul>
 
-              <Link className="btn btn--cta btn--sweep btn--block" to="/plan">
-                Request this journey
-                <ArrowRight width={15} height={15} />
-              </Link>
+              {/* Staff cannot book - the backend refuses an admin token with 403 - so they are not
+                  offered the request button. The price and the facts still show. */}
+              {mayBook ? (
+                <>
+                  <Link className="btn btn--cta btn--sweep btn--block" to="/plan">
+                    Request this journey
+                    <ArrowRight width={15} height={15} />
+                  </Link>
 
-              <p className="quote-card__note">
-                No payment now. We reply with an itinerary and a price, usually within one working
-                day.
-              </p>
+                  <p className="quote-card__note">
+                    No payment now. We reply with an itinerary and a price, usually within one
+                    working day.
+                  </p>
+                </>
+              ) : (
+                <Link className="btn btn--ghost btn--block" to="/admin/bookings">
+                  This is a customer journey — open the console
+                  <ArrowRight width={15} height={15} />
+                </Link>
+              )}
 
-              <a className="quote-card__phone" href="tel:+94770000000">
-                <Phone width={15} height={15} />
-                +94 77 000 0000
-              </a>
+              {/* The agency's real contact details, from the same cards the contact page edits.
+                  There is no published phone number yet, so this falls back to email. */}
+              {phone?.value ? (
+                <a className="quote-card__phone" href={phone.href}>
+                  <Phone width={15} height={15} />
+                  {phone.value}
+                </a>
+              ) : (
+                <a className="quote-card__phone" href={`mailto:${email?.value ?? CONTACT_FALLBACK.email}`}>
+                  <Mail width={15} height={15} />
+                  {email?.value ?? CONTACT_FALLBACK.email}
+                </a>
+              )}
             </div>
 
             <div className="card quote-card quote-card--soft">
@@ -247,10 +276,12 @@ export default function JourneyDetail() {
                 Every journey here is a starting point. Add a day in the hills, swap a safari for a
                 cooking class, or slow the whole thing down.
               </p>
-              <Link className="link-arrow" to="/plan">
-                Build a custom itinerary
-                <ArrowRight width={15} height={15} />
-              </Link>
+              {mayBook && (
+                <Link className="link-arrow" to="/plan">
+                  Build a custom itinerary
+                  <ArrowRight width={15} height={15} />
+                </Link>
+              )}
             </div>
           </aside>
         </div>

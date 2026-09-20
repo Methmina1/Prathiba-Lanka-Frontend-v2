@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
+import { useAuth } from '../../auth/AuthContext'
 import { firstSentence, formatDays, formatPrice, toParagraphs } from '../../utils/format'
 import { ArrowRight, Close } from './Icons'
 
@@ -15,6 +16,8 @@ import { ArrowRight, Close } from './Icons'
  * on the backdrop all dismiss it, and the page behind is frozen while it is up.
  */
 export default function StoryDialog({ pkg, onClose }) {
+  const { mayBook } = useAuth()
+
   useEffect(() => {
     if (!pkg) return undefined
 
@@ -78,9 +81,11 @@ export default function StoryDialog({ pkg, onClose }) {
             Day-by-day itinerary
             <ArrowRight width={15} height={15} />
           </Link>
-          <Link className="btn btn--ghost btn--sm" to="/plan">
-            Request this journey
-          </Link>
+          {mayBook && (
+            <Link className="btn btn--ghost btn--sm" to="/plan">
+              Request this journey
+            </Link>
+          )}
         </footer>
       </div>
     </div>

@@ -924,6 +924,297 @@ html.intro-landing .site-header .brand__text {
   transform: translateX(5px);
 }
 
+/* ================================================================ province map */
+
+.island {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
+  gap: var(--space-7);
+  /* Top-aligned on purpose: centring would move the map up and down as the journey list changes
+     length, so a province would slide out from under the pointer. */
+  align-items: start;
+  margin-top: var(--space-6);
+}
+
+.island__map {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-6);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at 50% 12%, rgba(210, 172, 78, 0.09), transparent 62%),
+    var(--surface);
+}
+
+.province-map {
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  max-height: 62vh;
+  filter: drop-shadow(0 22px 44px rgb(2 8 16 / 45%));
+}
+
+/* The island is one landmass made of nine shapes, so the shapes carry a hairline border rather
+   than a gap: neighbours touch, which is what a province map should look like. */
+.province-map__shape {
+  fill: var(--ink-700);
+  stroke: var(--ink-950);
+  stroke-width: 1.2;
+  cursor: pointer;
+  transition: fill var(--dur) var(--ease-out-soft), stroke var(--dur) var(--ease-out-soft);
+}
+
+.province-map__shape:hover,
+.province-map__shape:focus-visible {
+  fill: var(--emerald-600);
+  outline: none;
+}
+
+.province-map__shape.is-active {
+  fill: var(--gold-500);
+  stroke: var(--gold-200);
+  stroke-width: 1.6;
+}
+
+/* The province the click is holding: the pointer can leave it and the map keeps showing it. */
+.province-map__shape.is-held {
+  stroke: var(--ivory-100);
+  stroke-width: 2;
+}
+
+.province-map__shape:focus-visible {
+  stroke: var(--gold-200);
+  stroke-width: 1.6;
+}
+
+.island__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* Says whether the map is following the pointer or holding a province, and does the holding. */
+.island__hold {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.28rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft),
+    background var(--dur) var(--ease-out-soft);
+}
+
+.island__hold:hover {
+  border-color: var(--border-gold);
+  color: var(--text-heading);
+}
+
+.island__hold.is-held {
+  border-color: var(--gold-500);
+  background: rgba(195, 154, 46, 0.14);
+  color: var(--gold-200);
+}
+
+.island__panel {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: start;
+}
+
+.island__card {
+  display: grid;
+  gap: var(--space-3);
+  width: 100%;
+  /* Stops the panel jumping about while the pointer runs across the map: the journey list changes
+     length from province to province. */
+  min-height: 360px;
+  padding: var(--space-6);
+}
+
+.island__capital {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--gold-300);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.island__card h3 {
+  font-size: 1.5rem;
+}
+
+.island__card p {
+  color: var(--text-body);
+  line-height: 1.7;
+}
+
+/* The province description: the longest text in the panel, so it gets the room and the leading. */
+.island__about {
+  font-size: 0.96rem;
+  line-height: 1.75;
+}
+
+.island__districts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.island__districts li {
+  padding: 0.28rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+
+/* "Which journeys go through here" - the reason the map is on the page. */
+.island__journeys {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.island__journeys h4 {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.island__journey-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.island__journey {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(244, 239, 228, 0.02);
+  transition: border-color var(--dur) var(--ease-out-soft), background var(--dur) var(--ease-out-soft);
+}
+
+.island__journey:hover {
+  border-color: var(--border-gold);
+  background: rgba(195, 154, 46, 0.08);
+}
+
+.island__journey-name {
+  color: var(--text-heading);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.island__journey-meta {
+  grid-column: 1;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.island__journey svg {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  color: var(--gold-300);
+  transition: transform var(--dur) var(--ease-out-soft);
+}
+
+.island__journey:hover svg {
+  transform: translateX(4px);
+}
+
+.island__journey-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.island__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.island__pick {
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft),
+    background var(--dur) var(--ease-out-soft);
+}
+
+.island__pick:hover {
+  border-color: var(--border-gold);
+  color: var(--text-heading);
+}
+
+.island__pick.is-active {
+  border-color: var(--gold-500);
+  background: rgba(195, 154, 46, 0.14);
+  color: var(--gold-200);
+}
+
+@media (max-width: 900px) {
+  .island {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  .island__map {
+    padding: var(--space-5);
+  }
+
+  .province-map {
+    max-width: 280px;
+    max-height: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .province-map__shape,
+  .island__pick {
+    transition: none;
+  }
+}
+
 /* ================================================================ story dialog */
 
 .story-backdrop {
@@ -2636,7 +2927,17 @@ html.intro-landing .site-header .brand__text {
 
 /* ================================================================ account area */
 
+/* Who is signed in, and how to get out. The name is deliberately absent from the bar. */
+.navbar__account {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
 .navbar__auth {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   color: var(--text-invert-muted);
   font-size: 0.66rem;
   font-weight: 500;
@@ -2647,6 +2948,39 @@ html.intro-landing .site-header .brand__text {
 
 .navbar__auth:hover {
   color: var(--gold-300);
+}
+
+.navbar__signout {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-invert-faint);
+  font: inherit;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease-out-soft);
+}
+
+.navbar__signout:hover {
+  color: var(--gold-300);
+}
+
+.navbar__signout:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+/* Below the drawer's breakpoint the account and its sign-out live in the drawer, spelled out, where
+   there is room for them. Left in the bar as well they crowded the logo against the menu button.
+   This has to sit after the base rules above - same specificity, so order decides. */
+@media (max-width: 1080px) {
+  .navbar__account {
+    display: none;
+  }
 }
 
 /* the discreet way into the staff console, now in the footer */

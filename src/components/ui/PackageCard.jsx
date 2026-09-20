@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
+import { useAuth } from '../../auth/AuthContext'
 import Scenery from '../ui/Scenery'
 import { ArrowRight, Users } from '../ui/Icons'
 
@@ -21,6 +22,7 @@ function formatPrice(price) {
 }
 
 export default function PackageCard({ pkg, index = 0, onReadStory }) {
+  const { mayBook } = useAuth()
   const scenery = sceneryFor(pkg, index)
   const price = formatPrice(pkg.price)
   const days = pkg.durationDays ? `${pkg.durationDays} days` : null
@@ -78,10 +80,12 @@ export default function PackageCard({ pkg, index = 0, onReadStory }) {
               Details
               <ArrowRight width={15} height={15} />
             </Link>
-            <Link className="link-arrow" to="/plan">
-              Request
-              <ArrowRight width={15} height={15} />
-            </Link>
+            {mayBook && (
+              <Link className="link-arrow" to="/plan">
+                Request
+                <ArrowRight width={15} height={15} />
+              </Link>
+            )}
           </div>
         </div>
       </div>

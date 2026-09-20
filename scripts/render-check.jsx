@@ -42,7 +42,8 @@ const ROUTES = {
   '/journal': ['Stories from the island', 'Read the story', '/images/sl/journal-1.jpg'],
   '/journal/demo-1': ['When to visit Sri Lanka', 'All stories', '/images/sl/journal-1.jpg'],
   '/gallery': ['Where the journeys go', 'Nothing has been uploaded yet', '/images/sl/tile-1.jpg'],
-  '/reviews': ['What people said afterwards', 'The train to Ella was the highlight'],
+  // No sample reviews ship with the app, so the page renders its empty state without a backend.
+  '/reviews': ['What people said afterwards', 'No reviews yet'],
   '/about': ['Arranged by people who live here', 'How we got here', '/images/sl/about-story.jpg'],
   '/contact': ['Talk to us', 'Track a booking', '/images/sl/contact-map.jpg'],
   '/plan': ['Plan your journey', 'Request a journey', 'Track a booking', 'Sign in', 'Create an account'],

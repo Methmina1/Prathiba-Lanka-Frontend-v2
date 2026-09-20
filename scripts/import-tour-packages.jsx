@@ -40,6 +40,21 @@ import { adminApi } from '../src/api/admin.js'
 const here = dirname(fileURLToPath(import.meta.url))
 const photoDir = join(here, '..', 'public', 'images', 'sl')
 
+// Sign in as the agency's admin. As with the seeder, the password comes from the environment -
+// BOOTSTRAP_ADMIN_PASSWORD is the variable the backend creates the account from - so no password is
+// committed here.
+const adminEmail =
+  process.env.PRATHIBALANKA_ADMIN_EMAIL ?? process.env.BOOTSTRAP_ADMIN_EMAIL ?? 'prathibhalankavoyages@gmail.com'
+const adminPassword = process.env.PRATHIBALANKA_ADMIN_PASSWORD ?? process.env.BOOTSTRAP_ADMIN_PASSWORD ?? ''
+if (!adminPassword) {
+  console.error(
+    'No admin password.\n' +
+      'Set BOOTSTRAP_ADMIN_PASSWORD (the variable the backend creates the admin account from),\n' +
+      'or PRATHIBALANKA_ADMIN_PASSWORD, and run again.',
+  )
+  process.exit(1)
+}
+
 const args = process.argv.slice(2)
 const flags = new Set()
 let copyFile = join(here, '..', 'data', 'package-copy.json')
@@ -92,9 +107,9 @@ const experience = (value) => tidy(value).replace(/^(luxury|ultimate)\s*:\s*/i, 
 
 const days = (value) => Number(String(value ?? '').match(/(\d+)\s*Day/i)?.[1]) || null
 
-const login = await api.login('admin@test.com', 'Admin@12345')
+const login = await api.login(adminEmail, adminPassword)
 const token = login.token
-if (!token) throw new Error('no admin token - is the backend running?')
+if (!token) throw new Error(`could not sign in as ${adminEmail} - is the backend running?`)
 
 const existing = await adminApi.listPackages(token)
 const byTitle = new Map(existing.map((pkg) => [pkg.title, pkg]))

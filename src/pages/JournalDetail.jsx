@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { fallbackJournal } from '../data/fallback'
+import { useAuth } from '../auth/AuthContext'
 import { useResource } from '../hooks/useResource'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
@@ -13,6 +14,7 @@ const SCENERY = ['coast', 'temple', 'tea', 'safari', 'train', 'hills']
 
 export default function JournalDetail() {
   const { id } = useParams()
+  const { mayBook } = useAuth()
   const { status, data } = useResource(() => api.getJournalPost(id), [id])
 
   const sample = fallbackJournal.find((post) => String(post.journalId) === String(id))
@@ -87,10 +89,12 @@ export default function JournalDetail() {
 
           <Reveal delay={120}>
             <div className="post__footer">
-              <Link className="btn btn--cta btn--sweep" to="/plan">
-                Plan a journey around this
-                <ArrowRight width={15} height={15} />
-              </Link>
+              {mayBook && (
+                <Link className="btn btn--cta btn--sweep" to="/plan">
+                  Plan a journey around this
+                  <ArrowRight width={15} height={15} />
+                </Link>
+              )}
               <Link className="link-arrow" to="/journal">
                 All stories
               </Link>

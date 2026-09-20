@@ -1,9 +1,20 @@
 import { Link } from 'react-router-dom'
 import Reveal from '../ui/Reveal'
-import { ArrowRight, Phone, WhatsApp } from '../ui/Icons'
+import { ArrowRight, Mail, Phone, WhatsApp } from '../ui/Icons'
 import PHOTOS from '../../data/photos'
+import { CONTACT_FALLBACK } from '../../data/social'
+import { useAuth } from '../../auth/AuthContext'
+import { usePageContent } from '../../hooks/usePageContent'
 
 export default function CtaBand() {
+  // The same contact cards the Contact page and the footer read, so the number here is the real one
+  // - and while there is no number, the button is not shown at all.
+  const { mayBook } = useAuth()
+  const { content } = usePageContent('contact')
+  const cards = content.cards ?? []
+  const phone = cards.find((card) => card.href?.startsWith('tel:') && card.value)
+  const phoneValue = phone?.value ?? CONTACT_FALLBACK.phone
+
   return (
     <section className="cta-band">
       <div className="cta-band__media" aria-hidden="true">
@@ -16,20 +27,37 @@ export default function CtaBand() {
           <p>Tell us when you are coming and we will send a first outline within a working day.</p>
         </Reveal>
         <Reveal delay={150} className="cta-band__actions">
-          <Link className="btn btn--cta btn--sweep" to="/plan">
-            Begin your journey
-            <ArrowRight width={16} height={16} />
-          </Link>
-          <a className="btn btn--onDark" href="tel:+94770000000">
-            <Phone width={15} height={15} />
-            +94 77 000 0000
-          </a>
+          {/* Staff are pointed at their own console rather than at a booking form they cannot use. */}
+          {mayBook ? (
+            <Link className="btn btn--cta btn--sweep" to="/plan">
+              Begin your journey
+              <ArrowRight width={16} height={16} />
+            </Link>
+          ) : (
+            <Link className="btn btn--cta btn--sweep" to="/admin">
+              Open the admin console
+              <ArrowRight width={16} height={16} />
+            </Link>
+          )}
+          {phoneValue ? (
+            <a className="btn btn--onDark" href={phone?.href ?? `tel:${phoneValue.replace(/\s/g, '')}`}>
+              <Phone width={15} height={15} />
+              {phoneValue}
+            </a>
+          ) : (
+            <a className="btn btn--onDark" href={`mailto:${CONTACT_FALLBACK.email}`}>
+              <Mail width={15} height={15} />
+              Email us
+            </a>
+          )}
         </Reveal>
       </div>
 
-      <Link className="whatsapp-fab" to="/plan" aria-label="Plan your journey">
-        <WhatsApp width={22} height={22} />
-      </Link>
+      {mayBook && (
+        <Link className="whatsapp-fab" to="/plan" aria-label="Plan your journey">
+          <WhatsApp width={22} height={22} />
+        </Link>
+      )}
     </section>
   )
 }

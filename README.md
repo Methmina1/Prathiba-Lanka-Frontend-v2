@@ -7,7 +7,7 @@ framework, so the palette and layout stay easy to change.
 
 | Route | Contents |
 |---|---|
-| `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), sustainability, gallery, journal, reviews, FAQ, CTA band |
+| `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), the province map, sustainability, gallery, journal, reviews, FAQ, CTA band |
 | `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog |
 | `/journeys/:id` | One journey: overview, the full description, day-by-day itinerary, gallery strip, reviews for that package, sticky quote card |
 | `/journal` | Featured story plus the rest of the published posts |
@@ -43,11 +43,28 @@ lists fall back to `src/data/fallback.js`, with a notice explaining which one yo
 | Role | Sees | Cannot |
 |---|---|---|
 | `ROLE_CUSTOMER` | `/account` - own bookings, new booking request, review form | reach `/admin` |
-| `ROLE_ADMIN` | `/admin` - the staff console | hold a booking or post a review (the backend rejects both with 403) |
+| `ROLE_ADMIN` | `/admin` - the staff console | book a trip or post a review |
+
+**The header never says who is signed in.** It shows a *User* icon with *Account* (or *Console* for
+staff) and a *Sign out* button - no name, no address, because the bar is on every public page and
+whose account it is is nobody else's business. Signing out clears the session, drops the console or
+account link, and puts the visitor back on the home page; the account and console pages need a
+session, so staying on one would only bounce them to the login form. Below the drawer's breakpoint
+the account and its sign-out live in the drawer instead, where there is room to spell them out.
+The token itself stays valid until it expires (24h by default) - logging out ends the session in this
+browser rather than revoking the JWT, which is what a stateless token means.
+
+An administrator is staff, so the booking flow is closed to them twice over: the backend refuses
+`/api/bookings/request`, `/api/customer/bookings` and `POST /api/reviews` with a 403 for an admin
+token (`@PreAuthorize("hasRole('CUSTOMER')")` on the controllers), and the site does not offer the
+flow at all - no *Plan your trip* in the header, no *Plan your journey* in the footer, no *Request*
+on a journey card or page, and `/plan` explains instead of showing the forms. That decision lives in
+one place, `mayBook` in `auth/AuthContext.jsx`, so a new call to action cannot quietly reintroduce
+it.
 
 The admin console is reached from the small **Admin sign in** link in the site footer. There is no
-self-service admin signup: accounts come from `app.bootstrap-admin.*` in the backend
-(`admin@test.com` / `Admin@12345` by default).
+self-service admin signup: the account comes from `BOOTSTRAP_ADMIN_EMAIL` / `BOOTSTRAP_ADMIN_PASSWORD`
+in the backend.
 
 `/admin/**` is guarded on the client too - `components/admin/AdminLayout.jsx` sends a signed-out
 visitor to `/login?next=<path>` and shows "Admin access required" for a customer session - but the
@@ -81,11 +98,22 @@ VITE_API_BASE_URL=https://api.example.com
 npm run build         # production build -> dist/
 npm run preview       # serve the build on http://localhost:4173
 npm run check:render  # renders all 24 routes in Node and asserts their content
-npm run test:e2e      # drives the built site in Chromium (Playwright)
+npm run test:e2e      # drives the built site in Chromium against a mocked API (Playwright)
+npm run test:roles    # drives the real site against a real backend, as each role
 npm run seed          # load the demo content into a running backend (optional)
 npm run extract:packages   # rate sheet (.xlsx) -> packages.json
 npm run import:packages    # packages.json -> a running backend (see "The package catalogue")
 ```
+
+Five suites cover the project between them, from the outside in:
+
+| Suite | Needs | Covers |
+|---|---|---|
+| `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 160 checks |
+| `mvn test` (backend repo) | nothing | the Spring context, the mail configuration |
+| `npm run check:render` | nothing | all 24 routes in Node: undefined components, bad hooks, broken props |
+| `npm run test:e2e` | nothing (API mocked) | 30 browser tests: layout, clicks, navigation |
+| `npm run test:roles` | a running API + `BOOTSTRAP_ADMIN_PASSWORD` | 21 end-to-end journeys through the real UI and the real database, one per role |
 
 `check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
 stubbed admin session) with `renderToString`, so an undefined component, a bad hook or a broken prop
@@ -94,13 +122,35 @@ fails the build without a browser. It also checks the two access rules - a custo
 asserts that the photographs the site ships with are still referenced by the pages that use them, and
 enforces that the planning/tracking panels have not leaked back onto the home page.
 
+### The live role suite
+
+`npm run test:roles` is the one that answers "does the whole thing actually work?". It drives the
+dev server with a real backend behind it, walking the site as the three people who use it:
+
+| Role | What it does |
+|---|---|
+| a visitor | reads every public page, searches the catalogue, opens a journey and a story, sends an enquiry, tracks an unknown PIN, registers an account, is kept out of `/account` and `/admin` |
+| a customer | signs in, requests a journey and gets a PIN, tracks it, leaves a review, finds it on the public reviews page, is refused the console, signs out |
+| a member of staff | signs in to the dashboard, **confirms the customer's booking** (which the customer then sees, with the agreed price), answers the visitor's enquiry, creates/edits/deactivates a package, writes/publishes/unpublishes/deletes a story, uploads a file and puts it in the gallery, edits the contact page and sees it on the public site, removes the customer's review, is refused the booking flow by the API, signs out |
+
+It writes to the database it points at, so every record it creates carries a run marker (`E2E<id>`,
+generated once per run by `scripts/live-roles.mjs` and handed to every worker through the
+environment) and is deleted again at the end of the run - the cleanup prints what it removed, and
+`PRATHIBALANKA_SKIP_CLEANUP=1` keeps everything for inspection. Workers are restarted after a
+failure, which is why nothing is remembered in memory between tests: each one looks its data up by
+the marker, so a single step can also be re-run on its own:
+
+```bash
+npm run test:roles -- -g "confirms the booking"
+```
+
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Twenty-three tests across three files:
+so it needs no backend. Thirty tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, a journey detail page and its day-by-day steps (one numbered step per itinerary line), the home page's two rows of three and its link to the rest, the province map (nine shapes that tile the island at Sri Lanka's proportions, choosing one, and holding one so the pointer can leave it), the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer |
 
@@ -148,6 +198,73 @@ the way a member of staff would create it, so all of it stays editable in the co
 re-run (journal posts are matched on title, gallery items on their file), and it takes an optional
 base URL: `npm run seed -- http://localhost:8080`. Journeys are not seeded from here - the catalogue
 is the agency's own, and it is loaded from the rate sheet (below).
+
+## The province map
+
+Under the journeys on the home page, the nine provinces are drawn in their real positions, so the
+outline they make is Sri Lanka. Pointing at a province (or picking it from the list) names it, gives
+its capital, its districts and a line about what is there.
+
+The geometry is generated, never hand-written - a map is a factual claim, and a province drawn in
+the wrong place is worse than no map at all:
+
+```bash
+node scripts/build-province-map.mjs
+```
+
+`scripts/build-province-map.mjs` writes `src/data/provinces.js`. It reads the silhouettes supplied in
+`public/map` **only if they really are the province each file is named after**: every supplied file
+and every reference province is rasterised in a browser and scored by intersection over union, and a
+file has to reach 0.80 against its namesake to be used. If all nine pass, the map is drawn from
+`public/map`; if any fails, all nine come from the reference geometry instead, so the map is at least
+consistent and correct. The script prints the scores, so the check is visible on every run rather
+than hidden inside it.
+
+The reference is [@svg-maps/sri-lanka](https://www.npmjs.com/package/@svg-maps/sri-lanka): 25
+districts, CC BY 4.0, originally from [MapSVG](https://mapsvg.com/maps/sri-lanka). Districts are
+grouped into the nine provinces, and each province's districts are joined into one path - which has
+to be done carefully, because `m 44.4,578.9 2.6,0.07` is an absolute moveto followed by a *relative*
+lineto, so a joined path needs the moveto rewritten rather than its letter upper-cased.
+
+> **Attribution.** CC BY 4.0 asks for credit wherever the work is shown, and the map used to carry a
+> line saying so under the panel. That line has since been removed, at the client's request, so the
+> site currently shows no credit. The licence has not changed: this file and the header of the
+> generated `src/data/provinces.js` still record where the geometry came from, which is the right
+> thing to do but is not the same as crediting it in the product. Two ways to square it, if it
+> matters: put a one-line credit back (a `.island__credit` paragraph under the panel, or the small
+> print in the footer), or rebuild the map from a public-domain source - Natural Earth's admin-1
+> boundaries are public domain and carry no attribution condition - and change `REFERENCE_URL` in
+> the script.
+
+The map data is 58 KB of path coordinates in the bundle. It is worth it: the alternative is a
+picture of a map that cannot follow the palette, cannot be pointed at, and cannot be corrected.
+
+**What each province is like.** `src/data/provinceCopy.js` holds a description per province, written
+for somebody who has never been to Sri Lanka: what the place feels like, what you would do there, and
+the season that suits it (the whale season at Mirissa, the elephant gathering on the Minneriya tank,
+the east coast being the answer to the south-west monsoon). It lives outside `src/data/provinces.js`
+on purpose - that file is generated, and re-running the map script must not wipe the words.
+
+**Holding a province.** Hovering alone is not enough on this map: a province in the middle of the
+island is almost impossible to read, because every route to the panel on the right passes over its
+neighbours. So a click **holds** the province - the pointer can cross the rest of the map, or leave
+it entirely, and the panel stays put - and a second click on the same province lets go and hands the
+map back to the pointer. The panel carries a Hold/Held button that does the same thing, and `Held`
+on the map's `data-held` attribute is what the browser test asserts against.
+
+**Which journeys go through a province?** `src/data/provincePlaces.js` answers that from the places
+each journey names - its title, its region, its summary and every line of its day-by-day itinerary -
+so the panel stays right as packages are added or edited in the console, with no extra field to fill
+in. Journeys are ranked by how much of the trip is in that province (`3 of 7 days here`), so the tour
+that is mostly about a place comes above the one that merely passes through it, and the panel lists
+three with a link to the rest. Every entry is a link into the catalogue.
+
+The patterns have to be specific, and the near-misses are the interesting part:
+
+- **Galle** is Southern, **Galle Face** is in Colombo - so the Southern pattern looks ahead and
+  excludes it, or every tour that starts in the capital would claim the south coast.
+- **Little Adam's Peak** is in Ella (Uva); **Adam's Peak** (Sri Pada) is 100 km away in Sabaragamuwa.
+  One keyword would have merged them, so that pattern carries an `unless`.
 
 ## The package catalogue
 
@@ -207,6 +324,12 @@ library entries, so swapping one is a two-click job in Admin → Packages.
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
 needs a real session - so `/account` sends signed-out visitors to `/login?next=/account`.
 
+**Reviews are the exception.** There is no sample review in the fallbacks, and the home strip and
+`/reviews` show an empty state until real ones arrive. A review is a claim that a named person
+travelled with the agency and said something about it; writing those, even behind a "sample" notice,
+is not ours to do. The browser tests still serve one from their mocked API (`tests/e2e/fixtures.js`,
+which never ships) so the review cards themselves stay covered.
+
 ## Design system
 
 `src/styles/theme.css` holds every token. The palette is deep ink + metallic gold with the logo's
@@ -253,10 +376,13 @@ src/
   hooks/useApi.js          list loader with loading / live / fallback states
   hooks/useResource.js     single-record loader (loading / ready / missing / error)
   utils/format.js          price, date, paragraph and line helpers
-  data/fallback.js         sample journeys, journal posts, reviews, FAQ copy
+  data/fallback.js         sample journeys, journal posts, FAQ copy (no sample reviews - see below)
   data/pageContent.js      default copy for the editable About/Contact pages
   data/photos.js           the photographs that ship with the site, by slot
   data/package-copy.json   the written summary, full description and cover for each journey
+  data/provinces.js        the nine province shapes, placed on the island (generated)
+  data/provinceCopy.js     what to say about each province, for the map panel
+  data/provincePlaces.js   which places belong to which province, for the map's journey list
   auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens
@@ -267,7 +393,7 @@ src/
   components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
   components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills),
                            MediaPicker, useAdmin
-  components/sections/     Home page sections
+  components/sections/     Home page sections (including ProvinceMap)
   components/ui/           Icons, Scenery, PackageCard, StoryDialog, Reveal, ScrollProgress,
                            MediaFigure, CoverImage
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
@@ -280,12 +406,16 @@ scripts/
   seed-demo-content.jsx    loads the demo content through the admin API
   extract-tour-packages.ps1  rate workbook (.xlsx) -> packages.json, no Excel needed
   import-tour-packages.jsx   packages.json -> packages through the admin API
+  build-province-map.mjs   public/map + reference districts -> src/data/provinces.js
+  live-roles.mjs           runs the live role suite with one run id for the whole run
   optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
 tests/e2e/
   fixtures.js              mocked API + session seeding
   public.spec.js           hero, home layout, story dialog, journey page, covers
   admin.spec.js            access rules, all nine screens, dashboard layout
   mobile.spec.js           phone header, drawer, no sideways scroll
+tests/live/
+  roles.spec.js            the real UI against a real backend, per role (npm run test:roles)
 ```
 
 ## Photographs

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { collectPageErrors, mockApi } from './fixtures'
+import { ADMIN_SESSION, CUSTOMER_SESSION, collectPageErrors, mockApi, signIn } from './fixtures'
 
 test.beforeEach(async ({ page }) => {
   await mockApi(page)
@@ -58,6 +58,34 @@ test('the header offers no sign-in link, and the footer carries the staff link',
   await expect(header.locator('.navbar__actions .btn')).toHaveText('Plan your trip')
 
   await expect(page.locator('.site-footer a.footer__admin')).toHaveText('Admin sign in')
+})
+
+test('the header never says who is signed in, and signing out leaves', async ({ page }) => {
+  await signIn(page, CUSTOMER_SESSION)
+  await page.goto('/')
+
+  const header = page.locator('.site-header')
+  // A way into the account, and a way out - never the address, and never the name behind it.
+  await expect(header.locator('.navbar__auth')).toHaveText('Account')
+  await expect(header).not.toContainText('traveller')
+  await expect(header).not.toContainText('@')
+
+  await header.getByRole('button', { name: 'Sign out' }).click()
+
+  await expect(page).toHaveURL(/\/$/)
+  await expect(header.locator('.navbar__account')).toHaveCount(0)
+  await expect(header.locator('.navbar__actions .btn')).toHaveText('Plan your trip')
+  expect(await page.evaluate(() => window.localStorage.getItem('prathibalanka.session'))).toBeNull()
+})
+
+test('an administrator gets the console, not their address, in the header', async ({ page }) => {
+  await signIn(page, ADMIN_SESSION)
+  await page.goto('/')
+
+  const header = page.locator('.site-header')
+  await expect(header.locator('.navbar__auth')).toHaveText('Console')
+  await expect(header).not.toContainText('admin@test.com')
+  await expect(header.getByRole('button', { name: 'Sign out' })).toBeVisible()
 })
 
 test('the plan page is where a visitor signs in', async ({ page }) => {
@@ -154,6 +182,170 @@ test('the journey page prints the full write-up and the itinerary steps', async 
 
   // the header lede is the one-line summary, not the whole write-up
   await expect(page.locator('.page-hero__inner p')).toHaveText('Sigiriya at sunrise and the cave temples of Dambulla.')
+})
+
+test('the home page draws Sri Lanka out of its nine provinces', async ({ page }) => {
+  const errors = collectPageErrors(page)
+  await page.goto('/')
+
+  const map = page.locator('#island .province-map')
+  await expect(map.locator('path')).toHaveCount(9)
+  await expect(page.locator('.island__pick')).toHaveCount(9)
+
+  // The shapes have to add up to the island, not just sit near each other: sample a grid over the
+  // paths and check the proportions of Sri Lanka (about 0.57 wide for its height) and that the land
+  // fills roughly the share of the bounding box that the real island does (about 60%).
+  const shape = await map.evaluate((svg) => {
+    const [, , viewWidth, viewHeight] = svg.getAttribute('viewBox').split(/\s+/).map(Number)
+    const paths = [...svg.querySelectorAll('path')]
+    const canvas = document.createElement('canvas')
+    canvas.width = 46
+    canvas.height = 80
+    const ctx = canvas.getContext('2d')
+    ctx.setTransform(46 / viewWidth, 0, 0, 80 / viewHeight, 0, 0)
+
+    const shapes = paths.map((path) => new Path2D(path.getAttribute('d')))
+    let union = 0
+    let sum = 0
+    for (let y = 0; y < 80; y += 1) {
+      for (let x = 0; x < 46; x += 1) {
+        let hits = 0
+        for (const candidate of shapes) if (ctx.isPointInPath(candidate, x + 0.5, y + 0.5)) hits += 1
+        sum += hits
+        union += hits > 0 ? 1 : 0
+      }
+    }
+
+    const box = paths.reduce(
+      (acc, path) => {
+        const b = path.getBBox()
+        return {
+          left: Math.min(acc.left, b.x),
+          top: Math.min(acc.top, b.y),
+          right: Math.max(acc.right, b.x + b.width),
+          bottom: Math.max(acc.bottom, b.y + b.height),
+        }
+      },
+      { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity },
+    )
+
+    return {
+      aspect: (box.right - box.left) / (box.bottom - box.top),
+      coverage: union / (46 * 80),
+      overlap: (sum - union) / union,
+    }
+  })
+
+  expect(shape.aspect, 'the island should be taller than it is wide, like Sri Lanka').toBeGreaterThan(0.5)
+  expect(shape.aspect).toBeLessThan(0.65)
+  expect(shape.coverage, 'the land should fill about 60% of the map box').toBeGreaterThan(0.5)
+  expect(shape.coverage).toBeLessThan(0.72)
+  expect(shape.overlap, 'provinces should tile the island, not overlap it').toBeLessThan(0.06)
+
+  // Picking a province names it, describes it, and lists the journeys whose itinerary goes through it.
+  await page.getByRole('button', { name: 'Northern', exact: true }).click()
+  await expect(page.locator('.island__card h3')).toHaveText('Northern Province')
+  await expect(page.locator('.island__capital')).toContainText('Jaffna')
+  await expect(page.locator('.island__about')).toContainText('Tamil-speaking')
+  await expect(page.locator('.island__districts li')).toHaveCount(5)
+  await expect(page.locator('.island__journeys h4')).toHaveText('No fixed journey stops here yet')
+
+  // The fixture catalogue has a Cultural Triangle journey, which is Central.
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+  await expect(page.locator('.island__about')).toContainText('The tea country')
+  await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
+  const journey = page.locator('.island__journey').first()
+  await expect(journey).toContainText('Classical Heritage')
+  await expect(journey.locator('.island__journey-meta')).toContainText('of 8 days here')
+
+  // …and it is a way into the catalogue, not decoration.
+  await journey.click()
+  await expect(page).toHaveURL(/\/journeys\/41$/)
+  await expect(page.locator('h1')).toHaveText('Classical Heritage')
+
+  expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
+})
+
+test('a province can be held, so the pointer can leave the map', async ({ page }) => {
+  await page.goto('/')
+  await page.locator('#island').scrollIntoViewIfNeeded()
+
+  const card = page.locator('.island__card h3')
+  const hold = page.locator('.island__hold')
+  const map = page.locator('.province-map')
+
+  // Hovering a shape follows the pointer, and nothing is held.
+  const moveTo = async (name) => {
+    // The pointer has to land on the shape, so the point is measured against the live layout and
+    // then checked with elementFromPoint: content above the map (hero, cards, images) settles at its
+    // own pace, and a stale coordinate silently hovers a different province - or the sticky header.
+    for (let attempt = 0; attempt < 6; attempt += 1) {
+      const point = await page.evaluate((label) => {
+        const path = document.querySelector(`.province-map__shape[aria-label="${label} Province"]`)
+        const box = path.getBBox()
+        const matrix = path.getScreenCTM()
+        const svg = path.ownerSVGElement
+        const svgPoint = svg.createSVGPoint()
+        // A concave province's bounding-box centre can sit outside it, so find a point well inside.
+        for (let ring = 1; ring <= 10; ring += 1) {
+          for (let y = 0; y <= 20; y += 1) {
+            for (let x = 0; x <= 20; x += 1) {
+              const candidate = { x: box.x + (box.width * x) / 20, y: box.y + (box.height * y) / 20 }
+              if (!path.isPointInFill(candidate)) continue
+              const margin = 3 * ring
+              const inside =
+                path.isPointInFill({ x: candidate.x + margin, y: candidate.y }) &&
+                path.isPointInFill({ x: candidate.x - margin, y: candidate.y }) &&
+                path.isPointInFill({ x: candidate.x, y: candidate.y + margin }) &&
+                path.isPointInFill({ x: candidate.x, y: candidate.y - margin })
+              if (!inside) continue
+              svgPoint.x = candidate.x
+              svgPoint.y = candidate.y
+              const screen = svgPoint.matrixTransform(matrix)
+              const x0 = Math.round(screen.x)
+              const y0 = Math.round(screen.y)
+              // Only accept a point that the document agrees is over this province.
+              const hit = document.elementFromPoint(x0, y0)
+              if (hit === path) return { x: x0, y: y0, onTarget: true }
+              return { x: x0, y: y0, onTarget: false, hit: hit?.getAttribute?.('aria-label') ?? hit?.tagName }
+            }
+          }
+        }
+        return null
+      }, name)
+
+      if (point?.onTarget) {
+        await page.mouse.move(point.x, point.y)
+        return
+      }
+      // The section moved under the measurement, or something is covering it: settle and try again.
+      await page.locator('.province-map').scrollIntoViewIfNeeded()
+      await page.waitForTimeout(200)
+    }
+    throw new Error(`could not land the pointer on ${name} Province`)
+  }
+
+  await moveTo('Central')
+  await expect(card).toHaveText('Central Province')
+  await expect(hold).toHaveText('Hold')
+
+  // Clicking holds it: the pointer can then cross the other provinces without changing the panel.
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+  await expect(hold).toHaveText('Held')
+  await expect(map).toHaveAttribute('data-held', 'central')
+
+  await moveTo('Uva')
+  await expect(card).toHaveText('Central Province')
+  await moveTo('Western')
+  await expect(card).toHaveText('Central Province')
+
+  // Clicking it again lets go, and the map follows the pointer once more.
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+  await expect(hold).toHaveText('Hold')
+  await expect(map).toHaveAttribute('data-held', '')
+
+  await moveTo('Uva')
+  await expect(card).toHaveText('Uva Province')
 })
 
 test('the About page shows the photo that ships with the site', async ({ page }) => {

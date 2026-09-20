@@ -19,6 +19,44 @@ test('a customer is told the console needs an administrator', async ({ page }) =
   await expect(page.getByRole('button', { name: 'Sign out' })).toBeVisible()
 })
 
+test('an administrator is not offered the booking flow', async ({ page }) => {
+  await signIn(page, ADMIN_SESSION)
+
+  // Staff do not book trips: the booking endpoints refuse an admin token (403), so the site does not
+  // invite them. Every route into /plan goes, and the band points at the console instead.
+  await page.goto('/')
+  await expect(page.locator('.navbar__actions a[href="/plan"]')).toHaveCount(0)
+  await expect(page.locator('.footer__links a[href="/plan"]')).toHaveCount(0)
+  await expect(page.locator('.cta-band a[href="/plan"]')).toHaveCount(0)
+  await expect(page.locator('.cta-band a[href="/admin"]')).toHaveCount(1)
+  await expect(page.locator('.hero a[href="/plan"]')).toHaveCount(0)
+
+  await page.goto('/journeys')
+  await expect(page.locator('.package-card__meta a[href="/plan"]')).toHaveCount(0)
+  // …while the journey itself is still readable
+  await expect(page.locator('.package-card__meta a[href^="/journeys/"]')).not.toHaveCount(0)
+
+  await page.goto('/plan')
+  await expect(page.locator('h1')).toHaveText('Booking is for customers')
+  await expect(page.locator('.plan form')).toHaveCount(0)
+  await expect(page.getByRole('link', { name: 'Open the console' })).toBeVisible()
+})
+
+test('a customer still gets the booking flow', async ({ page }) => {
+  await signIn(page, CUSTOMER_SESSION)
+
+  await page.goto('/')
+  await expect(page.locator('.navbar__actions a[href="/plan"]')).toHaveCount(1)
+  await expect(page.locator('.footer__links a[href="/plan"]')).toHaveCount(1)
+
+  await page.goto('/journeys')
+  await expect(page.locator('.package-card__meta a[href="/plan"]').first()).toBeVisible()
+
+  await page.goto('/plan')
+  await expect(page.locator('h1')).toHaveText('Plan your journey')
+  await expect(page.locator('.plan form').first()).toBeVisible()
+})
+
 test('an admin reaches every console screen', async ({ page }) => {
   const errors = collectPageErrors(page)
   await signIn(page, ADMIN_SESSION)
@@ -119,6 +157,34 @@ test('the sidebar moves between screens and the console keeps its own chrome', a
   // the marketing header and footer belong to the public site, not here
   await expect(page.locator('.site-header')).toHaveCount(0)
   await expect(page.locator('.site-footer')).toHaveCount(0)
+})
+
+test('media previews ask the API for the file, not the site', async ({ page }) => {
+  await signIn(page, ADMIN_SESSION)
+
+  // An uploaded file is stored as a path (/media/<name>). Rendered as-is it resolves against the
+  // front end's own origin, which has never held the file - every thumbnail silently fails to load.
+  // This shipped broken once: the media screen and the package image picker both used the raw path.
+  await page.goto('/admin/media')
+  const tile = page.locator('.adm-media-card__thumb img')
+  await expect(tile).toHaveCount(1)
+  await expect(tile).toHaveAttribute('src', /^https?:\/\/[^/]+\/media\//)
+
+  // the same tile inside the picker, reached the way staff reach it: Admin -> Packages -> Edit -> Library
+  await page.goto('/admin/packages')
+  await page.locator('.adm-table tbody tr').first().getByRole('button', { name: /edit/i }).click()
+  await page.locator('.adm-dialog').getByRole('button', { name: /library/i }).click()
+
+  const picked = page.locator('.adm-media__thumb img')
+  await expect(picked).toHaveCount(1)
+  await expect(picked).toHaveAttribute('src', /^https?:\/\/[^/]+\/media\//)
+
+  // and picking one puts it in the preview and in the form, ready to save
+  await page.locator('.adm-media').first().click()
+  await expect(page.locator('.adm-preview')).toHaveAttribute('src', /^https?:\/\/[^/]+\/media\//)
+  await expect(page.locator('.adm-dialog input[maxlength="255"]')).toHaveValue(
+    '/media/11111111-1111-1111-1111-111111111111.jpg',
+  )
 })
 
 test('the page content editor shows both sections and their fields', async ({ page }) => {

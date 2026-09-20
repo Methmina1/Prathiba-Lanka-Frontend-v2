@@ -1,6 +1,10 @@
 /**
  * Demo content, shown until the backend returns real rows (and whenever it is unreachable).
- * Replace freely - real data from /api/packages, /api/journal/published and /api/reviews wins.
+ * Replace freely - real data from /api/packages and /api/journal/published wins.
+ *
+ * There are no sample reviews here on purpose. A review is a claim that somebody travelled with the
+ * agency and said something about it, so inventing one - even behind a "sample" notice - is not ours
+ * to do. The reviews pages show an empty state until real ones arrive from /api/reviews.
  */
 
 export const fallbackPackages = [
@@ -87,33 +91,6 @@ export const fallbackJournal = [
     status: 'PUBLISHED',
     publishedAt: '2026-06-11T09:00:00',
     scenery: 'tea',
-  },
-]
-
-export const fallbackReviews = [
-  {
-    reviewId: 'demo-1',
-    customerName: 'Anna & Piet',
-    rating: 5,
-    comment:
-      'Nine days, no decisions to make, and a guide who knew every temple guard by name. The train to Ella was the highlight.',
-    packageTitle: 'Mist & Tea',
-  },
-  {
-    reviewId: 'demo-2',
-    customerName: 'Marta Ruiz',
-    rating: 5,
-    comment:
-      'We saw three leopards in two mornings. Everything was arranged quietly in the background, which is exactly what we wanted.',
-    packageTitle: 'Wild Heart',
-  },
-  {
-    reviewId: 'demo-3',
-    customerName: 'The Oberoi family',
-    rating: 4,
-    comment:
-      'Beautifully paced for our children, and the stilt fishermen at sunset was worth the whole trip on its own.',
-    packageTitle: 'Southern Serenity',
   },
 ]
 

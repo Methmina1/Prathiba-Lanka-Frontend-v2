@@ -44,6 +44,26 @@ export function Compass(props) {
   )
 }
 
+export function Lock(props) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="4" y="10.5" width="16" height="10.5" rx="2" />
+      <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5" />
+      <path d="M12 15v2.5" />
+    </svg>
+  )
+}
+
+/** The way into an account, without printing whose account it is. */
+export function User(props) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.9 20.4a7.1 7.1 0 0 1 14.2 0" />
+    </svg>
+  )
+}
+
 export function Clock(props) {
   return (
     <svg {...base} {...props}>

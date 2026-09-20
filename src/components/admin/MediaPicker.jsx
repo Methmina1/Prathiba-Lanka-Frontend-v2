@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { api } from '../../api/client'
 import { adminApi } from '../../api/admin'
 import { useAuth } from '../../auth/AuthContext'
 import { Dialog, Notice, Segmented } from './AdminUI'
@@ -85,9 +86,9 @@ export default function MediaPicker({ open, onClose, onPick, initialType = null 
             >
               <span className="adm-media__thumb">
                 {asset.mediaType === 'VIDEO' ? (
-                  <video src={asset.url} muted preload="metadata" />
+                  <video src={api.mediaUrl(asset.url)} muted preload="metadata" />
                 ) : (
-                  <img src={asset.url} alt={asset.title ?? ''} loading="lazy" />
+                  <img src={api.mediaUrl(asset.url)} alt={asset.title ?? ''} loading="lazy" />
                 )}
                 {asset.mediaType === 'VIDEO' && <span className="adm-media__badge">Video</span>}
               </span>

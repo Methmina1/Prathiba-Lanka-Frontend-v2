@@ -73,10 +73,35 @@ const gallery = [
   { imageId: 2, imageUrl: photo('tile-2.jpg'), caption: 'Hills', mediaType: 'IMAGE', uploadedAt: '2026-09-19T10:01:00' },
 ]
 
-const reviews = [
+// The media library, as the backend returns it: uploaded files are stored as a path on the API
+// (/media/<name>), not a URL the browser can resolve on its own.
+const media = [
   {
+    mediaId: 1,
+    originalName: 'hero-1.jpg',
+    title: 'Coast cover',
+    url: '/media/11111111-1111-1111-1111-111111111111.jpg',
+    mediaType: 'IMAGE',
+    sizeBytes: 180224,
+    uploadedAt: '2026-09-19T10:00:00',
+  },
+  {
+    mediaId: 2,
+    originalName: 'clip.mp4',
+    title: 'Surf clip',
+    url: '/media/22222222-2222-2222-2222-222222222222.mp4',
+    mediaType: 'VIDEO',
+    sizeBytes: 3145728,
+    uploadedAt: '2026-09-19T10:05:00',
+  },
+]
+
+// A response for the mocked API only, so the review cards have something to render in a browser
+// test. The site itself ships no sample reviews: with a real backend and an empty table, the reviews
+// pages show their empty state.
+const reviews = [  {
     reviewId: 1,
-    customerName: 'Anna & Piet',
+    customerName: 'Test Traveller',
     rating: 5,
     comment: 'The train to Ella was the highlight.',
     packageTitle: 'Mist & Tea',
@@ -134,7 +159,7 @@ const content = {
         heading: 'Fewer places. Longer looks.',
         lede: 'We started with one vehicle.',
         badgeTitle: 'Since 2014',
-        badgeText: 'Arranging journeys from Colombo',
+        badgeText: 'Arranging journeys from Kurunagala',
         scenery: 'tea',
         image: '',
         points: [{ title: 'One consultant per journey', text: 'The same person answers.' }],
@@ -151,7 +176,7 @@ const content = {
         { icon: 'phone', label: 'Call or WhatsApp', value: '+94 77 000 0000', href: 'tel:+94770000000', note: 'Answered 08:00 - 21:00' },
         { icon: 'mail', label: 'Email', value: 'hello@prathibalanka.lk', href: 'mailto:hello@prathibalanka.lk', note: 'Within a working day' },
       ],
-      aside: { heading: 'Already sent a request?', text: 'Use your PIN.', mapLabel: 'Colombo, Sri Lanka' },
+      aside: { heading: 'Already sent a request?', text: 'Use your PIN.', mapLabel: 'Kurunagala, Sri Lanka' },
     },
   },
 }
@@ -190,7 +215,7 @@ export async function mockApi(page) {
     if (path === '/api/admin/content') return json(Object.values(content))
     if (path === '/api/admin/media') {
       const type = params.get('type')
-      return json(type ? [] : [])
+      return json(type ? media.filter((asset) => asset.mediaType === type) : media)
     }
     if (path === '/api/admin/media/limits') return json({ maxImageBytes: 10485760, maxVideoBytes: 62914560 })
     if (path === '/api/auth/login') return json({ ...ADMIN_SESSION, token: 'test-admin-token' })
