@@ -109,7 +109,7 @@ Five suites cover the project between them, from the outside in:
 
 | Suite | Needs | Covers |
 |---|---|---|
-| `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 160 checks |
+| `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 161 checks |
 | `mvn test` (backend repo) | nothing | the Spring context, the mail configuration |
 | `npm run check:render` | nothing | all 24 routes in Node: undefined components, bad hooks, broken props |
 | `npm run test:e2e` | nothing (API mocked) | 30 browser tests: layout, clicks, navigation |
