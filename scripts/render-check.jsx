@@ -32,7 +32,7 @@ const ROUTES = {
     '/images/sl/hero-2.webp',
     '/images/sl/hero-3.jpg',
     '/images/sl/hero-4.jpg',
-    // the "fewer places" frame, which now uses a scrapbook photograph
+    // the "fewer places" frame, which now uses a gallery photograph
     '/images/sl/seed-gallery-17.jpg',
     '/images/sl/cta-band.jpg',
     '/images/sl/tile-1.jpg',
@@ -50,9 +50,9 @@ const ROUTES = {
     'Read all',
   ],
   '/journal/demo-1': ['When to visit Sri Lanka', 'All stories', '/images/sl/journal-1.jpg'],
-  // the scrapbook board numbers every print ("Nº" and the number are separate text nodes in the
-  // server render, so only the marker can be matched)
-  '/gallery': ['Where the journeys go', 'Nothing has been uploaded yet', '/images/sl/tile-1.jpg', 'Nº'],
+  // a plain grid of square tiles; with no backend the shipped photographs run through it, and those
+  // carry no captions, so only the notice and the first tile can be matched
+  '/gallery': ['Where the journeys go', 'Nothing has been uploaded yet', '/images/sl/tile-1.jpg'],
   // No sample reviews ship with the app, so the page renders its empty state without a backend.
   '/reviews': ['What people said afterwards', 'No reviews yet', 'Sign in to write a review'],
   '/about': ['Arranged by people who live here', 'How we got here', '/images/sl/about-story.jpg'],

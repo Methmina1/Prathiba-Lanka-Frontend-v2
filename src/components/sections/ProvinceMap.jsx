@@ -102,7 +102,9 @@ export default function ProvinceMap({ posts = [], onProvince }) {
                     }
                   }}
                 >
-                  <title>{province.name} Province</title>
+                  {/* One string, not text plus a value: React refuses to render an array of children
+                      into a <title>, and warns about it on every server render. */}
+                  <title>{`${province.name} Province`}</title>
                 </path>
               ))}
             </svg>

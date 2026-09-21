@@ -2917,201 +2917,277 @@ html.intro-landing .site-header .brand__text {
   border-top: 1px solid var(--border);
 }
 
-/* --- gallery page: the scrapbook board ------------------------------------------------------ */
+/* --- gallery page: an even grid, and one photograph at a time ---------------------------------- */
 /*
- * The gallery is a board you pin prints to, not a grid of tiles. Each photograph sits in a paper
- * border with a strip of tape over one corner, a handwritten caption, and a tilt - the angle comes
- * from a custom property set per position with nth-child, so the wall looks hand-assembled rather
- * than generated, and hovering a print straightens it and lifts it off the board.
- *
- * The tilt is on the inner .scrapbook__card, never on .scrapbook__item: that element is animated by
- * <Reveal>, and both would be writing to `transform`.
+ * Every tile is the same square with the picture cropped to fill it, and the caption sits under the
+ * image rather than over it. That is the whole design: a wall of photographs that reads as a wall,
+ * where nothing is hidden behind a caption and no photograph is given a size its neighbours do not
+ * have. The viewer (components/ui/Lightbox.jsx) is where a picture gets to be seen properly.
  */
-.scrapbook-section {
+.gallery-section {
   position: relative;
-  overflow: hidden;
 }
 
-/* The board itself: warm light from the top, a green cast from the corner where the coast is. */
-.scrapbook-section::before {
+/* A soft light behind the top of the grid, so the wall is not flat ink. */
+.gallery-section::before {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(120% 80% at 50% 0%, rgba(195, 154, 46, 0.07), transparent 62%),
-    radial-gradient(90% 60% at 8% 100%, rgba(28, 128, 85, 0.09), transparent 65%);
+  background: radial-gradient(120% 70% at 50% 0%, rgba(195, 154, 46, 0.07), transparent 62%);
   pointer-events: none;
 }
 
-.scrapbook {
+.gallery-grid {
   position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: 248px;
-  gap: var(--space-6) var(--space-5);
+  gap: var(--space-5) var(--space-4);
 }
 
-.scrapbook__item {
+.gallery-grid__cell {
   min-width: 0;
 }
 
-.scrapbook__item.wide {
-  grid-column: span 2;
-}
-
-.scrapbook__item.tall {
-  grid-row: span 2;
-}
-
-.scrapbook__card {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  padding: 10px 10px 0;
+.gallery-tile {
+  display: grid;
+  gap: var(--space-2);
   margin: 0;
-  border-radius: 3px;
-  background: linear-gradient(158deg, #f8f4ea 0%, #eae2d1 100%);
-  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.5);
-  transform: rotate(var(--tilt, 0deg));
-  transition: transform var(--dur-slow) var(--ease-out-soft), box-shadow var(--dur-slow) var(--ease-out-soft);
 }
 
-.scrapbook__item:nth-child(4n + 1) .scrapbook__card {
-  --tilt: -1.5deg;
-}
-
-.scrapbook__item:nth-child(4n + 2) .scrapbook__card {
-  --tilt: 1deg;
-}
-
-.scrapbook__item:nth-child(4n + 3) .scrapbook__card {
-  --tilt: -0.7deg;
-}
-
-.scrapbook__item:nth-child(4n) .scrapbook__card {
-  --tilt: 1.7deg;
-}
-
-.scrapbook__item:hover .scrapbook__card,
-.scrapbook__item:focus-within .scrapbook__card {
-  transform: rotate(0deg) translateY(-7px);
-  box-shadow: 0 30px 54px rgba(0, 0, 0, 0.6);
-}
-
-.scrapbook__frame {
+/* Square, and the button is the picture: the click target and the image are the same box. */
+.gallery-tile__media {
   position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
-  border-radius: 2px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: var(--ink-950);
+  transition: border-color var(--dur) var(--ease-out-soft), box-shadow var(--dur) var(--ease-out-soft);
 }
 
-.scrapbook__frame img,
-.scrapbook__frame svg,
-.scrapbook__frame video {
+button.gallery-tile__media {
+  padding: 0;
+  cursor: zoom-in;
+}
+
+.gallery-tile__media img,
+.gallery-tile__media svg,
+.gallery-tile__media video {
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: saturate(0.94) contrast(1.03);
-  transition: transform 1.4s var(--ease-out-soft), filter var(--dur) var(--ease-out-soft);
+  transition: transform var(--dur-slow) var(--ease-out-soft);
 }
 
-.scrapbook__item:hover .scrapbook__frame img,
-.scrapbook__item:hover .scrapbook__frame svg {
-  transform: scale(1.045);
-  filter: saturate(1.06) contrast(1.03);
+.gallery-tile__media:hover img,
+.gallery-tile__media:hover svg {
+  transform: scale(1.04);
 }
 
-/* A clip keeps its controls, so it never scales - the same rule the home strip follows. */
-.scrapbook__frame video {
-  background: #000;
+.gallery-tile__media:hover,
+.gallery-tile__media:focus-visible {
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-md);
 }
 
-.scrapbook__tape {
+/* The magnification mark, which says the picture can be opened before it is clicked. */
+.gallery-tile__hint {
   position: absolute;
-  top: -11px;
-  left: 50%;
-  width: 94px;
-  height: 26px;
-  translate: -50% 0;
-  rotate: -4deg;
-  background: linear-gradient(100deg, rgba(223, 193, 120, 0.42), rgba(223, 193, 120, 0.2));
-  border-left: 1px dashed rgba(255, 255, 255, 0.22);
-  border-right: 1px dashed rgba(255, 255, 255, 0.22);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(6, 9, 8, 0.68);
+  color: var(--ivory-100);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
+  transform: translateY(4px);
+  backdrop-filter: blur(4px);
   pointer-events: none;
 }
 
-.scrapbook__item:nth-child(even) .scrapbook__tape {
-  left: 26%;
-  rotate: 3.5deg;
+.gallery-tile__media:hover .gallery-tile__hint,
+.gallery-tile__media:focus-visible .gallery-tile__hint {
+  opacity: 1;
+  transform: none;
 }
 
-.scrapbook__caption {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: 9px 4px 12px;
+.gallery-tile__caption {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
-.scrapbook__hand {
-  display: -webkit-box;
-  overflow: hidden;
-  color: #1f2422;
-  font-family: var(--font-hand);
-  font-size: 1.24rem;
-  line-height: 1.12;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.scrapbook__no {
-  flex: 0 0 auto;
-  color: #6b6455;
-  font-size: 0.62rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.scrapbook__line {
+.gallery-line {
   margin-top: var(--space-6);
 }
 
 @media (max-width: 1080px) {
-  .scrapbook {
+  .gallery-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 780px) {
-  .scrapbook {
+  .gallery-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-auto-rows: 210px;
-    gap: var(--space-5) var(--space-4);
+    gap: var(--space-4) var(--space-3);
   }
 }
 
-@media (max-width: 620px) {
-  /* One print per row: fixed heights stop working, so the frame takes a photographic ratio instead
-     and the wide/tall variants go back to being ordinary prints. */
-  .scrapbook {
+@media (max-width: 420px) {
+  .gallery-grid {
     grid-template-columns: minmax(0, 1fr);
-    grid-auto-rows: auto;
-  }
-  .scrapbook__item.wide,
-  .scrapbook__item.tall {
-    grid-column: auto;
-    grid-row: auto;
-  }
-  .scrapbook__frame {
-    aspect-ratio: 4 / 3;
   }
 }
 
+/* --- the viewer: one photograph, full size ----------------------------------------------------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: rgba(4, 8, 7, 0.92);
+  backdrop-filter: blur(8px);
+  animation: story-fade var(--dur) var(--ease-out-soft);
+}
+
+.lightbox__panel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 1400px);
+  max-height: 100%;
+  outline: none;
+}
+
+.lightbox__figure {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  max-height: calc(100vh - var(--space-9));
+}
+
+.lightbox__image {
+  display: block;
+  max-width: 100%;
+  max-height: 78vh;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  object-fit: contain;
+}
+
+.lightbox__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--ivory-200);
+}
+
+.lightbox__caption {
+  font-size: 0.95rem;
+}
+
+.lightbox__count {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: calc(var(--space-6) * -1);
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: rgba(6, 9, 8, 0.7);
+  color: var(--ivory-100);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.lightbox__close:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-300);
+}
+
+/* On the backdrop, not in the panel: the panel is only as wide as the photograph, so an arrow
+   offset from its edge would fall off a narrow screen. The backdrop is fixed, so these anchor to it. */
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  transform: translateY(-50%);
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: rgba(6, 9, 8, 0.6);
+  color: var(--ivory-100);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft),
+    background var(--dur) var(--ease-out-soft);
+}
+
+.lightbox__nav:hover {
+  border-color: var(--gold-500);
+  background: rgba(6, 9, 8, 0.85);
+  color: var(--gold-300);
+}
+
+.lightbox__nav--prev {
+  left: var(--space-5);
+}
+
+.lightbox__nav--prev svg {
+  transform: rotate(180deg);
+}
+
+.lightbox__nav--next {
+  right: var(--space-5);
+}
+
+@media (max-width: 900px) {
+  .lightbox {
+    padding: var(--space-4) var(--space-3) var(--space-6);
+  }
+  .lightbox__close {
+    top: 0;
+  }
+  .lightbox__panel {
+    padding-top: var(--space-7);
+  }
+  .lightbox__nav {
+    width: 40px;
+    height: 40px;
+    background: rgba(6, 9, 8, 0.78);
+  }
+  .lightbox__nav--prev {
+    left: var(--space-2);
+  }
+  .lightbox__nav--next {
+    right: var(--space-2);
+  }
+  .lightbox__image {
+    max-height: 70vh;
+  }
+}
 /* --- reviews page --- */
 .rating-summary {
   display: grid;

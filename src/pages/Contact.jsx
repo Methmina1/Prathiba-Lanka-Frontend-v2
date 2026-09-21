@@ -117,9 +117,9 @@ export default function Contact() {
       </section>
 
       {/* --- where we post ---------------------------------------------------------------------
-          The accounts from src/data/social.js, pinned up like the gallery's scrapbook: a card each,
-          with tape, a tilt and the handle written underneath. WhatsApp is here too: it is where the
-          agency actually answers, so it sits with the profiles rather than only in the footer. */}
+          The accounts from src/data/social.js, each in a card of its own with the handle and a link
+          that goes straight to the profile. WhatsApp is here too: it is where the agency actually
+          answers, so it sits with the profiles rather than only in the footer. */}
       <section className="section section--muted contact-social" id="follow">
         <div className="container">
           <Reveal className="section-head section-head--center">

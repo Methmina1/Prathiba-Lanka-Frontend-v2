@@ -12,7 +12,7 @@ framework, so the palette and layout stay easy to change.
 | `/journeys/:id` | One journey: overview, the full description, the day-by-day itinerary as a dropdown, gallery strip, reviews for that package (with a way to add one), sticky quote card |
 | `/journal` | **Opens on the province map and nothing else.** Picking a province brings up the notes written about it as cards, with what the province is like and its journeys beside the map; the whole journal sits behind "Read all N stories" |
 | `/journal/:id` | Full story, then more from the journal |
-| `/gallery` | The scrapbook board: every live gallery image or clip as a print with tape, a handwritten caption and its number |
+| `/gallery` | An even grid of square tiles, captions underneath, and a full-size viewer (arrow keys, Escape) |
 | `/reviews` | Average score, rating distribution, every review, and the way to the review form for a signed-in customer |
 | `/about` | Our story, the four things we hold to, milestones timeline |
 | `/contact` | Contact cards (WhatsApp, email, office), the enquiry form, a link to the PIN tracker, and a band of everything the agency posts to: Facebook, Instagram, TikTok and WhatsApp |
@@ -150,9 +150,9 @@ so it needs no backend. Forty tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the scrapbook gallery** (prints tilted, handwritten captions, straightening under the pointer), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the gallery grid and its viewer** (every tile the same square, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
-| `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer, and no sideways scroll on the pages whose layout is not a plain grid (the scrapbook, the contact social band, the journal with the map) |
+| `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer, and no sideways scroll on the pages whose layout is not a plain grid (the gallery tiles, the contact social band, the journal with the map) |
 
 The dashboard test exists because the console shipped with a layout bug that a Node render cannot see:
 the stat cards' label, figure and breakdown are spans, and with no layout on the card they sat on one
@@ -388,14 +388,20 @@ a scroll-progress bar, `<Reveal>` (IntersectionObserver fade/lift with stagger),
 active hero slide, hover zooms on card imagery, a gold sweep on CTA buttons, and animated nav
 underlines. Everything collapses under `prefers-reduced-motion: reduce`.
 
-**The scrapbook.** The gallery page (`/gallery`) is a board rather than a grid: each photograph is a
-print in a paper border with a strip of tape over one corner, a tilt from a `--tilt` custom property
-set per position with `nth-child`, a caption in the handwriting face (`--font-hand`, Caveat, loaded
-with the other two families in `index.html`) and a hand-pressed `NÃ‚Âº` under it. Hovering straightens
-the print and lifts it, and the number is the photograph's place in the gallery, not decoration. The
-tilt lives on the inner `<figure>` and never on the element `<Reveal>` animates, because both would
-be writing to `transform`. Only captions that exist are printed - an upload with no caption gets its
-number and nothing invented.
+**The gallery grid.** The gallery page (`/gallery`) is a plain grid rather than a board: four square
+tiles across (`repeat(4, minmax(0, 1fr))`, down to three, two and then one on a phone), each one the
+same size, the photograph cropped to fill it with `object-fit: cover`, and the caption written
+underneath the picture instead of over it. Hovering zooms the picture inside its square, turns the
+border gold and brings up a small magnifier, which is what says the photograph can be opened before
+anybody clicks it. A clip keeps its own controls and is not clickable.
+
+**The viewer.** Clicking a photograph opens `components/ui/Lightbox.jsx` - a dialog over a dark
+backdrop, with the caption and its place in the set underneath, arrow keys or the buttons to move
+through the photographs already on the page, and Escape, the close button or a click on the backdrop
+to leave. Focus moves into it on open, the page behind it is frozen (body scroll locked), and the
+same item renders a video clip with controls if one is opened. Nothing about the layout is generated
+per position any more: no tilt, no tape, no numbering - the photograph is the design, and the size
+of a tile never depends on where it happens to sit in the grid.
 
 **The contact page.** It is the one page allowed to move: two soft lights drift behind the cards and
 the form, a dashed thread travels slowly behind the row of contact cards, those cards lift with a
@@ -500,7 +506,7 @@ src/
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens
   styles/base.css          reset, type, buttons, grid, reveal/motion utilities
-  styles/components.css    section and page styles (including the scrapbook and the contact effects)
+  styles/components.css    section and page styles (including the gallery grid and the contact effects)
   styles/admin.css         staff console theme (scoped to .admin)
   components/layout/       Header, Footer, PageHero, SplashIntro, WhatsAppFab
   components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
@@ -508,7 +514,7 @@ src/
                            MediaPicker, useAdmin
   components/sections/     Home page sections (ProvinceMap is rendered by the journal page)
   components/ui/           Icons, Scenery, PackageCard, StoryDialog, DayAccordion, ReviewCallToAction,
-                           Reveal, ScrollProgress, MediaFigure, CoverImage
+                           Reveal, ScrollProgress, MediaFigure, CoverImage, Lightbox
   pages/                   Home, Journeys, JourneyDetail, JournalPage, JournalDetail,
                            GalleryPage, ReviewsPage, About, Contact, PlanPage, Login, Register,
                            Account, NotFound

@@ -182,7 +182,7 @@ test.describe('a visitor who has not signed in', () => {
     await expect(page.locator('h1')).toBeVisible()
 
     await page.goto('/gallery')
-    await expect(page.locator('.scrapbook__item').first()).toBeVisible()
+    await expect(page.locator('.gallery-tile').first()).toBeVisible()
 
     await page.goto('/reviews')
     await expect(page.locator('h1')).toContainText('What people said')
@@ -522,9 +522,14 @@ test.describe('a member of staff', () => {
 
     const visitor = await anotherVisitor(page)
     await visitor.goto('/gallery')
-    // the gallery is the scrapbook board now: the item just added is one of the prints
-    await expect(visitor.locator('.scrapbook__item').first()).toBeVisible()
-    await expect(visitor.locator('.scrapbook__hand').filter({ hasText: `E2E ${RUN} gallery` })).toBeVisible()
+    // the gallery is an even grid now: the item just added is one of the tiles, and clicking it opens
+    // the viewer on that photograph
+    const added = visitor.locator('.gallery-tile', { hasText: `E2E ${RUN} gallery` }).first()
+    await expect(added).toBeVisible()
+    await added.locator('.gallery-tile__open').click()
+    await expect(visitor.locator('.lightbox__caption')).toContainText(`E2E ${RUN} gallery`)
+    await visitor.keyboard.press('Escape')
+    await expect(visitor.locator('.lightbox')).toBeHidden()
     await visitor.close()
 
     // put the gallery item and the file back

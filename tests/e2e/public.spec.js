@@ -116,10 +116,10 @@ test('journeys, journal and gallery render their covers from the API', async ({ 
   await expect(page.locator('.journal-card__media img').first()).toHaveAttribute('src', '/images/sl/hero-2.webp')
 
   await page.goto('/gallery')
-  // the scrapbook wall: one print per gallery row, each with its number written under it
-  await expect(page.locator('.scrapbook__item')).toHaveCount(2)
-  await expect(page.locator('.scrapbook__item img').first()).toBeVisible()
-  await expect(page.locator('.scrapbook__no').first()).toHaveText('Nº 01')
+  // one square tile per gallery row, with the caption written underneath it
+  await expect(page.locator('.gallery-grid__cell')).toHaveCount(2)
+  await expect(page.locator('.gallery-tile__media img').first()).toBeVisible()
+  await expect(page.locator('.gallery-tile__caption').first()).toHaveText('Coast')
 })
 
 test('a journey detail page opens from a card', async ({ page }) => {
@@ -473,27 +473,65 @@ test('a customer is sent to the review form, and a visitor to sign in', async ({
   await expect(form.getByRole('button', { name: 'Publish review' })).toBeVisible()
 })
 
-test('the gallery is pinned up like a scrapbook', async ({ page }) => {
+test('the gallery is an even grid, and a photograph opens full size', async ({ page }) => {
   await page.goto('/gallery')
 
-  const prints = page.locator('.scrapbook__card')
-  await expect(prints).toHaveCount(2)
-  await expect(page.locator('.scrapbook__no').first()).toHaveText('Nº 01')
+  await expect(page.locator('.gallery-tile')).toHaveCount(2)
 
-  // Every print hangs at an angle, and the caption is written in the handwriting face.
-  const tilt = await prints.first().evaluate((node) => getComputedStyle(node).transform)
-  expect(tilt, 'a print should be tilted on the board').not.toBe('none')
+  // Nothing hangs at an angle any more: every tile is the same, evenly sized square, and the caption
+  // is written underneath the picture rather than across it.
+  const boxes = await page.locator('.gallery-tile__media').evaluateAll((nodes) =>
+    nodes.map((node) => {
+      const box = node.getBoundingClientRect()
+      return { w: Math.round(box.width), h: Math.round(box.height) }
+    })
+  )
+  expect(
+    new Set(boxes.map((box) => `${box.w}x${box.h}`)).size,
+    'every tile should be the same size'
+  ).toBe(1)
+  expect(boxes[0].w, 'a tile should be square').toBe(boxes[0].h)
 
-  const caption = page.locator('.scrapbook__hand').first()
-  await expect(caption).toHaveText('Coast')
-  const family = await caption.evaluate((node) => getComputedStyle(node).fontFamily)
-  expect(family.toLowerCase()).toContain('caveat')
+  await expect(page.locator('.gallery-tile__caption').first()).toHaveText('Coast')
+  const media = await page.locator('.gallery-tile__media').first().boundingBox()
+  const caption = await page.locator('.gallery-tile__caption').first().boundingBox()
+  expect(caption.y, 'the caption should sit below the picture').toBeGreaterThanOrEqual(
+    media.y + media.height
+  )
 
-  // Pointing at a print straightens it.
-  await prints.first().hover()
+  // Clicking a photograph opens the viewer, where the arrows move through the same set.
+  await page.locator('.gallery-tile__open').first().click()
+  const viewer = page.locator('.lightbox')
+  await expect(viewer).toBeVisible()
+  await expect(viewer.locator('.lightbox__caption')).toHaveText('Coast')
+  await expect(viewer.locator('.lightbox__count')).toHaveText('1 / 2')
+
+  await page.keyboard.press('ArrowRight')
+  await expect(viewer.locator('.lightbox__caption')).toHaveText('Hills')
+  await expect(viewer.locator('.lightbox__count')).toHaveText('2 / 2')
+
+  // The buttons do the same as the keys, and the arrows on the backdrop stay inside the viewport.
+  const next = viewer.getByRole('button', { name: 'Next photograph' })
+  const prev = viewer.getByRole('button', { name: 'Previous photograph' })
+  for (const button of [next, prev]) {
+    const box = await button.boundingBox()
+    expect(box.x, 'an arrow should not sit off the edge of the screen').toBeGreaterThanOrEqual(0)
+    expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize().width)
+  }
+  await prev.click()
+  await expect(viewer.locator('.lightbox__caption')).toHaveText('Coast')
+  await expect(viewer.locator('.lightbox__count')).toHaveText('1 / 2')
+
+  // The last one wraps round to the first, so the viewer is never a dead end.
+  await page.keyboard.press('ArrowLeft')
+  await expect(viewer.locator('.lightbox__caption')).toHaveText('Hills')
+
+  // Escape closes it, and the page behind is scrollable again.
+  await page.keyboard.press('Escape')
+  await expect(viewer).toBeHidden()
   await expect
-    .poll(async () => prints.first().evaluate((node) => getComputedStyle(node).transform))
-    .not.toBe(tilt)
+    .poll(() => page.evaluate(() => document.body.style.overflow))
+    .not.toBe('hidden')
 })
 
 test('the contact page carries the social accounts and the motion', async ({ page }) => {

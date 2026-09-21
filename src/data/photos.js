@@ -38,7 +38,7 @@ export const PHOTOS = {
   /**
    * Framed 4/5 portrait in the home "fewer places" section.
    *
-   * A photograph from the scrapbook set (see the gallery page): the picture this slot used to carry
+   * A photograph from the gallery set (see the gallery page): the picture this slot used to carry
    * was replaced at the client's request.
    */
   philosophy: '/images/sl/seed-gallery-17.jpg',
