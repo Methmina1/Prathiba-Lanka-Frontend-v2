@@ -173,7 +173,8 @@ const content = {
     payload: {
       hero: { eyebrow: 'Contact', title: 'Talk to us', lede: 'Tell us when you are coming.', scenery: 'coast', image: '' },
       cards: [
-        { icon: 'phone', label: 'Call or WhatsApp', value: '+94 77 000 0000', href: 'tel:+94770000000', note: 'Answered 08:00 - 21:00' },
+        { icon: 'whatsapp', label: 'WhatsApp', value: '+94 76 048 4088', href: 'https://wa.me/94760484088', note: 'Fastest way to reach us' },
+        { icon: 'phone', label: 'Call', value: '+94 77 000 0000', href: 'tel:+94770000000', note: 'Answered 08:00 - 21:00' },
         { icon: 'mail', label: 'Email', value: 'hello@prathibalanka.lk', href: 'mailto:hello@prathibalanka.lk', note: 'Within a working day' },
       ],
       aside: { heading: 'Already sent a request?', text: 'Use your PIN.', mapLabel: 'Kurunagala, Sri Lanka' },

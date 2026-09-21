@@ -194,3 +194,13 @@ export function Instagram(props) {
     </svg>
   )
 }
+
+/** The note-and-tail of the TikTok mark, drawn in the same single-stroke style as the others. */
+export function TikTok(props) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M14.5 4v9.4a3.6 3.6 0 1 1-3.6-3.6" />
+      <path d="M14.5 4c.6 2.3 2.2 3.7 4.5 4" />
+    </svg>
+  )
+}

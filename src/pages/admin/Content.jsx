@@ -14,7 +14,7 @@ const TABS = [
 ]
 
 const SCENERY = ['train', 'tea', 'coast', 'temple', 'safari', 'hills', 'galle', 'ella']
-const ICONS = ['phone', 'mail', 'map', 'clock']
+const ICONS = ['phone', 'mail', 'map', 'clock', 'whatsapp']
 
 /**
  * A photograph slot: the stored path, a button into the media library, a preview, and a way back to

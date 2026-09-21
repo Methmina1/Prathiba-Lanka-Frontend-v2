@@ -163,6 +163,11 @@ test.describe('a visitor who has not signed in', () => {
     await expect(days.first().locator('.days__steps li').first()).toBeVisible()
     expect(await days.first().locator('.days__steps li').count()).toBeGreaterThan(1)
     expect(await page.locator('.quote-card a[href="/plan"]').count()).toBeGreaterThan(0)
+    // and the page offers WhatsApp about this particular journey
+    await expect(page.locator('.quote-card__phone--whatsapp')).toHaveAttribute(
+      'href',
+      'https://wa.me/94760484088',
+    )
 
     await page.goto('/journal')
     // the featured post is the link itself, not a card with a link inside it
@@ -187,6 +192,24 @@ test.describe('a visitor who has not signed in', () => {
       'prathibhalankavoyages@gmail.com',
     )
     await expect(page.locator('.contact-card', { hasText: 'Office' })).toContainText('Kurunagala')
+
+    // The WhatsApp number the client gave us, on the card, in the social band it sits in, and in the
+    // bubble that follows a visitor around the site - all read from the one contact card the console
+    // edits, which is what makes this worth asserting against the live database.
+    await expect(page.locator('.contact-card', { hasText: 'WhatsApp' })).toContainText('+94 76 048 4088')
+    const band = page.locator('#follow')
+    await expect(band.getByRole('link', { name: /on WhatsApp/ })).toHaveAttribute(
+      'href',
+      'https://wa.me/94760484088',
+    )
+    await expect(band.getByRole('link', { name: /on TikTok/ })).toHaveAttribute(
+      'href',
+      'https://www.tiktok.com/@prathibha_lanka_voyages',
+    )
+    await expect(page.getByRole('link', { name: /Message us on WhatsApp/ })).toHaveAttribute(
+      'href',
+      'https://wa.me/94760484088',
+    )
 
     expect(errors, `console/page errors: ${errors.join(' | ')}`).toEqual([])
   })
@@ -517,7 +540,21 @@ test.describe('a member of staff', () => {
     await page.goto('/admin/content')
     await page.getByRole('button', { name: 'Contact page' }).click()
 
-    const office = page.getByLabel('Value').nth(1)
+    // By label, never by position: the cards are a list an editor adds to and reorders, and this
+    // test used to read "the second Value field", which broke the moment WhatsApp was added. The
+    // wait matters - the page fetches the content, so the list is empty for a moment after the tab.
+    const cards = page.locator('.adm-repeat')
+    await expect(cards.first()).toBeVisible()
+
+    const cardValue = async (label) => {
+      for (let index = 0; index < (await cards.count()); index += 1) {
+        const card = cards.nth(index)
+        if ((await card.getByLabel('Label').inputValue()) === label) return card.getByLabel('Value')
+      }
+      throw new Error(`no contact card labelled "${label}"`)
+    }
+
+    const office = await cardValue('Office')
     const original = await office.inputValue()
     expect(original, 'the office card should hold the agency address').toContain('Kurunagala')
 

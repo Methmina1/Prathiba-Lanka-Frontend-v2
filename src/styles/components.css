@@ -1938,25 +1938,49 @@ html.intro-landing .site-header .brand__text {
   gap: var(--space-3);
 }
 
+/* The WhatsApp bubble: on every public page (components/layout/WhatsAppFab.jsx), hidden on the
+   account and sign-in pages. The label is the number, and it slides out when the bubble is pointed
+   at or reached with the keyboard - the WhatsApp mark alone is recognisable, but the number removes
+   any doubt about whose phone it opens. */
 .whatsapp-fab {
   position: fixed;
   right: 20px;
   bottom: 20px;
   z-index: 40;
-  display: grid;
-  place-items: center;
-  width: 52px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
   height: 52px;
-  border-radius: 50%;
+  padding: 0 15px;
+  border-radius: var(--radius-pill);
   background: var(--gold-500);
   color: var(--ink-950);
   box-shadow: var(--shadow-gold);
-  transition: transform var(--dur) var(--ease-out-soft), background var(--dur) var(--ease-out-soft);
+  transition: transform var(--dur) var(--ease-out-soft), background var(--dur) var(--ease-out-soft),
+    gap var(--dur) var(--ease-out-soft);
 }
 
-.whatsapp-fab:hover {
+.whatsapp-fab:hover,
+.whatsapp-fab:focus-visible {
   transform: translateY(-3px) scale(1.04);
   background: var(--gold-400);
+  gap: var(--space-2);
+}
+
+.whatsapp-fab__label {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: max-width var(--dur) var(--ease-out-soft), opacity var(--dur) var(--ease-out-soft);
+}
+
+.whatsapp-fab:hover .whatsapp-fab__label,
+.whatsapp-fab:focus-visible .whatsapp-fab__label {
+  max-width: 12rem;
+  opacity: 1;
 }
 
 /* ================================================================ footer */
@@ -2201,8 +2225,12 @@ html.intro-landing .site-header .brand__text {
   .whatsapp-fab {
     right: 14px;
     bottom: 14px;
-    width: 46px;
     height: 46px;
+    padding: 0 12px;
+  }
+  /* No room for the number on a phone: the mark alone, at the smallest tap target we allow. */
+  .whatsapp-fab__label {
+    display: none;
   }
 }
 
@@ -2690,6 +2718,16 @@ html.intro-landing .site-header .brand__text {
 
 .quote-card__phone:hover {
   color: var(--gold-200);
+}
+
+/* Two contact lines on the same card: the WhatsApp one is tinted so it reads as a different channel
+   rather than another way of writing the same thing. Gold on ink is 7.56:1, emerald-300 on ink 8.2:1. */
+.quote-card__phone--whatsapp {
+  color: var(--emerald-300);
+}
+
+.quote-card__phone--whatsapp:hover {
+  color: #86efac;
 }
 
 /* --- journal list and post --- */
@@ -3408,6 +3446,14 @@ html.intro-landing .site-header .brand__text {
   min-width: 0;
 }
 
+/* Four accounts and the note: the note takes the rest of the last row rather than leaving a hole
+   beside it. It goes back to one column once the wall itself is a single column. */
+@media (min-width: 1081px) {
+  .social-wall__cell--note {
+    grid-column: span 2;
+  }
+}
+
 /* A card per account, tilted like the gallery prints and straightened on hover. The brand colour is
    only ever a soft light behind the card and a tint on the icon - the type stays ivory, because a
    blue or pink on ink is not readable. */
@@ -3460,6 +3506,15 @@ html.intro-landing .site-header .brand__text {
     radial-gradient(60% 55% at 92% 100%, rgba(131, 58, 180, 0.28), transparent 66%);
 }
 
+.social-card--tiktok .social-card__glow {
+  background: radial-gradient(85% 70% at 12% 0%, rgba(37, 244, 238, 0.2), transparent 62%),
+    radial-gradient(60% 55% at 92% 100%, rgba(254, 44, 85, 0.26), transparent 66%);
+}
+
+.social-card--whatsapp .social-card__glow {
+  background: radial-gradient(85% 70% at 12% 0%, rgba(37, 211, 102, 0.3), transparent 62%);
+}
+
 .social-card:hover .social-card__glow {
   opacity: 0.85;
 }
@@ -3491,6 +3546,14 @@ html.intro-landing .site-header .brand__text {
 
 .social-card--instagram:hover .social-card__icon {
   color: #ffb4c8;
+}
+
+.social-card--tiktok:hover .social-card__icon {
+  color: #8ff3ef;
+}
+
+.social-card--whatsapp:hover .social-card__icon {
+  color: #86efac;
 }
 
 .social-card__label {
@@ -3579,11 +3642,17 @@ html.intro-landing .site-header .brand__text {
   .social-wall {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .social-wall__cell--note {
+    grid-column: span 2;
+  }
 }
 
 @media (max-width: 680px) {
   .social-wall {
     grid-template-columns: minmax(0, 1fr);
+  }
+  .social-wall__cell--note {
+    grid-column: auto;
   }
   /* No thread between cards once they are stacked. */
   .contact-cards::before {

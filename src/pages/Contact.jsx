@@ -2,17 +2,32 @@ import { Link } from 'react-router-dom'
 import PageHero from '../components/layout/PageHero'
 import EnquiryForm from '../components/plan/EnquiryForm'
 import Reveal from '../components/ui/Reveal'
-import { ArrowRight, Clock, Facebook, Instagram, Mail, MapPin, Phone } from '../components/ui/Icons'
+import {
+  ArrowRight,
+  Clock,
+  Facebook,
+  Instagram,
+  Mail,
+  MapPin,
+  Phone,
+  TikTok,
+  WhatsApp,
+} from '../components/ui/Icons'
 import PHOTOS from '../data/photos'
 import SOCIAL_LINKS from '../data/social'
 import { useAuth } from '../auth/AuthContext'
 import { usePageContent } from '../hooks/usePageContent'
 import { api } from '../api/client'
 
-const ICONS = { phone: Phone, mail: Mail, map: MapPin, clock: Clock }
+const ICONS = { phone: Phone, mail: Mail, map: MapPin, clock: Clock, whatsapp: WhatsApp }
 
 /** An icon per social account; a profile we have no icon for simply shows the label. */
-const SOCIAL_ICONS = { facebook: Facebook, instagram: Instagram }
+const SOCIAL_ICONS = {
+  facebook: Facebook,
+  instagram: Instagram,
+  tiktok: TikTok,
+  whatsapp: WhatsApp,
+}
 
 /**
  * Contact.
@@ -102,8 +117,9 @@ export default function Contact() {
       </section>
 
       {/* --- where we post ---------------------------------------------------------------------
-          The accounts from src/data/social.js, pinned up like the gallery's scrapbook: a print each,
-          with tape, a tilt and the handle written underneath. */}
+          The accounts from src/data/social.js, pinned up like the gallery's scrapbook: a card each,
+          with tape, a tilt and the handle written underneath. WhatsApp is here too: it is where the
+          agency actually answers, so it sits with the profiles rather than only in the footer. */}
       <section className="section section--muted contact-social" id="follow">
         <div className="container">
           <Reveal className="section-head section-head--center">
@@ -111,7 +127,8 @@ export default function Contact() {
             <h2>Come along between journeys</h2>
             <p className="lede">
               Photographs from the road, which hotels we keep going back to, and the small things that
-              only turn up on the day - posted as they happen, between trips.
+              only turn up on the day - posted as they happen. And if you would rather just ask us,
+              WhatsApp is on this list too.
             </p>
           </Reveal>
 
@@ -139,7 +156,7 @@ export default function Contact() {
                     <span className="social-card__handle">{link.display}</span>
 
                     <span className="social-card__go">
-                      Follow along
+                      {link.cta ?? 'Follow along'}
                       <ArrowRight width={15} height={15} />
                     </span>
                   </a>
@@ -147,13 +164,14 @@ export default function Contact() {
               )
             })}
 
-            <Reveal delay={260} className="social-wall__cell">
+            <Reveal delay={300} className="social-wall__cell social-wall__cell--note">
               <div className="social-note">
                 <span className="social-note__pin" aria-hidden="true" />
                 <strong>A message reaches us faster</strong>
                 <p>
-                  A direct message on either account is the quickest way to ask about dates, rooms or
-                  a journey you have half-planned. Anything longer, use the form on the left.
+                  A WhatsApp message or a direct message on any of these is the quickest way to ask
+                  about dates, rooms or a journey you have half-planned. Anything longer, use the form
+                  on the left.
                 </p>
               </div>
             </Reveal>

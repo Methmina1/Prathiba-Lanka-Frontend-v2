@@ -15,7 +15,7 @@ framework, so the palette and layout stay easy to change.
 | `/gallery` | The scrapbook board: every live gallery image or clip as a print with tape, a handwritten caption and its number |
 | `/reviews` | Average score, rating distribution, every review, and the way to the review form for a signed-in customer |
 | `/about` | Our story, the four things we hold to, milestones timeline |
-| `/contact` | Contact cards, the enquiry form, a link to the PIN tracker, and a band of the agency's social accounts |
+| `/contact` | Contact cards (WhatsApp, email, office), the enquiry form, a link to the PIN tracker, and a band of everything the agency posts to: Facebook, Instagram, TikTok and WhatsApp |
 | `/plan` | **Plan your journey**: enquiry form (`POST /api/contact`), PIN tracker (`GET /api/bookings/track`), how-it-works steps |
 | `/login`, `/register` | Customer sign in and sign up (`POST /api/auth/login`, `POST /api/auth/register`); the JWT is kept in localStorage |
 | `/account` | Signed-in customers: their bookings (`GET /api/customer/bookings`), a new booking request (`POST /api/bookings/request`) and the review form (`POST /api/reviews`), which answers to `/account#review` |
@@ -112,7 +112,7 @@ Five suites cover the project between them, from the outside in:
 | `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 161 checks |
 | `mvn test` (backend repo) | nothing | the Spring context, the mail configuration |
 | `npm run check:render` | nothing | all 24 routes in Node: undefined components, bad hooks, broken props |
-| `npm run test:e2e` | nothing (API mocked) | 35 browser tests: layout, clicks, navigation |
+| `npm run test:e2e` | nothing (API mocked) | 37 browser tests: layout, clicks, navigation |
 | `npm run test:roles` | a running API + `BOOTSTRAP_ADMIN_PASSWORD` | 21 end-to-end journeys through the real UI and the real database, one per role |
 
 `check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
@@ -146,11 +146,11 @@ npm run test:roles -- -g "confirms the booking"
 
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Thirty-four tests across three files:
+so it needs no backend. Thirty-seven tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the province map on the journal page** (nine shapes that tile the island at Sri Lanka's proportions, choosing one, and holding one so the pointer can leave it), **the scrapbook gallery** (prints tilted, handwritten captions, straightening under the pointer), **the contact page's social band** (the two accounts, their labels and the tilt on the cards), **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the province map on the journal page** (nine shapes that tile the island at Sri Lanka's proportions, choosing one, and holding one so the pointer can leave it), **the scrapbook gallery** (prints tilted, handwritten captions, straightening under the pointer), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer, and no sideways scroll on the pages whose layout is not a plain grid (the scrapbook, the contact social band, the journal with the map) |
 
@@ -384,10 +384,21 @@ number and nothing invented.
 
 **The contact page.** It is the one page allowed to move: two soft lights drift behind the cards and
 the form, a dashed thread travels slowly behind the row of contact cards, those cards lift with a
-pulsing ring on hover, the office marker pulses on the map and the map itself drifts, and the social
-band at the bottom (`src/data/social.js`, the same accounts the footer uses) presents each profile as
-a tilted card with the brand colour as a soft glow behind it - never as text, because blue or pink on
-ink is not readable. All of it is scoped to `.contact-page` and all of it is CSS.
+pulsing ring on hover, the office marker pulses on the map and the map itself drifts, and the band at
+the bottom (`src/data/social.js`, the same accounts the footer uses) presents Facebook, Instagram,
+TikTok and WhatsApp as tilted cards with the brand colour as a soft glow behind each - never as text,
+because blue or pink on ink is not readable. All of it is scoped to `.contact-page` and all of it is
+CSS.
+
+**WhatsApp, in three places and one number.** The number is a *contact card* (`icon: 'whatsapp'`), so
+it is edited in Admin → Contact like the email and the office - `whatsappFrom()` in `data/social.js`
+reads that card and falls back to `CONTACT_FALLBACK` for a database that has not been edited yet. On
+top of the card it appears in the footer's "Talk to us" column, on a journey page's quote card as
+"ask about this journey", in the contact band as one of the profiles, and as the bubble in the corner
+of every public page (`components/layout/WhatsAppFab.jsx`). That bubble used to be a floating link to
+`/plan` - the class and the icon were already saying WhatsApp, and the CTA band carries its own
+"Begin your journey" button for that job. It is hidden on `/account`, `/login` and `/register`: those
+are a customer's own business, and neither belongs on the admin console's screens either.
 
 ## Deployment
 
@@ -476,7 +487,7 @@ src/
   styles/base.css          reset, type, buttons, grid, reveal/motion utilities
   styles/components.css    section and page styles (including the scrapbook and the contact effects)
   styles/admin.css         staff console theme (scoped to .admin)
-  components/layout/       Header, Footer, PageHero, SplashIntro
+  components/layout/       Header, Footer, PageHero, SplashIntro, WhatsAppFab
   components/plan/         EnquiryForm, TrackBooking  (used by /plan and /contact)
   components/admin/        AdminLayout (role guard + sidebar), AdminUI (table, dialog, pills),
                            MediaPicker, useAdmin

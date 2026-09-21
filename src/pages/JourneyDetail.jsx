@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { fallbackPackages } from '../data/fallback'
-import { CONTACT_FALLBACK } from '../data/social'
+import { CONTACT_FALLBACK, whatsappFrom } from '../data/social'
 import { useAuth } from '../auth/AuthContext'
 import { usePageContent } from '../hooks/usePageContent'
 import { useResource } from '../hooks/useResource'
@@ -11,7 +11,7 @@ import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
 import MediaFigure from '../components/ui/MediaFigure'
 import DayAccordion from '../components/ui/DayAccordion'
-import { ArrowRight, Calendar, Check, Mail, MapPin, Phone, Star, Users } from '../components/ui/Icons'
+import { ArrowRight, Calendar, Check, Mail, MapPin, Phone, Star, Users, WhatsApp } from '../components/ui/Icons'
 import { firstSentence, formatDate, formatDays, toLines, toParagraphs } from '../utils/format'
 
 const SCENERY = ['temple', 'safari', 'tea', 'coast', 'train', 'hills']
@@ -64,6 +64,7 @@ export default function JourneyDetail() {
   const contactCards = contact.cards ?? []
   const phone = contactCards.find((card) => card.href?.startsWith('tel:') && card.value)
   const email = contactCards.find((card) => card.href?.startsWith('mailto:') && card.value)
+  const whatsapp = whatsappFrom(contactCards)
 
   if (!pkg) {
     return (
@@ -258,6 +259,20 @@ export default function JourneyDetail() {
                   <ArrowRight width={15} height={15} />
                 </Link>
               )}
+
+              {/* WhatsApp leads: it is the channel the agency answers on, and this is the page where
+                  somebody is deciding. The number is the contact card from Admin -> Contact, not a
+                  constant, so changing it there changes it here. */}
+              <a
+                className="quote-card__phone quote-card__phone--whatsapp"
+                href={whatsapp.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={`Ask about ${pkg.title} on WhatsApp: ${whatsapp.value}`}
+              >
+                <WhatsApp width={15} height={15} />
+                {whatsapp.value}
+              </a>
 
               {/* The agency's real contact details, from the same cards the contact page edits.
                   There is no published phone number yet, so this falls back to email. */}

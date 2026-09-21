@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import Reveal from '../ui/Reveal'
-import { ArrowRight, Mail, Phone, WhatsApp } from '../ui/Icons'
+import { ArrowRight, Mail, Phone } from '../ui/Icons'
 import PHOTOS from '../../data/photos'
 import { CONTACT_FALLBACK } from '../../data/social'
 import { useAuth } from '../../auth/AuthContext'
@@ -52,12 +52,6 @@ export default function CtaBand() {
           )}
         </Reveal>
       </div>
-
-      {mayBook && (
-        <Link className="whatsapp-fab" to="/plan" aria-label="Plan your journey">
-          <WhatsApp width={22} height={22} />
-        </Link>
-      )}
     </section>
   )
 }

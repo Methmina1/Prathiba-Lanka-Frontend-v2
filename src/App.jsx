@@ -2,6 +2,7 @@ import { Outlet, Route, Routes } from 'react-router-dom'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import SplashIntro from './components/layout/SplashIntro'
+import WhatsAppFab from './components/layout/WhatsAppFab'
 import ScrollToTop from './components/ScrollToTop'
 import ScrollProgress from './components/ui/ScrollProgress'
 import AdminLayout from './components/admin/AdminLayout'
@@ -40,6 +41,8 @@ function SiteLayout() {
       <Header />
       <Outlet />
       <Footer />
+      {/* Public pages only - it hides itself on the account and sign-in pages. */}
+      <WhatsAppFab />
     </>
   )
 }

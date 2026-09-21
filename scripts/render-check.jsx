@@ -55,13 +55,16 @@ const ROUTES = {
   // No sample reviews ship with the app, so the page renders its empty state without a backend.
   '/reviews': ['What people said afterwards', 'No reviews yet', 'Sign in to write a review'],
   '/about': ['Arranged by people who live here', 'How we got here', '/images/sl/about-story.jpg'],
-  // the social accounts, straight from src/data/social.js
+  // the social accounts, straight from src/data/social.js - plus the WhatsApp bubble, which is on
+  // every public page
   '/contact': [
     'Talk to us',
     'Track a booking',
     '/images/sl/contact-map.jpg',
     'Come along between journeys',
     '@prathibha_lanka_voyeages',
+    'TikTok',
+    'Message us on WhatsApp',
   ],
   '/plan': ['Plan your journey', 'Request a journey', 'Track a booking', 'Sign in', 'Create an account'],
   '/login': ['Sign in', 'Create an account'],
@@ -92,6 +95,22 @@ const HOME_FORBIDDEN = [
   'Sign in',
 ]
 
+/**
+ * Pages that must not carry something. The WhatsApp bubble is the interesting one: it belongs to the
+ * pages a customer-to-be reads, and not to the sign-in or account pages - see WhatsAppFab.jsx.
+ */
+const PER_ROUTE_FORBIDDEN = {
+  '/': HOME_FORBIDDEN,
+  '/login': ['Message us on WhatsApp'],
+  '/register': ['Message us on WhatsApp'],
+}
+
+/** The bubble itself has to be there on the pages that are for them. */
+const PER_ROUTE_REQUIRED = {
+  '/journeys': ['Message us on WhatsApp'],
+  '/about': ['Message us on WhatsApp'],
+}
+
 const problems = []
 
 const check = (label, path, expected, session, { min = 2000, forbidden = [] } = {}) => {
@@ -115,7 +134,9 @@ const check = (label, path, expected, session, { min = 2000, forbidden = [] } = 
 }
 
 for (const [path, expected] of Object.entries(ROUTES)) {
-  check(path, path, expected, null, { forbidden: path === '/' ? HOME_FORBIDDEN : [] })
+  check(path, path, [...expected, ...(PER_ROUTE_REQUIRED[path] ?? [])], null, {
+    forbidden: PER_ROUTE_FORBIDDEN[path] ?? [],
+  })
 }
 
 for (const [path, expected] of Object.entries(ADMIN_ROUTES)) {

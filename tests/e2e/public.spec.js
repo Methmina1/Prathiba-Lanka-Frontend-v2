@@ -436,14 +436,19 @@ test('the gallery is pinned up like a scrapbook', async ({ page }) => {
 test('the contact page carries the social accounts and the motion', async ({ page }) => {
   await page.goto('/contact')
 
-  // Scoped to the band: the footer links the same two accounts, with the same labels.
+  // Scoped to the band: the footer links the same accounts, with the same labels.
   const band = page.locator('#follow')
   const facebook = band.getByRole('link', { name: 'Prathibha Lanka Voyages on Facebook' })
   const instagram = band.getByRole('link', { name: '@prathibha_lanka_voyeages on Instagram' })
+  const tiktok = band.getByRole('link', { name: 'Prathibha Lanka Voyages on TikTok' })
+  const whatsapp = band.getByRole('link', { name: 'Message Prathibha Lanka Voyages on WhatsApp' })
   await expect(facebook).toHaveAttribute('href', 'https://www.facebook.com/share/1KcQJzpSRF/')
   await expect(instagram).toHaveAttribute('href', 'https://www.instagram.com/prathibha_lanka_voyeages/')
+  await expect(tiktok).toHaveAttribute('href', 'https://www.tiktok.com/@prathibha_lanka_voyages')
+  await expect(whatsapp).toHaveAttribute('href', 'https://wa.me/94760484088')
   await expect(facebook).toHaveAttribute('rel', /noreferrer/)
   await expect(facebook).toHaveAttribute('target', '_blank')
+  await expect(band).toContainText('+94 76 048 4088')
   await expect(page.locator('.social-note')).toContainText('A message reaches us faster')
 
   // The effects layer is really applied: the aurora behind the cards animates, and a social card is
@@ -459,4 +464,33 @@ test('the contact page carries the social accounts and the motion', async ({ pag
   await expect
     .poll(async () => instagram.evaluate((node) => getComputedStyle(node).transform))
     .not.toBe(tilt)
+})
+
+test('the WhatsApp bubble follows a visitor, and stays out of the account pages', async ({ page }) => {
+  await page.goto('/')
+  const fab = page.getByRole('link', { name: /Message us on WhatsApp/ })
+  await expect(fab).toBeVisible()
+  await expect(fab).toHaveAttribute('href', 'https://wa.me/94760484088')
+  await expect(fab).toHaveAttribute('target', '_blank')
+
+  // It is on the pages a customer-to-be reads...
+  await page.goto('/journeys')
+  await expect(fab).toBeVisible()
+
+  // ...and not on the sign-in or account pages.
+  await page.goto('/login')
+  await expect(fab).toHaveCount(0)
+  await signIn(page, CUSTOMER_SESSION)
+  await page.goto('/account')
+  await expect(fab).toHaveCount(0)
+})
+
+test('a journey page offers WhatsApp about that journey', async ({ page }) => {
+  await page.goto('/journeys')
+  await page.locator('.package-card h3 a').first().click()
+
+  const whatsapp = page.locator('.quote-card__phone--whatsapp')
+  await expect(whatsapp).toBeVisible()
+  await expect(whatsapp).toHaveAttribute('href', 'https://wa.me/94760484088')
+  await expect(whatsapp).toContainText('+94 76 048 4088')
 })
