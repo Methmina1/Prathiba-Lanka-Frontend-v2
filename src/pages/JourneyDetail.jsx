@@ -243,14 +243,15 @@ export default function JourneyDetail() {
                   offered the request button. The facts still show. */}
               {mayBook ? (
                 <>
-                  <Link className="btn btn--cta btn--sweep btn--block" to="/plan">
+                  {/* The journey is carried in the URL so the request form opens with it chosen. */}
+                  <Link className="btn btn--cta btn--sweep btn--block" to={`/plan?package=${pkg.packageId}`}>
                     Request this journey
                     <ArrowRight width={15} height={15} />
                   </Link>
 
                   <p className="quote-card__note">
-                    No payment now. We reply with an itinerary and a price, usually within one
-                    working day.
+                    No payment now. You get a PIN straight away, and we reply with an itinerary and a
+                    price, usually within one working day.
                   </p>
                 </>
               ) : (

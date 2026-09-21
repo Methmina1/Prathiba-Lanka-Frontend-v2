@@ -1159,6 +1159,91 @@ html.intro-landing .site-header .brand__text {
   font-size: 0.86rem;
 }
 
+/* --- the journal notes for the chosen province --- */
+.island__notes {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.island__notes h4 {
+  margin-bottom: var(--space-4);
+  color: var(--text-faint);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.island__note-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+/* A note is a small landscape card: the cover answers "where is this?" faster than the title does,
+   so the photograph is a real column rather than a thumbnail behind the text. */
+.island__note {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-alt);
+  transition: border-color var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
+}
+
+.island__note:hover {
+  border-color: var(--border-gold);
+  transform: translateY(-2px);
+}
+
+.island__note-media {
+  display: block;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.island__note-media img,
+.island__note-media svg {
+  display: block;
+  width: 100%;
+  height: 68px;
+  object-fit: cover;
+}
+
+.island__note-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.island__note-body strong {
+  color: var(--text-heading);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.island__note-text {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.island__note-date {
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .island__list {
   display: flex;
   flex-wrap: wrap;
@@ -1617,6 +1702,93 @@ html.intro-landing .site-header .brand__text {
   margin: var(--space-2) 0 var(--space-5);
   color: var(--text-muted);
   font-size: 0.88rem;
+}
+
+/* --- requesting a journey (the form behind the Request buttons) --- */
+
+/* Two fields on one line: travellers and the date belong together. */
+.plan__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+/* A signed-in customer's request is attached to their account, so the form does not ask for a name
+   and an email - this says whose it will be instead. */
+.plan__signed-in {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+  padding: 0.7rem 1rem;
+  border: 1px dashed var(--border-gold);
+  border-radius: var(--radius);
+  color: var(--gold-300);
+  font-size: 0.84rem;
+}
+
+/* The general enquiry form sits under both columns, as the second thing to reach for. */
+.plan__enquiry {
+  grid-column: 1 / -1;
+}
+
+.plan__aside-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  color: var(--text-faint);
+  font-size: 0.8rem;
+}
+
+.plan__aside-link a {
+  color: var(--gold-300);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* The PIN, once the request is in: the one thing the traveller has to keep, so it is the loudest
+   thing on the card. */
+.plan__form--sent {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.booking-pin {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-5);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  text-align: center;
+}
+
+.booking-pin__label {
+  color: var(--text-faint);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.booking-pin__value {
+  color: var(--gold-200);
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+}
+
+.booking-pin__note {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 620px) {
+  .plan__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .field {

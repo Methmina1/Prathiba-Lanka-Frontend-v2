@@ -8,7 +8,7 @@ framework, so the palette and layout stay easy to change.
 | Route | Contents |
 |---|---|
 | `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), sustainability, gallery, journal, reviews, FAQ, CTA band |
-| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog. **No prices** — see below |
+| `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog. **No prices** â€” see below |
 | `/journeys/:id` | One journey: overview, the full description, the day-by-day itinerary as a dropdown, gallery strip, reviews for that package (with a way to add one), sticky quote card |
 | `/journal` | Featured story, the rest of the published posts, then **the province map** and its province details (moved here from the home page) |
 | `/journal/:id` | Full story, then more from the journal |
@@ -112,7 +112,7 @@ Five suites cover the project between them, from the outside in:
 | `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 161 checks |
 | `mvn test` (backend repo) | nothing | the Spring context, the mail configuration |
 | `npm run check:render` | nothing | all 24 routes in Node: undefined components, bad hooks, broken props |
-| `npm run test:e2e` | nothing (API mocked) | 37 browser tests: layout, clicks, navigation |
+| `npm run test:e2e` | nothing (API mocked) | 39 browser tests: layout, clicks, navigation |
 | `npm run test:roles` | a running API + `BOOTSTRAP_ADMIN_PASSWORD` | 21 end-to-end journeys through the real UI and the real database, one per role |
 
 `check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
@@ -146,7 +146,7 @@ npm run test:roles -- -g "confirms the booking"
 
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Thirty-seven tests across three files:
+so it needs no backend. Thirty-nine tests across three files:
 
 | File | Covers |
 |---|---|
@@ -273,7 +273,7 @@ The patterns have to be specific, and the near-misses are the interesting part:
 The journeys on the site are the agency's real ones, and they come from the rate workbook - one
 overview sheet plus one sheet per package, each with the day-by-day itinerary, the hotel table and
 the base price. Two commands turn it into records, both of which talk to the backend through the same
-admin API the console uses, so everything they write stays editable in Admin → Packages:
+admin API the console uses, so everything they write stays editable in Admin â†’ Packages:
 
 ```bash
 npm run extract:packages -- -Workbook "..\SriLanka_TourPackages.xlsx" -Out packages.json
@@ -291,7 +291,7 @@ refuses to delete a journey the gallery still points at).
 | Rate sheet | Package record |
 |---|---|
 | package name | `title` |
-| Experience (`Cultural & Heritage`, …) | `destination` - the pill on the card and the eyebrow on the detail page |
+| Experience (`Cultural & Heritage`, â€¦) | `destination` - the pill on the card and the eyebrow on the detail page |
 | Days | `durationDays`, and one numbered step per itinerary line |
 | Base price | `price` |
 | Day-by-day rows | `itinerary`, one line per day |
@@ -311,14 +311,14 @@ The importer merges that with the sheet: facts (route, durations, prices, hotels
 come from the workbook, prose comes from the copy file, and a package the copy file does not mention
 keeps a generated description made from the sheet's own facts and gets no long one. The copy is
 written for the site rather than lifted from any source document, and it is editable in
-Admin → Packages → *Full description* afterwards like every other field.
+Admin â†’ Packages â†’ *Full description* afterwards like every other field.
 
 Note on the numbers: the two price columns in the workbook disagree (the overview lists 550-2100 for
 the 13 tours, each package sheet lists 650-6500). The importer uses the package sheet, and prints the
 overview figure it did not use, so the difference is visible on every run rather than silent.
 
 **No prices are published.** The price is still stored on every package, imported from the workbook
-and edited in the console, and the staff console still shows it (Admin → Packages, and the figure an
+and edited in the console, and the staff console still shows it (Admin â†’ Packages, and the figure an
 admin agrees when confirming a booking). What the site does not do any more is *print* one: the
 cards, the journey page, the full-description dialog and the province map's journey list all leave it
 out, because a "from" figure on a card is a number nobody is actually offered - every journey is
@@ -329,7 +329,7 @@ a card or on a journey page.
 **Covers.** Each of the thirteen journeys has a photograph, chosen from the picture library for the
 part of the island that journey is about (the leopard for the Yala-heavy tours, the tea estates for
 the hill-country ones, the fort and the dancer for the heritage ones). They are ordinary media
-library entries, so swapping one is a two-click job in Admin → Packages.
+library entries, so swapping one is a two-click job in Admin â†’ Packages.
 
 **Fallbacks.** If the backend is down or a table is empty, `src/data/fallback.js` is rendered instead
 and a small notice explains why, so no page ever looks broken. The account area has no fallback - it
@@ -354,7 +354,7 @@ page deliberately offers no sign-in link.
 `src/styles/theme.css` holds every token. The palette is deep ink + metallic gold with the logo's
 emerald as a secondary note:
 
-- `--ink-950 … --ink-500` page and section backgrounds
+- `--ink-950 â€¦ --ink-500` page and section backgrounds
 - `--gold-500` (CTA and accents), `--gold-300` (on dark), `--gold-700` (text on light)
 - `--ivory-50/100` light surfaces, `--sand-*` warm grey text
 - `--emerald-600` brand note, plus `--success/--warning/--error/--info`
@@ -376,7 +376,7 @@ underlines. Everything collapses under `prefers-reduced-motion: reduce`.
 **The scrapbook.** The gallery page (`/gallery`) is a board rather than a grid: each photograph is a
 print in a paper border with a strip of tape over one corner, a tilt from a `--tilt` custom property
 set per position with `nth-child`, a caption in the handwriting face (`--font-hand`, Caveat, loaded
-with the other two families in `index.html`) and a hand-pressed `Nº` under it. Hovering straightens
+with the other two families in `index.html`) and a hand-pressed `NÂº` under it. Hovering straightens
 the print and lifts it, and the number is the photograph's place in the gallery, not decoration. The
 tilt lives on the inner `<figure>` and never on the element `<Reveal>` animates, because both would
 be writing to `transform`. Only captions that exist are printed - an upload with no caption gets its
@@ -391,7 +391,7 @@ because blue or pink on ink is not readable. All of it is scoped to `.contact-pa
 CSS.
 
 **WhatsApp, in three places and one number.** The number is a *contact card* (`icon: 'whatsapp'`), so
-it is edited in Admin → Contact like the email and the office - `whatsappFrom()` in `data/social.js`
+it is edited in Admin â†’ Contact like the email and the office - `whatsappFrom()` in `data/social.js`
 reads that card and falls back to `CONTACT_FALLBACK` for a database that has not been edited yet. On
 top of the card it appears in the footer's "Talk to us" column, on a journey page's quote card as
 "ask about this journey", in the contact band as one of the profiles, and as the bubble in the corner
@@ -416,21 +416,21 @@ mixed-content risk, and the backend's address can change without rebuilding the 
 
 | Setting | When | Purpose |
 |---|---|---|
-| `VITE_API_BASE_URL` | build (`--build-arg`) | API base. `/` — the image default — means same-origin through the proxy |
+| `VITE_API_BASE_URL` | build (`--build-arg`) | API base. `/` â€” the image default â€” means same-origin through the proxy |
 | `BACKEND_URL` | runtime | Where nginx forwards `/api` and `/media`. Defaults to `http://backend.railway.internal:8080` |
 | `PORT` | runtime | Port nginx listens on. Railway injects it; 80 otherwise |
 
 ### Railway
 
-Two services from two repositories — this one and the API:
+Two services from two repositories â€” this one and the API:
 
-1. *New → GitHub repo → this repository*. Railway builds the `Dockerfile`; `railway.json` sets the
+1. *New â†’ GitHub repo â†’ this repository*. Railway builds the `Dockerfile`; `railway.json` sets the
    builder, the `/healthz` health check and the restart policy.
-2. Add a public domain (*Settings → Networking → Generate Domain*). That is the address the agency
+2. Add a public domain (*Settings â†’ Networking â†’ Generate Domain*). That is the address the agency
    uses; the API needs no public domain of its own.
 3. Set `BACKEND_URL` to the API service, one of:
-   - `http://<api-service>.railway.internal:8080` — private networking inside the project, no egress;
-   - `https://<api-service>.up.railway.app` — if the API has (or gets) a public domain.
+   - `http://<api-service>.railway.internal:8080` â€” private networking inside the project, no egress;
+   - `https://<api-service>.up.railway.app` â€” if the API has (or gets) a public domain.
 
    The default assumes that service is called `backend`, and the port has to be the one the API
    listens on. nginx resolves this at start-up, so if the API's address changes, restart this
@@ -441,7 +441,7 @@ the image never needs rebuilding when the backend moves. `nginx/05-check-backend
 before that rendering: it fails with an explanation rather than an nginx stack trace when
 `BACKEND_URL` is missing or empty, strips a trailing slash from it, and prints the address it will
 use. It is an `.envsh` because the nginx entrypoint *sources* those (so its changes reach `envsubst`)
-and ignores a script that is not executable — which is why the Dockerfile chmods it.
+and ignores a script that is not executable â€” which is why the Dockerfile chmods it.
 
 The rest of the config is the set of decisions that make the built site behave: gzip; security
 headers; `client_max_body_size 70m`, which has to stay at or above the backend's multipart limit or
@@ -462,7 +462,7 @@ so `/journeys` and `/admin/...` reach the app instead of 404ing.
 | `Deploy to GitHub Pages` | push to `main`, opt-in | builds with the Pages base path and publishes |
 
 The deploy job only runs when the repository variable `DEPLOY_PAGES` is `true` and Pages is enabled
-(Settings → Pages → Source: GitHub Actions). Until then it is skipped, so the pipeline cannot fail
+(Settings â†’ Pages â†’ Source: GitHub Actions). Until then it is skipped, so the pipeline cannot fail
 because of it.
 
 ## Structure
@@ -531,11 +531,11 @@ carries an uploaded one instead. Which is which:
 | Where | Comes from | Changed by |
 |---|---|---|
 | Home hero carousel, page header bands, the "fewer places" panel, the CTA band, the contact map panel, the 404 page | `public/images/sl/*.jpg`, mapped slot by slot in `src/data/photos.js` | replacing the file, or editing that map (a developer change) |
-| Journey cards and journey headers | the package's `imageUrl`, seeded per journey by `npm run import:packages` from `data/package-copy.json` | Admin → Packages → Cover image (media library) |
-| Journal cards, featured story, story cover | the post's `coverImageUrl` | Admin → Journal → Cover image (media library) |
-| Gallery, home gallery strip | gallery items (image or short video) | Admin → Gallery, files from Admin → Media library |
-| About and Contact header bands and the About story panel | `hero.image` / `story.image` in the page content | Admin → About and Contact (media library) |
-| Journey page "from the road" strip | gallery items linked to that journey | Admin → Gallery → link to a package |
+| Journey cards and journey headers | the package's `imageUrl`, seeded per journey by `npm run import:packages` from `data/package-copy.json` | Admin â†’ Packages â†’ Cover image (media library) |
+| Journal cards, featured story, story cover | the post's `coverImageUrl` | Admin â†’ Journal â†’ Cover image (media library) |
+| Gallery, home gallery strip | gallery items (image or short video) | Admin â†’ Gallery, files from Admin â†’ Media library |
+| About and Contact header bands and the About story panel | `hero.image` / `story.image` in the page content | Admin â†’ About and Contact (media library) |
+| Journey page "from the road" strip | gallery items linked to that journey | Admin â†’ Gallery â†’ link to a package |
 
 Nothing is decorative filler: every managed slot falls back to a photograph that ships with the site
 (`components/ui/CoverImage.jsx`, `src/data/photos.js`) when no upload has been chosen, and to the drawn

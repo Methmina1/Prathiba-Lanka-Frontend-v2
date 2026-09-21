@@ -4,10 +4,12 @@ import { api } from '../../api/client'
 import { fallbackPackages } from '../../data/fallback'
 import { MAP_SOURCE, MAP_VIEW_BOX, PROVINCES } from '../../data/provinces'
 import { PROVINCE_COPY } from '../../data/provinceCopy'
-import { journeysInProvince } from '../../data/provincePlaces'
+import { journeysInProvince, journalsInProvince } from '../../data/provincePlaces'
 import { useApi } from '../../hooks/useApi'
-import { formatDays } from '../../utils/format'
+import { formatDate, formatDays } from '../../utils/format'
 import { ArrowRight, Lock, MapPin } from '../ui/Icons'
+import CoverImage from '../ui/CoverImage'
+import PHOTOS from '../../data/photos'
 import Reveal from '../ui/Reveal'
 
 /** How many journeys the panel lists before it offers the rest. */
@@ -31,7 +33,7 @@ const LISTED = 3
  * Without the hold, a province in the middle of the map was almost impossible to read: every route
  * to the panel passes over its neighbours.
  */
-export default function ProvinceMap() {
+export default function ProvinceMap({ posts = [] }) {
   const { data: packages } = useApi(() => api.getPackages(), fallbackPackages)
 
   const [hoveredId, setHoveredId] = useState(null)
@@ -40,6 +42,9 @@ export default function ProvinceMap() {
   const activeId = heldId ?? hoveredId ?? 'central'
   const active = PROVINCES.find((province) => province.id === activeId) ?? PROVINCES[0]
   const journeys = journeysInProvince(packages, active.id)
+  // The journal notes that name this province's places, so picking a province answers "what is it
+  // like there?" with something to read and a photograph, not only a list of journeys.
+  const notes = journalsInProvince(posts, active.id)
 
   /** A click holds the province; a second click on the same one lets go. */
   const toggleHold = (provinceId) => {
@@ -174,6 +179,51 @@ export default function ProvinceMap() {
                   </Link>
                 )}
               </div>
+
+              {/* The journal notes for this province, with their covers. Hidden rather than empty
+                  when there is nothing to show, so a thin journal does not leave a heading over
+                  nothing. */}
+              {notes.length > 0 && (
+                <div className="island__notes">
+                  <h4>
+                    {notes.length === 1
+                      ? `A note from ${active.name}`
+                      : `${notes.length} notes from ${active.name}`}
+                  </h4>
+
+                  <ul className="island__note-list">
+                    {notes.slice(0, LISTED).map(({ post }, index) => (
+                      <li key={post.journalId}>
+                        <Link className="island__note" to={`/journal/${post.journalId}`}>
+                          <span className="island__note-media">
+                            <CoverImage
+                              src={post.coverImageUrl}
+                              fallback={PHOTOS.journalFallback[index % PHOTOS.journalFallback.length]}
+                              alt={post.title}
+                            />
+                          </span>
+                          <span className="island__note-body">
+                            <strong>{post.title}</strong>
+                            {post.description && (
+                              <span className="island__note-text">{post.description}</span>
+                            )}
+                            <span className="island__note-date">
+                              {formatDate(post.publishedAt) ?? 'Recently published'}
+                            </span>
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {notes.length > LISTED && (
+                    <Link className="link-arrow" to="/journal">
+                      More from the journal
+                      <ArrowRight width={15} height={15} />
+                    </Link>
+                  )}
+                </div>
+              )}
             </div>
 
             <ul className="island__list">

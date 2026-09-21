@@ -32,9 +32,12 @@ export default function EnquiryForm() {
   }
 
   return (
-    <form className="card plan__form" onSubmit={submit}>
-      <h3>Request a journey</h3>
-      <p className="plan__hint">Tell us roughly when, and what you would like to see.</p>
+    <form className="card plan__form" id="enquiry" onSubmit={submit}>
+      <h3>Ask us something</h3>
+      <p className="plan__hint">
+        For anything that is not a request for a particular journey: a question about a place, a date
+        that might work, or a trip you would like us to design from scratch.
+      </p>
 
       <div className="field">
         <label htmlFor="name">Your name</label>

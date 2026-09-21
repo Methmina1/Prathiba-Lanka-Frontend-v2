@@ -9,8 +9,11 @@ const FILTERS = [
   { value: '', label: 'All' },
   { value: 'PENDING', label: 'Pending' },
   { value: 'CONFIRMED', label: 'Confirmed' },
-  { value: 'REJECTED', label: 'Rejected' },
+  // The API and the database call this REJECTED; the agency calls it cancelling a request.
+  { value: 'REJECTED', label: 'Cancelled' },
 ]
+
+const STATUS_LABELS = { PENDING: 'Pending', CONFIRMED: 'Confirmed', REJECTED: 'Cancelled' }
 
 export default function AdminBookings() {
   const { token } = useAuth()
@@ -23,6 +26,7 @@ export default function AdminBookings() {
 
   const [confirming, setConfirming] = useState(null)
   const [confirmForm, setConfirmForm] = useState({ confirmedPrice: '', confirmedDate: '' })
+  const [cancelling, setCancelling] = useState(null)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState({ kind: 'info', text: '' })
 
@@ -55,11 +59,19 @@ export default function AdminBookings() {
     }
   }
 
-  async function reject(booking) {
+  /**
+   * Cancelling ends somebody's request and emails them about it, so it asks first: the button sits
+   * next to Confirm, and one stray click should not close a booking the agency meant to take.
+   */
+  async function cancel(booking) {
     setBusy(true)
     try {
       await adminApi.rejectBooking(token, booking.bookingId)
-      setNotice({ kind: 'success', text: `Booking ${booking.pinCode} rejected.` })
+      setCancelling(null)
+      setNotice({
+        kind: 'success',
+        text: `Booking ${booking.pinCode} cancelled - the traveller has been emailed.`,
+      })
       reload()
     } catch (problem) {
       setNotice({ kind: 'error', text: describeError(problem) })
@@ -110,7 +122,7 @@ export default function AdminBookings() {
               <td>{booking.numTravelers}</td>
               <td>{booking.preferredTravelDate}</td>
               <td>
-                <StatusPill value={booking.status} />
+                <StatusPill value={booking.status} label={STATUS_LABELS[booking.status]} />
               </td>
               <td>
                 {formatPrice(booking.confirmedPrice) ?? '—'}
@@ -131,9 +143,9 @@ export default function AdminBookings() {
                         type="button"
                         className="adm-btn adm-btn--sm adm-btn--danger"
                         disabled={busy}
-                        onClick={() => reject(booking)}
+                        onClick={() => setCancelling(booking)}
                       >
-                        Reject
+                        Cancel
                       </button>
                     </>
                   ) : (
@@ -177,13 +189,46 @@ export default function AdminBookings() {
 
             <div className="adm-form__actions">
               <button type="button" className="adm-btn adm-btn--outline" onClick={() => setConfirming(null)}>
-                Cancel
+                Close
               </button>
               <button type="submit" className="adm-btn adm-btn--primary" disabled={busy}>
                 {busy ? 'Confirming…' : 'Confirm booking'}
               </button>
             </div>
           </form>
+        )}
+      </Dialog>
+
+      <Dialog
+        open={Boolean(cancelling)}
+        title={`Cancel request ${cancelling?.pinCode ?? ''}`}
+        onClose={() => setCancelling(null)}
+      >
+        {cancelling && (
+          <>
+            <p style={{ color: 'var(--adm-muted)', fontSize: '0.88rem' }}>
+              {cancelling.customerName} ({cancelling.customerEmail}) · {cancelling.packageTitle} ·{' '}
+              {cancelling.numTravelers} traveller{cancelling.numTravelers === 1 ? '' : 's'} from{' '}
+              {cancelling.preferredTravelDate}
+            </p>
+            <p style={{ color: 'var(--adm-muted)', fontSize: '0.88rem' }}>
+              The request is closed and {cancelling.customerName} is emailed to say it could not be
+              confirmed. Nothing is charged either way.
+            </p>
+            <div className="adm-form__actions">
+              <button type="button" className="adm-btn adm-btn--outline" onClick={() => setCancelling(null)}>
+                Keep it pending
+              </button>
+              <button
+                type="button"
+                className="adm-btn adm-btn--danger"
+                disabled={busy}
+                onClick={() => cancel(cancelling)}
+              >
+                {busy ? 'Cancelling…' : 'Cancel the request'}
+              </button>
+            </div>
+          </>
         )}
       </Dialog>
     </>

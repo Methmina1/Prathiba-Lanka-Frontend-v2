@@ -50,7 +50,8 @@ test('a customer still gets the booking flow', async ({ page }) => {
   await expect(page.locator('.footer__links a[href="/plan"]')).toHaveCount(1)
 
   await page.goto('/journeys')
-  await expect(page.locator('.package-card__meta a[href="/plan"]').first()).toBeVisible()
+  // The journey is carried in the URL so the request form opens with it selected.
+  await expect(page.locator('.package-card__meta a[href^="/plan"]').first()).toBeVisible()
 
   await page.goto('/plan')
   await expect(page.locator('h1')).toHaveText('Plan your journey')
@@ -142,7 +143,8 @@ test('a status filter refetches and changes the table', async ({ page }) => {
   await expect(page.locator('.adm-table')).toContainText('E5F6A7B8')
   await expect(page.locator('.adm-table')).not.toContainText('A1B2C3D4')
 
-  await page.getByRole('button', { name: 'Rejected' }).click()
+  // The stored status is REJECTED; the console says Cancelled, which is the agency's word for it.
+  await page.getByRole('button', { name: 'Cancelled' }).click()
   await expect(page.locator('.adm-empty')).toBeVisible()
 })
 

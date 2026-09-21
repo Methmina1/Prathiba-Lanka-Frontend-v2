@@ -162,7 +162,8 @@ test.describe('a visitor who has not signed in', () => {
     // stops it is made of rather than one paragraph.
     await expect(days.first().locator('.days__steps li').first()).toBeVisible()
     expect(await days.first().locator('.days__steps li').count()).toBeGreaterThan(1)
-    expect(await page.locator('.quote-card a[href="/plan"]').count()).toBeGreaterThan(0)
+    // The request button carries the journey in the URL, so the form opens with it chosen.
+    expect(await page.locator('.quote-card a[href^="/plan"]').count()).toBeGreaterThan(0)
     // and the page offers WhatsApp about this particular journey
     await expect(page.locator('.quote-card__phone--whatsapp')).toHaveAttribute(
       'href',

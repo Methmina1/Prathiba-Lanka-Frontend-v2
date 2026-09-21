@@ -66,7 +66,15 @@ const ROUTES = {
     'TikTok',
     'Message us on WhatsApp',
   ],
-  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking', 'Sign in', 'Create an account'],
+  '/plan': [
+    'Plan your journey',
+    // the request form (what the Journey cards open) and the general enquiry form beside it
+    'Request a journey',
+    'Ask us something',
+    'Track a booking',
+    'Sign in',
+    'Create an account',
+  ],
   '/login': ['Sign in', 'Create an account'],
   '/register': ['Create an account', 'At least 8 characters'],
   '/nope': ['This path leads nowhere', '/images/sl/not-found.jpg'],
@@ -75,7 +83,8 @@ const ROUTES = {
 // the staff console, rendered with an admin session
 const ADMIN_ROUTES = {
   '/admin': ['Admin console', 'Awaiting decision', 'New enquiries', 'Packages live'],
-  '/admin/bookings': ['Admin console', 'Pending', 'Confirmed', 'Rejected'],
+  // The console calls the status Cancelled; the API and the database still store REJECTED.
+  '/admin/bookings': ['Admin console', 'Pending', 'Confirmed', 'Cancelled'],
   '/admin/queries': ['Admin console', 'Waiting for a reply'],
   '/admin/packages': ['Admin console', 'New package'],
   '/admin/journal': ['Admin console', 'New story'],

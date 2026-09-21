@@ -55,7 +55,8 @@ const posts = [
     status: 'PUBLISHED',
     publishedAt: '2026-09-19T10:00:00',
     coverImageUrl: photo('hero-1.jpg'),
-    content: 'First paragraph.\n\nSecond paragraph.',
+    // The map places a post by the places it names, so the fixtures name some: this one is Southern.
+    content: 'First paragraph about Mirissa and Weligama.\n\nSecond paragraph about Galle.',
   },
   {
     journalId: 35,
@@ -64,7 +65,16 @@ const posts = [
     status: 'PUBLISHED',
     publishedAt: '2026-09-19T10:05:00',
     coverImageUrl: photo('hero-2.webp'),
-    content: 'First paragraph.\n\nSecond paragraph.',
+    content: 'First paragraph about Yala.\n\nSecond paragraph about the elephants of Minneriya.',
+  },
+  {
+    journalId: 36,
+    title: 'Kandy, and the road up into the tea country',
+    description: 'The hill capital and the estates above it.',
+    status: 'PUBLISHED',
+    publishedAt: '2026-09-19T10:10:00',
+    coverImageUrl: photo('hero-3.jpg'),
+    content: 'First paragraph about Kandy and the Temple of the Tooth.\n\nSecond about Nuwara Eliya.',
   },
 ]
 
@@ -223,6 +233,30 @@ export async function mockApi(page) {
     if (path === '/api/auth/register') return json({ ...CUSTOMER_SESSION })
     if (path.startsWith('/api/customer/bookings')) return json(bookings)
     if (path.startsWith('/api/bookings/track')) return json(bookings[0])
+
+    // Requesting a journey: the public form. The mock answers the way the API does - 201 with a PIN
+    // and the journey that was asked for - so the form's success state can be asserted.
+    if (path === '/api/bookings/request') {
+      const body = JSON.parse(route.request().postData() ?? '{}')
+      const journey = packages.find((p) => String(p.packageId) === String(body.packageId)) ?? packages[0]
+      return json(
+        {
+          bookingId: 501,
+          pinCode: 'TESTPIN1',
+          status: 'PENDING',
+          customerName: body.contactName ?? CUSTOMER_SESSION.email,
+          customerEmail: body.contactEmail ?? CUSTOMER_SESSION.email,
+          packageTitle: journey.title,
+          destination: journey.destination,
+          numTravelers: body.numTravelers,
+          preferredTravelDate: body.preferredTravelDate,
+          specialRequests: body.specialRequests ?? null,
+          confirmedPrice: null,
+          confirmedDate: null,
+        },
+        201
+      )
+    }
     if (path === '/api/contact') return json({ queryId: 3, status: 'NEW', autoResponseSent: false }, 201)
 
     return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })

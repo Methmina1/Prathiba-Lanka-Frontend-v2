@@ -64,7 +64,7 @@ export default function PackageCard({ pkg, index = 0, onReadStory }) {
               <ArrowRight width={15} height={15} />
             </Link>
             {mayBook && (
-              <Link className="link-arrow" to="/plan">
+              <Link className="link-arrow" to={`/plan?package=${pkg.packageId}`}>
                 Request
                 <ArrowRight width={15} height={15} />
               </Link>

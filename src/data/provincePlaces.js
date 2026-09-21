@@ -65,6 +65,11 @@ export function journeyText(pkg) {
   return [pkg?.title, pkg?.destination, pkg?.description, pkg?.itinerary].filter(Boolean).join(' \n ')
 }
 
+/** Everything a journal post says, as one string. */
+export function journalText(post) {
+  return [post?.title, post?.description, post?.content].filter(Boolean).join(' \n ')
+}
+
 /** True when a place pattern matches some text, honouring its `unless` escape hatch. */
 function mentions(pattern, text) {
   if (pattern instanceof RegExp) return pattern.test(text)
@@ -103,6 +108,36 @@ export function journeysInProvince(packages, provinceId) {
         b.share - a.share ||
         b.days - a.days ||
         String(a.pkg.title ?? '').localeCompare(String(b.pkg.title ?? '')),
+    )
+}
+
+/**
+ * The journal notes that belong to a province, best first.
+ *
+ * The same patterns as the journeys, because the question is identical: which places does this text
+ * name? What differs is the ranking. A journey is placed by how many of its days are spent there; a
+ * note has no days, so it is placed by how many of the province's places it mentions - the note
+ * written about a province names four or five of them, and one that mentions a single town in
+ * passing names one.
+ *
+ * Returns `{ post, hits }` so a caller can say why a note is on the list, and it works on any post
+ * an editor publishes: nothing has to be tagged with a province by hand.
+ */
+export function journalsInProvince(posts, provinceId) {
+  const patterns = PROVINCE_PLACES[provinceId]
+  if (!patterns || !posts) return []
+
+  return posts
+    .map((post) => {
+      const text = journalText(post)
+      const hits = patterns.filter((pattern) => mentions(pattern, text)).length
+      return hits > 0 ? { post, hits } : null
+    })
+    .filter(Boolean)
+    .sort(
+      (a, b) =>
+        b.hits - a.hits ||
+        String(b.post?.publishedAt ?? '').localeCompare(String(a.post?.publishedAt ?? '')),
     )
 }
 

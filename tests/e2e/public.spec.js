@@ -382,6 +382,49 @@ test('the About page shows the photo that ships with the site', async ({ page })
   await expect(page.locator('.philosophy__frame img')).toHaveAttribute('src', '/images/sl/about-story.jpg')
 })
 
+test('the Request button opens the form with its journey already chosen', async ({ page }) => {
+  await page.goto('/journeys')
+  await page.locator('.package-card__meta a[href^="/plan"]').first().click()
+
+  // The journey travels in the URL, and the field is filled in for you.
+  await expect(page).toHaveURL(/\/plan\?package=\d+/)
+  const form = page.locator('#request')
+  await expect(form.locator('#bookingPackage')).toHaveValue('41')
+  await expect(form.locator('#bookingPackage option:checked')).toHaveText(/Classical Heritage/)
+
+  // A visitor without an account gives a name and an email...
+  await form.getByLabel('Your name').fill('Ada Traveller')
+  await form.getByLabel('Email').fill('ada@example.com')
+  await form.getByLabel('Travellers').fill('3')
+  await form.getByLabel('Preferred date').fill('2027-03-04')
+  await form.getByRole('button', { name: 'Request this journey' }).click()
+
+  // ...and comes back with the PIN that tracks it.
+  const sent = page.locator('.plan__form--sent')
+  await expect(sent).toBeVisible()
+  await expect(sent.locator('.booking-pin__value')).toHaveText('TESTPIN1')
+  await expect(sent).toContainText('Classical Heritage')
+  await expect(sent).toContainText('3 travellers')
+})
+
+test('the journal page shows a province its own notes', async ({ page }) => {
+  await page.goto('/journal')
+
+  // The map carries the notes that name that province's places, with their covers.
+  const panel = page.locator('.island__card')
+  await expect(panel.locator('.island__notes h4')).toContainText('Central')
+  const notes = panel.locator('.island__note')
+  await expect(notes.first()).toBeVisible()
+  await expect(notes.first().locator('img')).toBeVisible()
+
+  // Choosing another province swaps the list for that province's.
+  const before = await notes.first().innerText()
+  await page.getByRole('button', { name: 'Southern', exact: true }).click()
+  await expect(panel.locator('.island__notes h4')).toContainText('Southern')
+  await expect(notes.first()).toBeVisible()
+  expect(await notes.first().innerText()).not.toBe(before)
+})
+
 test('a 404 renders the island photograph, not a blank band', async ({ page }) => {
   await page.goto('/this-path-does-not-exist')
   await expect(page.locator('h1')).toHaveText('This path leads nowhere')

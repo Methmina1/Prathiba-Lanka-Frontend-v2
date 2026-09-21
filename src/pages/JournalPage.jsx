@@ -94,8 +94,9 @@ export default function JournalPage() {
       </section>
 
       {/* The province map lives here rather than on the home page: it is something to read, and the
-          stories above are the reason to look at it. Everything else on this page is unchanged. */}
-      <ProvinceMap />
+          stories above are the reason to look at it. Each province carries its own notes - the posts
+          that name its places - so picking one off the map shows what to read about it. */}
+      <ProvinceMap posts={posts} />
     </main>
   )
 }
