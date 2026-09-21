@@ -17,6 +17,7 @@ import ReviewsPage from './pages/ReviewsPage'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import PlanPage from './pages/PlanPage'
+import EnquiryPage from './pages/EnquiryPage'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Account from './pages/Account'
@@ -62,6 +63,8 @@ export default function App({ initialSession = null }) {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/plan" element={<PlanPage />} />
+          {/* The customer's own enquiry, opened by the token in their acknowledgement email. */}
+          <Route path="/enquiry/:token" element={<EnquiryPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/account" element={<Account />} />

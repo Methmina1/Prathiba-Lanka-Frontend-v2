@@ -151,13 +151,117 @@ const queries = [
     queryId: 3,
     name: 'Traveller One',
     email: 'one@example.com',
+    phone: '+94 77 000 0001',
     subject: 'December availability',
     message: 'Is December a good time?',
     status: 'NEW',
     autoResponseSent: true,
+    replySent: false,
+    answeredOutside: false,
     submittedAt: '2026-09-19T10:00:00',
+    enquiryUrl: '/enquiry/demo-token',
+    messages: [],
+  },
+  {
+    queryId: 4,
+    name: 'Traveller Two',
+    email: 'two@example.com',
+    subject: 'Tea country in March',
+    message: 'Could we see the tea country?',
+    status: 'RESPONDED',
+    autoResponseSent: true,
+    replySent: true,
+    answeredOutside: false,
+    respondedByName: 'Prathibha Lanka Voyages',
+    respondedAt: '2026-09-20T09:00:00',
+    submittedAt: '2026-09-19T11:00:00',
+    enquiryUrl: '/enquiry/demo-token-two',
+    messages: [
+      {
+        messageId: 11,
+        direction: 'AGENCY',
+        body: 'Yes - March is the best month for it. Shall I send an itinerary?',
+        authorName: 'Prathibha Lanka Voyages',
+        emailed: true,
+        createdAt: '2026-09-20T09:00:00',
+      },
+    ],
+  },
+  // The other two outcomes a reply can have. They are fixtures rather than decoration: an enquiry
+  // answered from the agency's own inbox and one whose reply never left look identical in a status
+  // column, and telling them apart is what the console has to do.
+  {
+    queryId: 5,
+    name: 'Traveller Three',
+    email: 'three@example.com',
+    subject: 'Airport transfer',
+    message: 'Can you arrange a transfer from Colombo?',
+    status: 'RESPONDED',
+    autoResponseSent: true,
+    replySent: false,
+    answeredOutside: true,
+    respondedByName: 'Prathibha Lanka Voyages',
+    respondedAt: '2026-09-20T12:00:00',
+    submittedAt: '2026-09-20T10:00:00',
+    enquiryUrl: '/enquiry/demo-token-three',
+    messages: [
+      {
+        messageId: 13,
+        direction: 'AGENCY',
+        body: 'Rang them back about the airport transfer.',
+        authorName: 'Prathibha Lanka Voyages',
+        emailed: false,
+        createdAt: '2026-09-20T12:00:00',
+      },
+    ],
+  },
+  {
+    queryId: 6,
+    name: 'Traveller Four',
+    email: 'four@example.com',
+    subject: 'Group of nine',
+    message: 'Do you take groups of nine?',
+    status: 'RESPONDED',
+    autoResponseSent: true,
+    replySent: false,
+    answeredOutside: false,
+    respondedByName: 'Prathibha Lanka Voyages',
+    respondedAt: '2026-09-20T14:00:00',
+    submittedAt: '2026-09-20T13:00:00',
+    enquiryUrl: '/enquiry/demo-token-four',
+    messages: [
+      {
+        messageId: 14,
+        direction: 'AGENCY',
+        body: 'The mail server refused it - send this one again.',
+        authorName: 'Prathibha Lanka Voyages',
+        emailed: false,
+        createdAt: '2026-09-20T14:00:00',
+      },
+    ],
   },
 ]
+
+/** What GET /api/enquiries/{token} answers: the customer's own view of enquiry 4. */
+const enquiryView = {
+  queryId: 4,
+  name: 'Traveller Two',
+  subject: 'Tea country in March',
+  message: 'Could we see the tea country?',
+  status: 'RESPONDED',
+  awaitingReply: false,
+  submittedAt: '2026-09-19T11:00:00',
+  respondedAt: '2026-09-20T09:00:00',
+  messages: [
+    {
+      messageId: 11,
+      direction: 'AGENCY',
+      body: 'Yes - March is the best month for it. Shall I send an itinerary?',
+      authorName: 'Prathiba Lanka Voyages',
+      createdAt: '2026-09-20T09:00:00',
+    },
+  ],
+}
 
 const content = {
   about: {
@@ -258,6 +362,88 @@ export async function mockApi(page) {
       )
     }
     if (path === '/api/contact') return json({ queryId: 3, status: 'NEW', autoResponseSent: false }, 201)
+
+    // The customer's own enquiry, opened by the token from their acknowledgement email. Unknown tokens
+    // answer the way the API does - 404 - so the page's "we could not find it" state is reachable.
+    if (path === '/api/enquiries/demo-token') {
+      return json({ ...enquiryView, queryId: 3, subject: 'December availability', messages: [] })
+    }
+    if (path === '/api/enquiries/demo-token-two/messages') {
+      const body = JSON.parse(route.request().postData() ?? '{}')
+      return json(
+        {
+          ...enquiryView,
+          awaitingReply: true,
+          status: 'NEW',
+          messages: [
+            ...enquiryView.messages,
+            {
+              messageId: 12,
+              direction: 'CUSTOMER',
+              body: body.message,
+              authorName: 'Traveller Two',
+              createdAt: '2026-09-21T08:00:00',
+            },
+          ],
+        },
+        201
+      )
+    }
+    if (path === '/api/enquiries/demo-token-two') return json(enquiryView)
+    if (path.startsWith('/api/enquiries/')) return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
+
+    // Answering an enquiry. The PATCH mirrors the API's shape: the reply lands on the thread and the
+    // panel is told whether it was emailed, answered by hand, or not sent at all.
+    if (path.match(/^\/api\/admin\/queries\/\d+\/respond$/)) {
+      const id = Number(path.split('/')[4])
+      const body = JSON.parse(route.request().postData() ?? '{}')
+      const original = queries.find((q) => q.queryId === id) ?? queries[0]
+      return json({
+        ...original,
+        status: 'RESPONDED',
+        respondedByName: 'Prathibha Lanka Voyages',
+        respondedAt: '2026-09-21T09:00:00',
+        replySent: false,
+        answeredOutside: false,
+        adminResponse: body.adminResponse,
+        messages: [
+          ...(original.messages ?? []),
+          {
+            messageId: 21,
+            direction: 'AGENCY',
+            body: body.adminResponse,
+            authorName: 'Prathibha Lanka Voyages',
+            emailed: false,
+            createdAt: '2026-09-21T09:00:00',
+          },
+        ],
+      })
+    }
+    if (path.match(/^\/api\/admin\/queries\/\d+\/answered-outside$/)) {
+      const id = Number(path.split('/')[4])
+      const body = JSON.parse(route.request().postData() ?? '{}')
+      const original = queries.find((q) => q.queryId === id) ?? queries[0]
+      return json({
+        ...original,
+        status: 'RESPONDED',
+        respondedByName: 'Prathibha Lanka Voyages',
+        respondedAt: '2026-09-21T09:05:00',
+        replySent: false,
+        answeredOutside: true,
+        adminResponse: body.note || null,
+        messages: [
+          ...(original.messages ?? []),
+          {
+            messageId: 22,
+            direction: 'AGENCY',
+            body: body.note || null,
+            authorName: 'Prathibha Lanka Voyages',
+            emailed: false,
+            createdAt: '2026-09-21T09:05:00',
+          },
+        ],
+      })
+    }
 
     return route.fulfill({ status: 404, contentType: 'application/json', body: '{}' })
   })

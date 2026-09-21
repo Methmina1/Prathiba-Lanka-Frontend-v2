@@ -399,12 +399,67 @@ test.describe('a member of staff', () => {
 
     const row = page.locator('.adm-table tbody tr', { hasText: MARK.enquirySubject })
     await expect(row, `no enquiry matching ${MARK.enquirySubject}`).toBeVisible()
+    await expect(row).toContainText(`#`) // the reference staff quote back at the customer
     await row.getByRole('button', { name: 'Reply' }).click()
 
     const dialog = page.locator('.adm-dialog')
-    await dialog.getByLabel('Your response').fill('Thanks - we will send an outline today.')
-    await dialog.getByRole('button', { name: 'Save response' }).click()
-    await expect(page.locator('.adm-notice')).toContainText(/response saved/i)
+    // The dialog quotes what they asked, so the wrong enquiry cannot be answered by accident.
+    await expect(dialog).toContainText('Automated check of the enquiry form.')
+    await expect(dialog).toContainText(MARK.guestEmail)
+
+    await dialog.getByLabel('Your reply').fill('Thanks - we will send an outline today.')
+    await dialog.getByRole('button', { name: 'Send reply by email' }).click()
+
+    // Saving sends it. The notice names the address it went to rather than claiming success blind.
+    await expect(page.locator('.adm-notice')).toContainText('on its way to')
+    await expect(dialog.locator('.adm-thread__body')).toContainText('we will send an outline today')
+
+    // The panel's own Close, not the dialog header's: both are called Close, and only one of them is
+    // inside the form.
+    await dialog.locator('.adm-form__actions').getByRole('button', { name: 'Close' }).click()
+
+    // Answered enquiries leave the waiting list, and the row says which of the three things happened -
+    // emailed, written in the agency's own inbox, or not sent at all. Which one it is depends on the
+    // transport this instance runs with, so the assertion is that it says one of them.
+    await page.getByRole('button', { name: 'All' }).click()
+    const replied = page.locator('.adm-table tbody tr', { hasText: MARK.enquirySubject })
+    await expect(replied).toContainText(/Reply emailed|Answered from your inbox|Reply not sent/)
+    await expect(replied).not.toContainText('They wrote again')
+  })
+
+  test('the customer reads the answer on their own page and writes back', async ({ page }) => {
+    const token = await adminToken()
+    const { body: queries } = await json('/api/admin/queries', {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const enquiry = (queries ?? []).find((query) => String(query.subject).includes(RUN))
+    expect(enquiry, `no enquiry matching ${MARK.enquirySubject}`).toBeTruthy()
+    // Staff get the customer's link so it can be pasted into a reply written by hand.
+    expect(enquiry.enquiryUrl, 'the API should hand staff the customer link').toContain('/enquiry/')
+
+    // A different browser, nobody signed in: the token in the link is the whole credential.
+    const visitor = await anotherVisitor(page)
+    await visitor.goto(enquiry.enquiryUrl)
+    await expect(visitor.locator('h1')).toContainText(MARK.enquirySubject)
+    await expect(visitor.locator('.enquiry__meta')).toContainText(`#${enquiry.queryId}`)
+    await expect(visitor.locator('.thread__item--agency')).toContainText('we will send an outline today')
+    // Whether the agency's mail or a person sent it is the agency's business, not the customer's.
+    await expect(visitor.locator('.thread__item--agency')).not.toContainText('emailed')
+
+    await visitor.getByLabel('Your message').fill('Three of us now - does that change the price?')
+    await visitor.getByRole('button', { name: 'Send message' }).click()
+
+    await expect(visitor.locator('.form-note--sent')).toContainText(/with us/i)
+    await expect(visitor.locator('.thread__item--customer')).toContainText('Three of us now')
+    await expect(visitor.locator('.enquiry__head .pill')).toHaveText('Waiting for a reply')
+    await visitor.close()
+
+    // Writing again puts it back in front of staff, flagged, so the waiting list stays worth reading.
+    await asAdmin(page)
+    await page.goto('/admin/queries')
+    const back = page.locator('.adm-table tbody tr', { hasText: MARK.enquirySubject })
+    await expect(back, 'the follow-up should be waiting for a reply').toBeVisible()
+    await expect(back).toContainText('They wrote again')
   })
 
   test('adds, edits and deactivates a package', async ({ page }) => {

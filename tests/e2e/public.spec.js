@@ -451,6 +451,38 @@ test('a 404 renders the island photograph, not a blank band', async ({ page }) =
   await expect(page.locator('.page-hero__media img')).toHaveAttribute('src', '/images/sl/not-found.jpg')
 })
 
+test('the customer opens their enquiry from the email link, and writes back', async ({ page }) => {
+  // The token in the link is the credential: no account, no sign-in. Reached the way the email
+  // reaches it, which is why this is a URL test rather than a click-through.
+  await page.goto('/enquiry/demo-token-two')
+
+  await expect(page.locator('h1')).toHaveText('Tea country in March')
+  await expect(page.locator('.enquiry__meta')).toContainText('#4')
+  await expect(page.locator('.enquiry__head .pill')).toHaveText('Answered')
+  await expect(page.locator('.enquiry__sent')).toHaveText('Could we see the tea country?')
+
+  // The agency's answer, and nothing about how it was sent - that is the agency's business.
+  const answer = page.locator('.thread__item--agency')
+  await expect(answer.locator('.thread__body')).toContainText('March is the best month for it')
+  await expect(answer).not.toContainText('emailed')
+
+  // Writing again: their message joins the thread and the enquiry goes back to waiting.
+  await page.getByLabel('Your message').fill('Four of us, if that changes the price.')
+  await page.getByRole('button', { name: 'Send message' }).click()
+
+  await expect(page.locator('.form-note--sent')).toContainText('your message is with us')
+  await expect(page.locator('.thread__item--customer .thread__body')).toContainText('Four of us')
+  await expect(page.locator('.enquiry__head .pill')).toHaveText('Waiting for a reply')
+})
+
+test('an enquiry link that does not work says so, and offers a way through', async ({ page }) => {
+  await page.goto('/enquiry/not-a-real-token')
+
+  // Explaining the likely cause, because the usual one is an email client splitting the URL in two.
+  await expect(page.locator('.form-note--error')).toContainText('could not find that enquiry')
+  await expect(page.getByRole('link', { name: /Send us a message/ })).toHaveAttribute('href', '/contact')
+})
+
 test('a customer is sent to the review form, and a visitor to sign in', async ({ page }) => {
   // Signed out: the reviews page offers the way in, and it is not /plan any more - that page has the
   // enquiry form and the PIN tracker, and no review form at all.
@@ -492,9 +524,13 @@ test('the gallery is an even grid, and a photograph opens full size', async ({ p
   ).toBe(1)
   expect(boxes[0].w, 'a tile should be square').toBe(boxes[0].h)
 
-  await expect(page.locator('.gallery-tile__caption').first()).toHaveText('Coast')
-  const media = await page.locator('.gallery-tile__media').first().boundingBox()
-  const caption = await page.locator('.gallery-tile__caption').first().boundingBox()
+  // The swap from the shipped photographs to the ones the API returns replaces the tiles, so both
+  // measurements are taken from one tile once its caption is there - reading them across the swap was
+  // how this went flaky.
+  const firstTile = page.locator('.gallery-tile').first()
+  await expect(firstTile.locator('.gallery-tile__caption')).toHaveText('Coast')
+  const media = await firstTile.locator('.gallery-tile__media').boundingBox()
+  const caption = await firstTile.locator('.gallery-tile__caption').boundingBox()
   expect(caption.y, 'the caption should sit below the picture').toBeGreaterThanOrEqual(
     media.y + media.height
   )

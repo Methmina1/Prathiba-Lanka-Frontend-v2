@@ -71,6 +71,20 @@ export const api = {
   submitQuery: (payload) => request('/api/contact', { method: 'POST', body: JSON.stringify(payload) }),
   trackBooking: (pin) => request(`/api/bookings/track?pin=${encodeURIComponent(pin)}`),
 
+  /**
+   * The customer's own enquiry, opened by the token from their acknowledgement email.
+   *
+   * No account and no token header: the token in the URL *is* the credential, which is the same trade
+   * the booking PIN makes. Reading is not rate limited, writing is (see the backend's
+   * app.rate-limit.paths), so refreshing this page never answers "too many requests".
+   */
+  getEnquiry: (token) => request(`/api/enquiries/${encodeURIComponent(token)}`),
+  sendEnquiryMessage: (token, message) =>
+    request(`/api/enquiries/${encodeURIComponent(token)}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    }),
+
   // editable page content (public read; the admin console writes it)
   getPageContent: (section) => request(`/api/content/${section}`),
 

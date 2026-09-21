@@ -30,10 +30,23 @@ export const adminApi = {
   // ---- contact queries ----------------------------------------------------
   listQueries: (token, onlyNew) =>
     request(`/api/admin/queries${onlyNew ? '?onlyNew=true' : ''}`, { headers: auth(token) }),
+  /**
+   * Sends the reply to the customer. The mail leaves after the commit, so the response says the reply
+   * is stored - `replySent` on a later read is what says it was delivered.
+   */
   respondToQuery: (token, id, adminResponse) =>
     request(`/api/admin/queries/${id}/respond`, {
       method: 'PATCH',
       ...json(token, { adminResponse }),
+    }),
+  /**
+   * Records that the reply was written in the agency's own inbox instead: answered, nothing sent. The
+   * note is optional - a reply sent from a phone is worth marking even with no copy of the words.
+   */
+  markQueryAnsweredOutside: (token, id, note) =>
+    request(`/api/admin/queries/${id}/answered-outside`, {
+      method: 'POST',
+      ...json(token, { note }),
     }),
 
   // ---- journal ------------------------------------------------------------

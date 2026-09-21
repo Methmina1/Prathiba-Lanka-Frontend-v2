@@ -55,6 +55,9 @@ const ROUTES = {
   '/gallery': ['Where the journeys go', 'Nothing has been uploaded yet', '/images/sl/tile-1.jpg'],
   // No sample reviews ship with the app, so the page renders its empty state without a backend.
   '/reviews': ['What people said afterwards', 'No reviews yet', 'Sign in to write a review'],
+  // The customer's own enquiry: without a backend the lookup cannot finish, so what renders is the
+  // heading and the note that says it is looking. The token is theirs, so no route is special-cased.
+  '/enquiry/demo-token': ['Your enquiry', 'Looking up your enquiry'],
   '/about': ['Arranged by people who live here', 'How we got here', '/images/sl/about-story.jpg'],
   // the social accounts, straight from src/data/social.js - plus the WhatsApp bubble, which is on
   // every public page

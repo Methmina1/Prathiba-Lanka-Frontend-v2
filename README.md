@@ -17,11 +17,12 @@ framework, so the palette and layout stay easy to change.
 | `/about` | Our story, the four things we hold to, milestones timeline |
 | `/contact` | Contact cards (WhatsApp, email, office), the enquiry form, a link to the PIN tracker, and a band of everything the agency posts to: Facebook, Instagram, TikTok and WhatsApp |
 | `/plan` | **Plan your journey**: enquiry form (`POST /api/contact`), PIN tracker (`GET /api/bookings/track`), how-it-works steps |
+| `/enquiry/:token` | **Your enquiry**, opened from the link in the acknowledgement email: what you sent, the answer, and a box to write back (`GET /api/enquiries/{token}`, `POST /api/enquiries/{token}/messages`). No sign-in - the token is the credential |
 | `/login`, `/register` | Customer sign in and sign up (`POST /api/auth/login`, `POST /api/auth/register`); the JWT is kept in localStorage |
 | `/account` | Signed-in customers: their bookings (`GET /api/customer/bookings`), a new booking request (`POST /api/bookings/request`) and the review form (`POST /api/reviews`), which answers to `/account#review` |
 | `/admin` | **Staff console.** Overview: pending/confirmed counts, live packages, new enquiries, recent bookings |
 | `/admin/bookings` | Every booking with status filter, confirm (price + date) and reject |
-| `/admin/queries` | Enquiries with a "new only" filter and a reply box that emails the sender |
+| `/admin/queries` | Enquiries with a "waiting for a reply" filter, what they asked, the whole conversation, a reply that is emailed to the customer, and "I answered from my inbox" for the replies written in Gmail |
 | `/admin/packages` | Journey CRUD, activate/deactivate, delete |
 | `/admin/journal` | Story CRUD, publish/unpublish, delete |
 | `/admin/gallery` | Images and short clips on the public gallery, linked to a journey if you like |
@@ -97,7 +98,7 @@ VITE_API_BASE_URL=https://api.example.com
 ```bash
 npm run build         # production build -> dist/
 npm run preview       # serve the build on http://localhost:4173
-npm run check:render  # renders all 24 routes in Node and asserts their content
+npm run check:render  # renders all 25 routes in Node and asserts their content
 npm run test:e2e      # drives the built site in Chromium against a mocked API (Playwright)
 npm run test:roles    # drives the real site against a real backend, as each role
 npm run seed          # load the demo content into a running backend (optional)
@@ -109,13 +110,13 @@ Five suites cover the project between them, from the outside in:
 
 | Suite | Needs | Covers |
 |---|---|---|
-| `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 161 checks |
+| `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 180 checks |
 | `mvn test` (backend repo) | nothing | the Spring context, the mail configuration |
-| `npm run check:render` | nothing | all 24 routes in Node: undefined components, bad hooks, broken props |
-| `npm run test:e2e` | nothing (API mocked) | 40 browser tests: layout, clicks, navigation |
-| `npm run test:roles` | a running API + `BOOTSTRAP_ADMIN_PASSWORD` | 21 end-to-end journeys through the real UI and the real database, one per role |
+| `npm run check:render` | nothing | all 25 routes in Node: undefined components, bad hooks, broken props |
+| `npm run test:e2e` | nothing (API mocked) | 43 browser tests: layout, clicks, navigation |
+| `npm run test:roles` | a running API + `BOOTSTRAP_ADMIN_PASSWORD` | 22 end-to-end journeys through the real UI and the real database, one per role |
 
-`check:render` is the useful one: it renders every page (14 public, 8 screens under `/admin` with a
+`check:render` is the useful one: it renders every page (15 public, 8 screens under `/admin` with a
 stubbed admin session) with `renderToString`, so an undefined component, a bad hook or a broken prop
 fails the build without a browser. It also checks the two access rules - a customer session on
 `/admin` must show "Admin access required" and a signed-out one must render no console at all -
@@ -131,7 +132,7 @@ dev server with a real backend behind it, walking the site as the three people w
 |---|---|
 | a visitor | reads every public page, searches the catalogue, opens a journey and a story, sends an enquiry, tracks an unknown PIN, registers an account, is kept out of `/account` and `/admin` |
 | a customer | signs in, requests a journey and gets a PIN, tracks it, leaves a review, finds it on the public reviews page, is refused the console, signs out |
-| a member of staff | signs in to the dashboard, **confirms the customer's booking** (which the customer then sees, with the agreed price), answers the visitor's enquiry, creates/edits/deactivates a package, writes/publishes/unpublishes/deletes a story, uploads a file and puts it in the gallery, edits the contact page and sees it on the public site, removes the customer's review, is refused the booking flow by the API, signs out |
+| a member of staff | signs in to the dashboard, **confirms the customer's booking** (which the customer then sees, with the agreed price), answers the visitor's enquiry from the console (and the customer then reads that answer on their own page and writes back to it), creates/edits/deactivates a package, writes/publishes/unpublishes/deletes a story, uploads a file and puts it in the gallery, edits the contact page and sees it on the public site, removes the customer's review, is refused the booking flow by the API, signs out |
 
 It writes to the database it points at, so every record it creates carries a run marker (`E2E<id>`,
 generated once per run by `scripts/live-roles.mjs` and handed to every worker through the
@@ -146,12 +147,12 @@ npm run test:roles -- -g "confirms the booking"
 
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Forty tests across three files:
+so it needs no backend. Forty-three tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the gallery grid and its viewer** (every tile the same square, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography |
-| `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the gallery grid and its viewer** (every tile the same square, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography, **the customer's own enquiry page** (opened by the token from the email, showing the agency's answer and letting them write back) and what an unknown link says |
+| `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections, **answering an enquiry** (the reply sent by email, the three states a reply can be in - emailed, answered in Gmail, never sent - and recording a reply written by hand) |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer, and no sideways scroll on the pages whose layout is not a plain grid (the gallery tiles, the contact social band, the journal with the map) |
 
 The dashboard test exists because the console shipped with a layout bug that a Node render cannot see:
@@ -173,7 +174,8 @@ sections, which is fixed.
 | `/account` | `GET /api/customer/bookings`, `POST /api/bookings/request`, `POST /api/reviews` - all send the bearer token |
 | `/admin` | `GET /api/admin/bookings`, `GET /api/admin/packages`, `GET /api/admin/queries`, `GET /api/reviews` |
 | `/admin/bookings` | `GET /api/admin/bookings?status=`, `PATCH /api/admin/bookings/{id}/confirm`, `PATCH /api/admin/bookings/{id}/reject` |
-| `/admin/queries` | `GET /api/admin/queries?onlyNew=true`, `PATCH /api/admin/queries/{id}/respond` |
+| `/admin/queries` | `GET /api/admin/queries?onlyNew=true`, `PATCH /api/admin/queries/{id}/respond` (emails the customer), `POST /api/admin/queries/{id}/answered-outside` |
+| `/enquiry/:token` | `GET /api/enquiries/{token}`, `POST /api/enquiries/{token}/messages` - public, the token is the credential |
 | `/admin/packages` | `GET|POST /api/admin/packages`, `PUT /api/admin/packages/{id}`, `PATCH .../deactivate`, `DELETE /api/admin/packages/{id}` |
 | `/admin/journal` | `GET|POST /api/admin/journal`, `PUT /api/admin/journal/{id}`, `PATCH .../publish`, `PATCH .../unpublish`, `DELETE /api/admin/journal/{id}` |
 | `/admin/gallery` | `POST /api/admin/gallery`, `PUT /api/admin/gallery/{id}`, `DELETE /api/admin/gallery/{id}` |
