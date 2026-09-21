@@ -171,11 +171,13 @@ test.describe('a visitor who has not signed in', () => {
     )
 
     await page.goto('/journal')
+    // The page opens on the map: the province map is the index, and the story cards come from a
+    // province or from "Read all".
+    await expect(page.locator('#island .province-map__shape')).toHaveCount(9)
+    await page.getByRole('button', { name: /^Read all/ }).click()
     // the featured post is the link itself, not a card with a link inside it
     const featured = page.locator('a.feature-post')
     await expect(featured).toBeVisible()
-    // the province map lives on this page, below the stories
-    await expect(page.locator('#island .province-map__shape')).toHaveCount(9)
     await page.goto(await featured.getAttribute('href'))
     await expect(page.locator('h1')).toBeVisible()
 
@@ -476,6 +478,9 @@ test.describe('a member of staff', () => {
 
     const visitor = await anotherVisitor(page)
     await visitor.goto('/journal')
+    // The journal opens on the map, so the list of every story is behind this button. This is also
+    // the assertion that a post an editor publishes actually reaches the public site.
+    await visitor.getByRole('button', { name: /^Read all/ }).click()
     await expect(visitor.locator('.journal-card, .feature-post').filter({ hasText: MARK.postTitle }).first()).toBeVisible()
     await visitor.close()
 

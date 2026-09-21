@@ -4,12 +4,10 @@ import { api } from '../../api/client'
 import { fallbackPackages } from '../../data/fallback'
 import { MAP_SOURCE, MAP_VIEW_BOX, PROVINCES } from '../../data/provinces'
 import { PROVINCE_COPY } from '../../data/provinceCopy'
-import { journeysInProvince, journalsInProvince } from '../../data/provincePlaces'
+import { journeysInProvince } from '../../data/provincePlaces'
 import { useApi } from '../../hooks/useApi'
-import { formatDate, formatDays } from '../../utils/format'
+import { formatDays } from '../../utils/format'
 import { ArrowRight, Lock, MapPin } from '../ui/Icons'
-import CoverImage from '../ui/CoverImage'
-import PHOTOS from '../../data/photos'
 import Reveal from '../ui/Reveal'
 
 /** How many journeys the panel lists before it offers the rest. */
@@ -33,7 +31,7 @@ const LISTED = 3
  * Without the hold, a province in the middle of the map was almost impossible to read: every route
  * to the panel passes over its neighbours.
  */
-export default function ProvinceMap({ posts = [] }) {
+export default function ProvinceMap({ posts = [], onProvince }) {
   const { data: packages } = useApi(() => api.getPackages(), fallbackPackages)
 
   const [hoveredId, setHoveredId] = useState(null)
@@ -42,14 +40,20 @@ export default function ProvinceMap({ posts = [] }) {
   const activeId = heldId ?? hoveredId ?? 'central'
   const active = PROVINCES.find((province) => province.id === activeId) ?? PROVINCES[0]
   const journeys = journeysInProvince(packages, active.id)
-  // The journal notes that name this province's places, so picking a province answers "what is it
-  // like there?" with something to read and a photograph, not only a list of journeys.
-  const notes = journalsInProvince(posts, active.id)
 
-  /** A click holds the province; a second click on the same one lets go. */
+  /**
+   * A click holds the province; a second click on the same one lets go.
+   *
+   * Holding is also the selection the page acts on: `onProvince` is told which province was chosen
+   * (or null when it is released), so the page can show that province's journal cards. Hovering stays
+   * private to the map - a panel that followed the pointer everywhere would make the cards below it
+   * flicker through nine provinces on the way to the one being aimed at.
+   */
   const toggleHold = (provinceId) => {
-    setHeldId((current) => (current === provinceId ? null : provinceId))
+    const lettingGo = heldId === provinceId
+    setHeldId(lettingGo ? null : provinceId)
     setHoveredId(provinceId)
+    onProvince?.(lettingGo ? null : provinceId)
   }
 
   return (
@@ -158,7 +162,7 @@ export default function ProvinceMap({ posts = [] }) {
                                 pkg.destination,
                               ]
                                 .filter(Boolean)
-                                .join(' · ')}
+                                .join(' Â· ')}
                             </span>
                             <ArrowRight width={14} height={14} />
                           </Link>
@@ -168,7 +172,7 @@ export default function ProvinceMap({ posts = [] }) {
                   </ul>
                 ) : (
                   <p className="island__journey-empty">
-                    We still build trips here — tell us your dates and we will draft one.
+                    We still build trips here â€” tell us your dates and we will draft one.
                   </p>
                 )}
 
@@ -180,50 +184,6 @@ export default function ProvinceMap({ posts = [] }) {
                 )}
               </div>
 
-              {/* The journal notes for this province, with their covers. Hidden rather than empty
-                  when there is nothing to show, so a thin journal does not leave a heading over
-                  nothing. */}
-              {notes.length > 0 && (
-                <div className="island__notes">
-                  <h4>
-                    {notes.length === 1
-                      ? `A note from ${active.name}`
-                      : `${notes.length} notes from ${active.name}`}
-                  </h4>
-
-                  <ul className="island__note-list">
-                    {notes.slice(0, LISTED).map(({ post }, index) => (
-                      <li key={post.journalId}>
-                        <Link className="island__note" to={`/journal/${post.journalId}`}>
-                          <span className="island__note-media">
-                            <CoverImage
-                              src={post.coverImageUrl}
-                              fallback={PHOTOS.journalFallback[index % PHOTOS.journalFallback.length]}
-                              alt={post.title}
-                            />
-                          </span>
-                          <span className="island__note-body">
-                            <strong>{post.title}</strong>
-                            {post.description && (
-                              <span className="island__note-text">{post.description}</span>
-                            )}
-                            <span className="island__note-date">
-                              {formatDate(post.publishedAt) ?? 'Recently published'}
-                            </span>
-                          </span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {notes.length > LISTED && (
-                    <Link className="link-arrow" to="/journal">
-                      More from the journal
-                      <ArrowRight width={15} height={15} />
-                    </Link>
-                  )}
-                </div>
-              )}
             </div>
 
             <ul className="island__list">

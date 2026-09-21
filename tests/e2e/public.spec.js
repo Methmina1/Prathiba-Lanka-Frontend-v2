@@ -107,6 +107,8 @@ test('journeys, journal and gallery render their covers from the API', async ({ 
   await expect(card.locator('.package-card__media img')).toHaveAttribute('src', '/images/sl/seed-package-heritage.jpg')
 
   await page.goto('/journal')
+  // The page opens on the map; the stories are behind this button (or behind a province).
+  await page.getByRole('button', { name: /^Read all/ }).click()
   // the newest post is the featured one, the rest follow as cards - both carry their cover
   await expect(page.locator('.feature-post')).toContainText('The turquoise coast')
   await expect(page.locator('.feature-post__media img')).toHaveAttribute('src', '/images/sl/hero-1.jpg')
@@ -407,22 +409,40 @@ test('the Request button opens the form with its journey already chosen', async 
   await expect(sent).toContainText('3 travellers')
 })
 
-test('the journal page shows a province its own notes', async ({ page }) => {
+test('the journal page opens on the map, and a province brings its stories up', async ({ page }) => {
   await page.goto('/journal')
 
-  // The map carries the notes that name that province's places, with their covers.
-  const panel = page.locator('.island__card')
-  await expect(panel.locator('.island__notes h4')).toContainText('Central')
-  const notes = panel.locator('.island__note')
-  await expect(notes.first()).toBeVisible()
-  await expect(notes.first().locator('img')).toBeVisible()
+  // At first: the map, and no story cards at all.
+  await expect(page.locator('#island .province-map')).toBeVisible()
+  await expect(page.locator('.journal-card')).toHaveCount(0)
+  await expect(page.locator('#province-notes')).toHaveCount(0)
 
-  // Choosing another province swaps the list for that province's.
-  const before = await notes.first().innerText()
+  // Choosing a province brings up what was written about it, with its cover.
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+  const notes = page.locator('#province-notes')
+  await expect(notes).toBeVisible()
+  await expect(notes).toContainText('Central Province')
+  await expect(notes.locator('.journal-card').first()).toContainText('Kandy')
+  await expect(notes.locator('.journal-card__media img').first()).toBeVisible()
+
+  // Another province swaps the stories for that province's.
   await page.getByRole('button', { name: 'Southern', exact: true }).click()
-  await expect(panel.locator('.island__notes h4')).toContainText('Southern')
-  await expect(notes.first()).toBeVisible()
-  expect(await notes.first().innerText()).not.toBe(before)
+  const southern = page.locator('#province-notes')
+  await expect(southern).toContainText('Southern Province')
+  await expect(southern.locator('.journal-card').first()).not.toContainText('Kandy')
+
+  // And letting go puts the page back to the map alone.
+  await page.getByRole('button', { name: 'Let go of Southern' }).click()
+  await expect(page.locator('#province-notes')).toHaveCount(0)
+})
+
+test('the whole journal is still reachable from the map', async ({ page }) => {
+  await page.goto('/journal')
+  await expect(page.locator('.feature-post')).toHaveCount(0)
+
+  await page.getByRole('button', { name: /^Read all 3 stories$/ }).click()
+  await expect(page.locator('.feature-post')).toBeVisible()
+  await expect(page.locator('.journal-card')).toHaveCount(2)
 })
 
 test('a 404 renders the island photograph, not a blank band', async ({ page }) => {

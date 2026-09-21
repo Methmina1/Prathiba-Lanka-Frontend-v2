@@ -40,13 +40,14 @@ const ROUTES = {
   '/journeys': ['Signature journeys', 'Search by destination', '/images/sl/page-journeys.jpg'],
   // the sample data ships with the app, so detail routes render without a backend
   '/journeys/demo-1': ['Classical Heritage', 'About this journey', 'Request this journey'],
-  // the province map moved here from the home page: the panel opens on the province in the middle
+  // The journal opens on the map alone: the notes appear once a province is picked, and the full
+  // list is behind the button in "Every story".
   '/journal': [
     'Stories from the island',
-    'Read the story',
-    '/images/sl/journal-1.jpg',
     'Nine provinces, one island',
     'Central Province',
+    'Every story',
+    'Read all',
   ],
   '/journal/demo-1': ['When to visit Sri Lanka', 'All stories', '/images/sl/journal-1.jpg'],
   // the scrapbook board numbers every print ("Nº" and the number are separate text nodes in the
