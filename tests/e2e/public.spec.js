@@ -45,6 +45,35 @@ test('home renders the hero carousel with its own photographs', async ({ page })
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
 })
 
+test('the sharing tags name an absolute address, never a placeholder', async ({ page }) => {
+  // Read from the served document rather than the source: this is about what a crawler or a chat app
+  // receives. A literal %SITE_URL% reaching production would mean every link shared on WhatsApp shows
+  // no picture and no title, and nothing else in the suite would notice.
+  const response = await page.goto('/')
+  const html = await response.text()
+
+  expect(html, 'the build left a placeholder in the sharing tags').not.toContain('%SITE_URL%')
+
+  const absolute = (tag) => {
+    const match = html.match(new RegExp(`<meta[^>]+(?:property|name)="${tag}"[^>]+content="([^"]+)"`))
+    return match?.[1] ?? null
+  }
+
+  expect(absolute('og:url'), 'og:url should be an absolute address').toMatch(/^https?:\/\/[^/]+\/$/)
+  expect(absolute('og:image'), 'og:image should be an absolute address').toMatch(
+    /^https?:\/\/[^/]+\/images\/sl\/share\.jpg$/
+  )
+  expect(absolute('og:image:width')).toBe('1200')
+  expect(absolute('og:image:height')).toBe('630')
+  expect(absolute('twitter:card')).toBe('summary_large_image')
+  expect(html).toContain('<link rel="canonical"')
+
+  // The image the tags name has to exist, or the preview is a broken box.
+  const card = await page.request.get(new URL('/images/sl/share.jpg', page.url()).toString())
+  expect(card.status(), 'the share card should be served').toBe(200)
+  expect(Number(card.headers()['content-length'] ?? 0)).toBeGreaterThan(1000)
+})
+
 test('the hero carousel advances and the dots switch slides', async ({ page }) => {
   await page.goto('/')
   const hero = page.locator('.hero')
