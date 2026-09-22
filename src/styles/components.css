@@ -419,25 +419,14 @@
   pointer-events: none;
 }
 
-/* Smaller and un-wrapped while loading: the tagline has to share a column with the name, and the
- * navbar has no room for it at all on phones. */
-.splash__brand .brand__text small {
-  opacity: 0;
-  white-space: nowrap;
-  font-size: 0.5rem;
-  letter-spacing: 0.1em;
-}
-
+/* The lockup is one line now - the name alone, no tagline - so the streak covers it and nothing settles
+   in underneath. */
 .splash__brand.is-painting .brand__text strong {
   animation: paint-on 1.55s var(--ease-out-soft) 0.2s forwards;
 }
 
 .splash__brand.is-painting .brand__text::after {
   animation: brush-streak 1.55s var(--ease-out-soft) 0.2s forwards;
-}
-
-.splash__brand.is-painting .brand__text small {
-  animation: fade-up 0.85s var(--ease-out-soft) 1.35s forwards;
 }
 
 @keyframes paint-on {
