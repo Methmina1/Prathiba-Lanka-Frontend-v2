@@ -944,10 +944,13 @@ html.intro-landing .site-header .brand__text {
 
 .island__grid {
   display: grid;
-  /* Left and right take the same width and the map takes what it needs, so the island sits dead
-     centre however long the description runs. */
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  gap: var(--space-6);
+  /* The middle column is capped rather than left to size itself: an `auto` column takes the widest
+     thing in it, which was the row of nine province buttons - 850px of map column and 139px for the
+     photographs either side. Capped, the map still sits dead centre and the sides get the rest. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px) minmax(0, 1fr);
+  /* Small: the description belongs beside the map, not across the room from it. */
+  column-gap: var(--space-3);
+  row-gap: var(--space-5);
   align-items: start;
 }
 
@@ -966,12 +969,13 @@ html.intro-landing .site-header .brand__text {
 
 .province-map {
   width: 100%;
-  max-width: 360px;
+  /* Fills the column it is given rather than sitting in the middle of it: what is left of the column
+     would otherwise be a gap between the island and the description beside it. */
+  max-width: 100%;
   height: auto;
   max-height: 62vh;
-  /* The only thing left of the frame: a soft shadow, so the island reads as lifted off the page
-     rather than pasted onto it. */
-  filter: drop-shadow(0 18px 38px rgb(2 8 16 / 40%));
+  /* Nothing around it at all: no frame, no card, no shadow. The island's own outline and the hairline
+     between provinces are the only edges it needs. */
 }
 
 /* The island is one landmass made of nine shapes, so the shapes carry a hairline border rather
@@ -1066,7 +1070,8 @@ html.intro-landing .site-header .brand__text {
 
 .island__photo-list {
   display: grid;
-  /* Two up: four photographs of a province read as a set rather than as a row of thumbnails. */
+  /* Two up, square, like the gallery: the province's photographs read as a set and use the column
+     they have rather than sitting in it as thumbnails. */
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
   margin: 0;
@@ -1083,7 +1088,7 @@ html.intro-landing .site-header .brand__text {
 .island__photo img {
   display: block;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1234,11 +1239,13 @@ html.intro-landing .site-header .brand__text {
   line-height: 1.65;
 }
 
-/* "Which journeys go through here" - the reason the map is on the page. */
+/* "Which journeys go through here" - the reason the map is on the page. It sits in the map's own
+   column, directly under it, so the answer belongs to the province being pointed at. */
 .island__journeys {
   display: grid;
   gap: var(--space-3);
-  margin-top: var(--space-2);
+  width: 100%;
+  margin-top: var(--space-1);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border);
 }
@@ -1343,15 +1350,45 @@ html.intro-landing .site-header .brand__text {
 
 @media (max-width: 1180px) {
   /* Three columns of prose around a map is one column too many below this width: the map keeps the
-     middle of the section but takes a row of its own, with the photographs and the description
-     underneath it. */
+     middle by taking a row of its own, and the rest stacks. `.island__centre` is dissolved with
+     `display: contents` so its pieces - the province's name, the map and its journeys - can take
+     their place among the others in the order they should be read. */
   .island__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-4);
   }
 
   .island__centre {
+    display: contents;
+  }
+
+  .island__head {
     grid-column: 1 / -1;
-    order: -1;
+    order: 1;
+  }
+
+  .island__map {
+    grid-column: 1 / -1;
+    order: 2;
+  }
+
+  .island__photos {
+    order: 3;
+  }
+
+  .island__detail {
+    order: 4;
+  }
+
+  .island__journeys {
+    grid-column: 1 / -1;
+    order: 5;
+  }
+
+  /* On its own row the map has the whole width to fill, which would make it 1000px tall: it keeps a
+     size that belongs to the page instead. */
+  .province-map {
+    max-width: 420px;
   }
 }
 

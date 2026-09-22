@@ -366,19 +366,17 @@ test('the province panel answers with photographs, a description and the journey
   await expect(sections.first()).toContainText('central highlands')
   await expect(sections.nth(1)).toContainText('last capital of the Sinhala kingdom')
 
-  // Bottom, across the whole panel: the journeys we run through it. The three columns are read again
-  // here rather than reused: the district rows above have just changed the panel's height.
+  // Bottom, under the map and in its own column: the packages belong to the province being pointed at.
+  // Read again here rather than reused: the district rows above have just changed the panel's height.
   const photoBox = await photos.boundingBox()
   const detailBox = await detail.boundingBox()
   const centreBox = await page.locator('.province-map').boundingBox()
   const journeyBox = await page.locator('.island__journeys').boundingBox()
   expect(photoBox.x, 'photographs belong on the left').toBeLessThan(centreBox.x)
-  expect(centreBox.x, 'the map belongs in the middle').toBeGreaterThan(photoBox.x)
   expect(detailBox.x, 'the description belongs on the right').toBeGreaterThan(centreBox.x + centreBox.width)
-  expect(journeyBox.y, 'the journeys belong below all three').toBeGreaterThanOrEqual(
-    Math.max(photoBox.y + photoBox.height, detailBox.y + detailBox.height) - 1
-  )
-  expect(journeyBox.width, 'the journeys span the panel').toBeGreaterThan(detailBox.width * 1.5)
+  expect(detailBox.x - (centreBox.x + centreBox.width), 'the description belongs close to the map').toBeLessThan(30)
+  expect(journeyBox.y, 'the packages belong below the map').toBeGreaterThanOrEqual(centreBox.y + centreBox.height - 1)
+  expect(Math.abs(journeyBox.x - centreBox.x), 'the packages belong in the map column').toBeLessThanOrEqual(2)
   await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
 })
 

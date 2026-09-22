@@ -10,7 +10,7 @@ framework, so the palette and layout stay easy to change.
 | `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), sustainability, gallery, journal, reviews, FAQ, CTA band |
 | `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog. **No prices** Ã¢â‚¬â€ see below |
 | `/journeys/:id` | One journey: overview, the full description, the day-by-day itinerary as a dropdown, gallery strip, reviews for that package (with a way to add one), sticky quote card |
-| `/journal` | **Opens on the province map and nothing else.** The map holds the middle of the section: photographs of the province on the left, its description and districts on the right, the journeys we run through it across the bottom. Each district opens onto the facts and five sections the agency's district document gives it. Holding a province brings up the notes written about it as cards. The whole journal sits behind "Read all N stories" |
+| `/journal` | **Opens on the province map and nothing else.** The map holds the middle of the section with nothing drawn around it: photographs of the province on the left, its description and districts on the right, the journeys we run through it directly beneath the map. Each district opens onto the facts and five sections the agency's district document gives it. Holding a province brings up the notes written about it as cards. The whole journal sits behind "Read all N stories" |
 | `/journal/:id` | Full story, then more from the journal |
 | `/gallery` | An even grid of square tiles, captions underneath, and a full-size viewer (arrow keys, Escape) |
 | `/reviews` | Average score, rating distribution, every review, and the way to the review form for a signed-in customer |
@@ -151,7 +151,7 @@ so it needs no backend. Forty-four tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the province panel** (the map in the middle with the photographs to its left and the description to its right, the journeys across the bottom, and each district opening onto the district document's own sections), **the gallery grid and its viewer** (every tile the same square, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography, **the customer's own enquiry page** (opened by the token from the email, showing the agency's answer and letting them write back) and what an unknown link says |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the province panel** (the map in the middle with nothing drawn around it, the photographs to its left and the description close on its right, the packages underneath the map, and each district opening onto the district document's own sections), **the gallery grid and its viewer** (every tile the same square, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography, **the customer's own enquiry page** (opened by the token from the email, showing the agency's answer and letting them write back) and what an unknown link says |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections, **answering an enquiry** (the reply sent by email, the three states a reply can be in - emailed, answered in Gmail, never sent - and recording a reply written by hand) |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer, and no sideways scroll on the pages whose layout is not a plain grid (the gallery tiles, the contact social band, the journal with the map) |
 
@@ -203,16 +203,25 @@ is the agency's own, and it is loaded from the rate sheet (below).
 
 ## The province map
 
-The journal page opens on the map and nothing else: the island is the index. The map carries no frame and
-holds **the middle** of the section, with the panel arranged around it: **photographs of the province on
-the left, what it is like on the right, and the journeys we run through it across the bottom**. Picking a
-province (or clicking it off the list under the map) names it, gives its capital, its districts and their
-detail, holds the panel, and brings up **the journal notes written about it** as cards underneath.
-Releasing it - clicking the same province again - puts the page back to the map alone.
+The journal page opens on the map and nothing else: the island is the index, and it takes **the middle**
+of the section with nothing drawn around it - no frame, no card, no shadow. The panel is arranged around
+it: **photographs of the province on the left, what it is like on the right, and the journeys we run
+through it directly under the map**, in the map's own column, so the answer belongs to the province being
+pointed at. The nine provinces by name sit below all of that, for keyboards and phones. Picking a province
+(or clicking it off that list) names it, gives its capital, its districts and their detail, holds the
+panel, and brings up **the journal notes written about it** as cards underneath. Releasing it - clicking
+the same province again - puts the page back to the map alone.
 
 Below 1180px the three columns become one: the map keeps the middle by taking a row of its own, centred,
-with the photographs and the description side by side underneath it, and below 760px everything stacks in
-one column with the map still first.
+with the photographs and the description side by side underneath it and the journeys last. Below 760px
+everything stacks in one column with the map still first.
+
+One thing worth knowing before touching that layout: the middle column is **capped**
+(`minmax(0, 400px)`) rather than left to size itself. An `auto` column takes the width of the widest thing
+in it, and the widest thing was the row of nine province buttons - 850px of map column, which left the
+photographs 139px wide and put the description 277px away from the map. With the buttons moved out of the
+column and the cap in place, the map sits dead centre, the photographs get 384px each side and the
+description starts 12px from the island.
 
 Nine provinces are drawn in their real positions, so the outline they make is Sri Lanka.
 

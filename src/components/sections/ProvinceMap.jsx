@@ -189,21 +189,46 @@ export default function ProvinceMap({ posts = [], onProvince }) {
                   </svg>
                 </div>
 
-                <ul className="island__list">
-                  {PROVINCES.map((province) => (
-                    <li key={province.id}>
-                      <button
-                        type="button"
-                        className={`island__pick ${province.id === activeId ? 'is-active' : ''}`}
-                        onClick={() => toggleHold(province.id)}
-                        onMouseEnter={() => setHoveredId(province.id)}
-                        aria-pressed={province.id === heldId}
-                      >
-                        {province.name}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
+                {/* Under the map, in its own column: the journeys we run through the province. */}
+                <div className="island__journeys">
+                  <h4>
+                    {journeys.length === 0
+                      ? 'No fixed journey stops here yet'
+                      : `${journeys.length} journey${journeys.length === 1 ? '' : 's'} through ${active.name}`}
+                  </h4>
+
+                  {journeys.length > 0 ? (
+                    <ul className="island__journey-list">
+                      {journeys.slice(0, LISTED).map(({ pkg, days }) => {
+                        const length = formatDays(pkg.durationDays)
+                        return (
+                          <li key={pkg.packageId}>
+                            <Link className="island__journey" to={`/journeys/${pkg.packageId}`}>
+                              <span className="island__journey-name">{pkg.title}</span>
+                              <span className="island__journey-meta">
+                                {[days > 0 && length ? `${days} of ${length} here` : length, pkg.destination]
+                                  .filter(Boolean)
+                                  .join(' · ')}
+                              </span>
+                              <ArrowRight width={14} height={14} />
+                            </Link>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  ) : (
+                    <p className="island__journey-empty">
+                      We still build trips here — tell us your dates and we will draft one.
+                    </p>
+                  )}
+
+                  {journeys.length > LISTED && (
+                    <Link className="link-arrow" to="/journeys">
+                      All {journeys.length} journeys
+                      <ArrowRight width={15} height={15} />
+                    </Link>
+                  )}
+                </div>
               </div>
 
               {/* Right: what it is like - the province first, then its districts, each one openable. */}
@@ -249,46 +274,23 @@ export default function ProvinceMap({ posts = [], onProvince }) {
               </div>
             </div>
 
-            {/* Across the bottom: the journeys we run through it. */}
-            <div className="island__journeys">
-              <h4>
-                {journeys.length === 0
-                  ? 'No fixed journey stops here yet'
-                  : `${journeys.length} journey${journeys.length === 1 ? '' : 's'} through ${active.name}`}
-              </h4>
-
-              {journeys.length > 0 ? (
-                <ul className="island__journey-list">
-                  {journeys.slice(0, LISTED).map(({ pkg, days }) => {
-                    const length = formatDays(pkg.durationDays)
-                    return (
-                      <li key={pkg.packageId}>
-                        <Link className="island__journey" to={`/journeys/${pkg.packageId}`}>
-                          <span className="island__journey-name">{pkg.title}</span>
-                          <span className="island__journey-meta">
-                            {[days > 0 && length ? `${days} of ${length} here` : length, pkg.destination]
-                              .filter(Boolean)
-                              .join(' · ')}
-                          </span>
-                          <ArrowRight width={14} height={14} />
-                        </Link>
-                      </li>
-                    )
-                  })}
-                </ul>
-              ) : (
-                <p className="island__journey-empty">
-                  We still build trips here — tell us your dates and we will draft one.
-                </p>
-              )}
-
-              {journeys.length > LISTED && (
-                <Link className="link-arrow" to="/journeys">
-                  All {journeys.length} journeys
-                  <ArrowRight width={15} height={15} />
-                </Link>
-              )}
-            </div>
+            {/* The same nine provinces by name, for keyboards and phones: a tap holds one exactly the
+                way a click on the map does. */}
+            <ul className="island__list">
+              {PROVINCES.map((province) => (
+                <li key={province.id}>
+                  <button
+                    type="button"
+                    className={`island__pick ${province.id === activeId ? 'is-active' : ''}`}
+                    onClick={() => toggleHold(province.id)}
+                    onMouseEnter={() => setHoveredId(province.id)}
+                    aria-pressed={province.id === heldId}
+                  >
+                    {province.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <Link className="link-arrow" to="/journeys">
