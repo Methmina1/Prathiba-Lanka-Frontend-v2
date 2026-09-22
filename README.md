@@ -12,7 +12,7 @@ framework, so the palette and layout stay easy to change.
 | `/journeys/:id` | One journey: overview, the full description, the day-by-day itinerary as a dropdown, gallery strip, reviews for that package (with a way to add one), sticky quote card |
 | `/journal` | **Opens on the province map and nothing else.** The map holds the middle of the section with nothing drawn around it: photographs of the province on the left, its description and districts on the right, the journeys we run through it directly beneath the map. Each district opens onto the facts and five sections the agency's district document gives it. Holding a province brings up the notes written about it as cards. The whole journal sits behind "Read all N stories" |
 | `/journal/:id` | Full story, then more from the journal |
-| `/gallery` | An even grid of 2:1 tiles, captions underneath, and a full-size viewer (arrow keys, Escape) |
+| `/gallery` | A wall of photographs in four columns, each cropped to a shape of its own (2:1, 3:2, square, 4:5), captions underneath, and a full-size viewer (arrow keys, Escape) |
 | `/reviews` | Average score, rating distribution, every review, and the way to the review form for a signed-in customer |
 | `/about` | Our story, the four things we hold to, milestones timeline |
 | `/contact` | Contact cards (WhatsApp, email, office), the enquiry form, a link to the PIN tracker, and a band of everything the agency posts to: Facebook, Instagram, TikTok and WhatsApp |
@@ -151,7 +151,7 @@ so it needs no backend. Forty-four tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the province panel** (the map in the middle with nothing drawn around it, the photographs to its left and the description close on its right, the packages underneath the map, and each district opening onto the district document's own sections), **the gallery grid and its viewer** (every tile the same 2:1 band, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography, **the customer's own enquiry page** (opened by the token from the email, showing the agency's answer and letting them write back) and what an unknown link says |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the province panel** (the map in the middle with nothing drawn around it, the photographs to its left and the description close on its right, the packages underneath the map, and each district opening onto the district document's own sections), **the gallery wall and its viewer** (tiles of different shapes rather than one repeated band, the same wall after a reload, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography, **the customer's own enquiry page** (opened by the token from the email, showing the agency's answer and letting them write back) and what an unknown link says |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections, **answering an enquiry** (the reply sent by email, the three states a reply can be in - emailed, answered in Gmail, never sent - and recording a reply written by hand) |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer, and no sideways scroll on the pages whose layout is not a plain grid (the gallery tiles, the contact social band, the journal with the map) |
 
@@ -436,14 +436,20 @@ a scroll-progress bar, `<Reveal>` (IntersectionObserver fade/lift with stagger),
 active hero slide, hover zooms on card imagery, a gold sweep on CTA buttons, and animated nav
 underlines. Everything collapses under `prefers-reduced-motion: reduce`.
 
-**The gallery grid.** The gallery page (`/gallery`) is a plain grid rather than a board: four 2:1 tiles
-across (`repeat(4, minmax(0, 1fr))`, down to three, two and then one on a phone), each one the same
-landscape band, the photograph cropped to fill it with `object-fit: cover`, and the caption written
-underneath the picture instead of over it. The wide shape suits what these photographs are - coast,
-hills, the road - and keeps a gallery of twenty-odd pictures from becoming a column of small squares;
-whatever the band crops away is in the viewer, at the photograph's own proportions. Hovering zooms the
-picture inside its band, turns the border gold and brings up a small magnifier, which is what says the
-photograph can be opened before anybody clicks it. A clip keeps its own controls and is not clickable.
+**The gallery wall.** The gallery page (`/gallery`) is a wall rather than a grid: photographs are laid
+out down four columns (`column-count`, three, two and then one down the breakpoints) and each one is
+cropped to **a shape of its own** - 2:1 for most, then 3:2, square and 4:5 - so a tall picture takes more
+of its column instead of leaving a hole and the bottom edge is ragged, the way a wall of prints is.
+Uniform rows of identical bands read as a spreadsheet; this reads as somebody's photographs. Captions sit
+underneath the pictures rather than over them, and whatever a crop takes away is in the viewer at the
+photograph's own proportions.
+
+Which photograph gets which shape is `shapeFor()` in `src/pages/GalleryPage.jsx`: a hash of the
+photograph's own key, never `Math.random` and never its position. The wall looks irregular but **does not
+reshuffle** when somebody reloads it, and uploading one new photograph does not reshape everything that
+follows it. Hovering zooms the picture inside its tile, turns the border gold and brings up a small
+magnifier, which is what says the photograph can be opened before anybody clicks it. A clip keeps its own
+controls and is not clickable.
 
 **The viewer.** Clicking a photograph opens `components/ui/Lightbox.jsx` - a dialog over a dark
 backdrop, with the caption and its place in the set underneath, arrow keys or the buttons to move

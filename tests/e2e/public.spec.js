@@ -589,31 +589,39 @@ test('a customer is sent to the review form, and a visitor to sign in', async ({
   await expect(form.getByRole('button', { name: 'Publish review' })).toBeVisible()
 })
 
-test('the gallery is an even grid, and a photograph opens full size', async ({ page }) => {
+test('the gallery is an irregular wall, and a photograph opens full size', async ({ page }) => {
   await page.goto('/gallery')
 
   await expect(page.locator('.gallery-tile')).toHaveCount(2)
 
-  // Nothing hangs at an angle any more: every tile is the same 2:1 band, and the caption is written
-  // underneath the picture rather than across it.
-  const boxes = await page.locator('.gallery-tile__media').evaluateAll((nodes) =>
-    nodes.map((node) => {
-      const box = node.getBoundingClientRect()
-      return { w: Math.round(box.width), h: Math.round(box.height) }
-    })
+  // The wall is deliberately not a grid of identical bands: each photograph is cropped to a shape of
+  // its own, so the tiles are different heights. In the fixture the first is a 2:1 panorama and the
+  // second a square, which is enough to prove the shapes are not all the same.
+  const SHAPES = ['gallery-tile--panorama', 'gallery-tile--landscape', 'gallery-tile--square', 'gallery-tile--portrait']
+  const shapes = await page.locator('.gallery-tile').evaluateAll((nodes) =>
+    nodes.map((node) => [...node.classList].find((name) => name.startsWith('gallery-tile--')))
   )
-  expect(
-    new Set(boxes.map((box) => `${box.w}x${box.h}`)).size,
-    'every tile should be the same size'
-  ).toBe(1)
-  expect(
-    boxes[0].w / boxes[0].h,
-    `a tile should be twice as wide as it is tall, got ${boxes[0].w}x${boxes[0].h}`
-  ).toBeCloseTo(2, 1)
+  expect(new Set(shapes).size, `the tiles should not share one shape, got ${shapes.join(', ')}`).toBeGreaterThan(1)
+  for (const shape of shapes) expect(SHAPES, 'an unknown tile shape').toContain(shape)
 
-  // The swap from the shipped photographs to the ones the API returns replaces the tiles, so both
-  // measurements are taken from one tile once its caption is there - and the comparison is polled,
-  // because a reveal mid-animation can put the two boxes a hair out of order for one frame.
+  const measured = () =>
+    page.locator('.gallery-tile__media').evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const box = node.getBoundingClientRect()
+        return `${Math.round(box.width)}x${Math.round(box.height)}`
+      })
+    )
+  const before = await measured()
+  expect(new Set(before).size, 'the tiles should be different sizes').toBeGreaterThan(1)
+
+  // Which photograph gets which shape is a hash of the photograph, never a coin toss: the same wall
+  // comes back after a reload, so nothing reshuffles under somebody reading it.
+  await page.reload()
+  await expect(page.locator('.gallery-tile')).toHaveCount(2)
+  expect(await measured(), 'the wall should be the same after a reload').toEqual(before)
+
+  // The caption is written underneath the picture rather than across it. Polled, because a reveal
+  // mid-animation can put the two boxes a hair out of order for one frame.
   const firstTile = page.locator('.gallery-tile').first()
   await expect(firstTile.locator('.gallery-tile__caption')).toHaveText('Coast')
   await expect

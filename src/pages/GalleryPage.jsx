@@ -18,6 +18,45 @@ import { formatDate } from '../utils/format'
  * set with the arrow keys. A clip keeps its own controls and is not clickable: opening a video on top
  * of itself would only get in the way of playing it.
  */
+/**
+ * The shapes a tile can take, and how often.
+ *
+ * The wall is not a uniform grid any more: photographs of different shapes sit at different heights,
+ * which is what stops twenty-odd pictures reading as a spreadsheet. 2:1 leads because that is the shape
+ * that suits this coast-and-hills photography; the others are the variation around it.
+ */
+const TILE_SHAPES = [
+  'panorama', 'landscape', 'panorama', 'square', 'panorama', 'portrait',
+  'landscape', 'panorama', 'portrait', 'panorama', 'landscape', 'panorama',
+]
+
+/**
+ * Which shape a photograph gets.
+ *
+ * A hash of the photograph's own key, not a random number and not its position: the same photograph
+ * keeps its shape between visits (so the wall does not reshuffle under somebody who reloads), and
+ * adding a new upload does not change the shape of everything after it. It *looks* random, and it is
+ * the same on every render - which is also what makes it testable.
+ */
+function shapeFor(key) {
+  const text = String(key ?? '')
+  let hash = 7
+  for (let index = 0; index < text.length; index += 1) {
+    hash = (hash * 31 + text.charCodeAt(index)) % 100003
+  }
+  return TILE_SHAPES[hash % TILE_SHAPES.length]
+}
+
+/**
+ * The gallery: a wall of photographs, and any one of them full size when it is clicked.
+ *
+ * The tiles are laid out in columns rather than rows, so a taller photograph simply takes more of the
+ * column instead of leaving a hole - and each photograph is cropped to its own shape rather than to one
+ * shape for the whole page. Captions sit underneath the pictures. Clicking one opens the viewer
+ * (components/ui/Lightbox.jsx), which moves through the set with the arrow keys and shows each
+ * photograph at its own proportions. A clip keeps its own controls and is not clickable: opening a
+ * video on top of itself would only get in the way of playing it.
+ */
 export default function GalleryPage() {
   const { data: images } = useApi(() => api.getGallery(), [])
   const [openIndex, setOpenIndex] = useState(null)
@@ -62,7 +101,7 @@ export default function GalleryPage() {
           <div className="gallery-grid">
             {photos.map((photo, index) => (
               <Reveal key={photo.key} className="gallery-grid__cell" delay={(index % 4) * 70}>
-                <figure className="gallery-tile">
+                <figure className={`gallery-tile gallery-tile--${shapeFor(photo.key)}`}>
                   {photo.item?.mediaType === 'VIDEO' ? (
                     <>
                       <div className="gallery-tile__media">

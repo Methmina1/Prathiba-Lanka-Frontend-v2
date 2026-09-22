@@ -3118,14 +3118,19 @@ html.intro-landing .site-header .brand__text {
   border-top: 1px solid var(--border);
 }
 
-/* --- gallery page: an even grid, and one photograph at a time ---------------------------------- */
+/* --- gallery page: a wall of photographs, and one of them at a time ---------------------------- */
 /*
- * Every tile is the same 2:1 landscape band with the picture cropped to fill it, and the caption sits
- * under the image rather than over it. That is the whole design: a wall of photographs that reads as a
- * wall, where nothing is hidden behind a caption and no photograph is given a size its neighbours do
- * not have. The wide shape suits what these are - coast, hills, the road - and keeps a long gallery
- * from becoming a column of small squares. The viewer (components/ui/Lightbox.jsx) is where a picture
- * gets to be seen properly, at its own proportions.
+ * The wall is irregular on purpose. Photographs are laid out down four columns rather than across
+ * rows, and each one is cropped to its own shape - so a tall picture takes more of its column instead
+ * of leaving a hole, and the bottom edge is ragged the way a wall of prints is. Uniform rows of
+ * identical bands read as a spreadsheet; this reads as somebody's photographs.
+ *
+ * The shape each photograph gets comes from a hash of its own key (shapeFor in GalleryPage.jsx), not
+ * from its position and not from Math.random: the wall looks random but does not reshuffle when
+ * somebody reloads, and uploading one new picture does not reshape the rest.
+ *
+ * Captions sit under the pictures rather than across them, and the viewer
+ * (components/ui/Lightbox.jsx) is where a photograph is finally seen at its own proportions.
  */
 .gallery-section {
   position: relative;
@@ -3142,13 +3147,15 @@ html.intro-landing .site-header .brand__text {
 
 .gallery-grid {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-5) var(--space-4);
+  column-count: 4;
+  column-gap: var(--space-4);
 }
 
 .gallery-grid__cell {
   min-width: 0;
+  /* A tile is never split across two columns. */
+  break-inside: avoid;
+  margin-bottom: var(--space-4);
 }
 
 .gallery-tile {
@@ -3157,7 +3164,7 @@ html.intro-landing .site-header .brand__text {
   margin: 0;
 }
 
-/* 2:1, and the button is the picture: the click target and the image are the same box. */
+/* 2:1 by default - and the button is the picture: the click target and the image are the same box. */
 .gallery-tile__media {
   position: relative;
   display: block;
@@ -3168,6 +3175,23 @@ html.intro-landing .site-header .brand__text {
   border-radius: var(--radius);
   background: var(--ink-950);
   transition: border-color var(--dur) var(--ease-out-soft), box-shadow var(--dur) var(--ease-out-soft);
+}
+
+/* The shapes the wall mixes. 2:1 leads; the rest are the variation around it. */
+.gallery-tile--panorama .gallery-tile__media {
+  aspect-ratio: 2 / 1;
+}
+
+.gallery-tile--landscape .gallery-tile__media {
+  aspect-ratio: 3 / 2;
+}
+
+.gallery-tile--square .gallery-tile__media {
+  aspect-ratio: 1 / 1;
+}
+
+.gallery-tile--portrait .gallery-tile__media {
+  aspect-ratio: 4 / 5;
 }
 
 button.gallery-tile__media {
@@ -3233,20 +3257,24 @@ button.gallery-tile__media {
 
 @media (max-width: 1080px) {
   .gallery-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-count: 3;
   }
 }
 
 @media (max-width: 780px) {
   .gallery-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4) var(--space-3);
+    column-count: 2;
+    column-gap: var(--space-3);
+  }
+
+  .gallery-grid__cell {
+    margin-bottom: var(--space-3);
   }
 }
 
 @media (max-width: 420px) {
   .gallery-grid {
-    grid-template-columns: minmax(0, 1fr);
+    column-count: 1;
   }
 }
 
