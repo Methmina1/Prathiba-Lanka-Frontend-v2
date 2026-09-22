@@ -110,7 +110,7 @@ export const sustainabilityPoints = [
 
 export const faqs = [
   {
-    q: 'How does a PrathibaLanka journey work?',
+    q: 'How does a PrathibhaLanka journey work?',
     a: 'You send a request with your dates and interests. A consultant replies with a draft itinerary and a price, usually within one working day. Once you are happy, we confirm the booking and send your PIN.',
   },
   {

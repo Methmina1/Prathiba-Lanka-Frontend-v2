@@ -7,7 +7,7 @@ export const ABOUT_DEFAULTS = {
   hero: {
     eyebrow: 'About us',
     title: 'Arranged by people who live here',
-    lede: 'PrathibaLanka is a small Sri Lankan travel house. We build private journeys for travellers who would rather see four places properly than fourteen badly.',
+    lede: 'PrathibhaLanka is a small Sri Lankan travel house. We build private journeys for travellers who would rather see four places properly than fourteen badly.',
     scenery: 'train',
   },
   story: {

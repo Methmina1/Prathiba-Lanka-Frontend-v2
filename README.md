@@ -1,6 +1,6 @@
-# PrathibaLanka - frontend
+# PrathibhaLanka - frontend
 
-React front end for the PrathibaLanka travel agency backend. Vite, React Router, plain CSS - no UI
+React front end for the PrathibhaLanka travel agency backend. Vite, React Router, plain CSS - no UI
 framework, so the palette and layout stay easy to change.
 
 ## Pages

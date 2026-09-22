@@ -72,7 +72,7 @@ export default function EnquiryForm() {
 
       {state.message && <p className={`form-note form-note--${state.status}`}>{state.message}</p>}
       <p className="plan__api">
-        Posts to <code>/api/contact</code> on the PrathibaLanka backend.
+        Posts to <code>/api/contact</code> on the PrathibhaLanka backend.
       </p>
     </form>
   )

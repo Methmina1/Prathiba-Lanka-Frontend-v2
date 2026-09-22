@@ -67,12 +67,12 @@ export default function Header() {
     <header className={`site-header ${atTop ? 'is-top' : 'is-scrolled'}`}>
       <div className="navbar">
         <div className="container navbar__inner">
-          <Link className="brand" to="/" aria-label="PrathibaLanka Voyages home">
+          <Link className="brand" to="/" aria-label="PrathibhaLanka Voyages home">
             <img src="/logo-mark.png" alt="" className="brand__mark" />
             <span className="brand__text">
               {/* The name, and nothing under it. "Journeys through the emerald isle" used to sit here as
                   a tagline; the agency asked for the name alone, so the lockup is one line. */}
-              <strong>PrathibaLanka Voyages</strong>
+              <strong>PrathibhaLanka Voyages</strong>
             </span>
           </Link>
 
