@@ -681,7 +681,7 @@ test('the contact page carries the social accounts and the motion', async ({ pag
   const whatsapp = band.getByRole('link', { name: 'Message Prathibha Lanka Voyages on WhatsApp' })
   await expect(facebook).toHaveAttribute('href', 'https://www.facebook.com/share/1KcQJzpSRF/')
   await expect(instagram).toHaveAttribute('href', 'https://www.instagram.com/prathibha_lanka_voyeages/')
-  await expect(tiktok).toHaveAttribute('href', 'https://www.tiktok.com/@prathibha_lanka_voyages')
+  await expect(tiktok).toHaveAttribute('href', 'https://vm.tiktok.com/ZS9AyKrWS8DUb-bXcUA/')
   await expect(whatsapp).toHaveAttribute('href', 'https://wa.me/94760484088')
   await expect(facebook).toHaveAttribute('rel', /noreferrer/)
   await expect(facebook).toHaveAttribute('target', '_blank')
