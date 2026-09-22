@@ -153,7 +153,7 @@ export default function AdminLayout() {
           <div className="admin__brand">
             <img src="/logo-mark.png" alt="" />
             <div>
-              <strong>PrathibaLanka Voyages</strong>
+              <strong>PrathibhaLanka Voyages</strong>
               <span>Admin console</span>
             </div>
           </div>

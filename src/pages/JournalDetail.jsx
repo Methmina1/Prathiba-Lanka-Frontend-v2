@@ -81,7 +81,7 @@ export default function JournalDetail() {
               )}
 
               <p className="prose__signoff">
-                Written from the road by the PrathibaLanka team. If you would like this turned into
+                Written from the road by the PrathibhaLanka team. If you would like this turned into
                 days on the ground, the enquiry form is the fastest way.
               </p>
             </article>

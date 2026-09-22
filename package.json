@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "React frontend for the PrathibaLanka travel agency",
+  "description": "React frontend for the PrathibhaLanka travel agency",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

@@ -1,4 +1,4 @@
-# Production image for the PrathibaLanka front end: Vite build served by nginx.
+# Production image for the PrathibhaLanka front end: Vite build served by nginx.
 #
 #   docker build -t prathibalanka-web .
 #   docker run -p 8080:80 -e BACKEND_URL=http://host.docker.internal:8080 prathibalanka-web
