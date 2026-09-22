@@ -39,7 +39,7 @@ export default function Footer() {
           <Link className="brand brand--footer" to="/">
             <img src="/logo-mark.png" alt="" className="brand__mark" />
             <span className="brand__text">
-              <strong>PrathibaLanka</strong>
+              <strong>PrathibaLanka Voyages</strong>
               <small>Sri Lanka, arranged with care</small>
             </span>
           </Link>
@@ -140,7 +140,7 @@ export default function Footer() {
       </div>
 
       <div className="container footer__bottom">
-        <span>© {new Date().getFullYear()} PrathibaLanka. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} PrathibaLanka Voyages. All rights reserved.</span>
         <div className="footer__bottom-meta">
           <Link className="footer__admin" to="/admin">
             Admin sign in

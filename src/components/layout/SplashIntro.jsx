@@ -189,8 +189,8 @@ export default function SplashIntro() {
       >
         <img ref={markRef} src="/logo-mark.png" alt="" className="brand__mark" />
         <span className="brand__text">
-          <strong>PrathibaLanka</strong>
-          <small>Journeys through the emerald isle</small>
+          {/* Identical to the navbar's lockup, tagline-less since the agency dropped it. */}
+          <strong>PrathibaLanka Voyages</strong>
         </span>
       </div>
 

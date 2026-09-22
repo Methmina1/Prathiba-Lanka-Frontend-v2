@@ -5,8 +5,13 @@
  * point at the same profiles. `display` is the handle as it is written on the site, and `handle` is
  * the longer sentence a screen reader reads out for the link.
  *
- * The TikTok link is the canonical profile URL: the address the app offers for sharing carries `_r`
- * and `_t` parameters that belong to that one share, not to the profile.
+ * TikTok is the short link the agency shares, not the profile address: it 301s to
+ * https://www.tiktok.com/@prathibha_lanka_voyages, which is the same account this site has always
+ * pointed at - checked, because "the link changed" and "the account moved" are not the same thing. The
+ * profile address TikTok offers for sharing carries `_r`, `_svg`, `checksum` and `utm_*` parameters
+ * that belong to one share rather than to the profile, so it is not the one to write down. Keeping the
+ * short code has one advantage worth knowing: it is bound to the account, so it keeps working if the
+ * handle is ever renamed - while `display` above would then need changing by hand.
  */
 export const SOCIAL_LINKS = [
   {
@@ -31,7 +36,7 @@ export const SOCIAL_LINKS = [
     display: '@prathibha_lanka_voyages',
     handle: 'Prathibha Lanka Voyages on TikTok',
     cta: 'Watch the clips',
-    href: 'https://www.tiktok.com/@prathibha_lanka_voyages',
+    href: 'https://vm.tiktok.com/ZS9AyKrWS8DUb-bXcUA/',
   },
   {
     // Written the way a visitor from abroad dials it. The same number is on the contact page as a

@@ -141,4 +141,50 @@ export function journalsInProvince(posts, provinceId) {
     )
 }
 
+/**
+ * Photographs of a province, best first.
+ *
+ * Nothing is tagged with a province, and nothing should be: the same places-matching that decides which
+ * journeys and notes belong here decides which photographs do. Three sources, in the order that puts the
+ * most specific picture first:
+ *
+ *   1. the photograph of each journey that goes through the province - it is of somewhere in it, and it
+ *      is the picture the agency chose for the trip;
+ *   2. the cover of each note written about the province;
+ *   3. gallery items linked to any of those journeys, which is where pictures actually taken on a trip
+ *      end up once somebody uploads them in the console.
+ *
+ * So a photograph added in the console appears on the map by itself, and a province nobody has
+ * photographed yet comes back empty - which the panel says rather than filling with something generic.
+ *
+ * @returns `{ src, alt, caption }[]`, at most `limit`, with no duplicates
+ */
+export function provincePhotos({ packages, posts, gallery } = {}, provinceId, limit = 4) {
+  const photos = []
+  const seen = new Set()
+
+  const add = (src, caption) => {
+    if (!src || seen.has(src) || photos.length >= limit) return
+    seen.add(src)
+    photos.push({ src, alt: caption ?? '', caption: caption ?? '' })
+  }
+
+  const journeys = journeysInProvince(packages, provinceId)
+  journeys.forEach(({ pkg }) => add(pkg.imageUrl, pkg.title))
+  journalsInProvince(posts, provinceId).forEach(({ post }) => add(post.coverImageUrl, post.title))
+
+  const linkedIds = new Set(journeys.map(({ pkg }) => String(pkg.packageId)))
+  const linkedTitles = new Set(journeys.map(({ pkg }) => pkg.title).filter(Boolean))
+  ;(gallery ?? [])
+    .filter(
+      (item) =>
+        item?.mediaType !== 'VIDEO' &&
+        ((item?.packageId != null && linkedIds.has(String(item.packageId))) ||
+          (item?.packageTitle && linkedTitles.has(item.packageTitle))),
+    )
+    .forEach((item) => add(item.imageUrl, item.caption ?? item.packageTitle))
+
+  return photos
+}
+
 export default PROVINCE_PLACES

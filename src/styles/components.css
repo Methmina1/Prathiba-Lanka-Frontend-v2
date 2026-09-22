@@ -419,25 +419,14 @@
   pointer-events: none;
 }
 
-/* Smaller and un-wrapped while loading: the tagline has to share a column with the name, and the
- * navbar has no room for it at all on phones. */
-.splash__brand .brand__text small {
-  opacity: 0;
-  white-space: nowrap;
-  font-size: 0.5rem;
-  letter-spacing: 0.1em;
-}
-
+/* The lockup is one line now - the name alone, no tagline - so the streak covers it and nothing settles
+   in underneath. */
 .splash__brand.is-painting .brand__text strong {
   animation: paint-on 1.55s var(--ease-out-soft) 0.2s forwards;
 }
 
 .splash__brand.is-painting .brand__text::after {
   animation: brush-streak 1.55s var(--ease-out-soft) 0.2s forwards;
-}
-
-.splash__brand.is-painting .brand__text small {
-  animation: fade-up 0.85s var(--ease-out-soft) 1.35s forwards;
 }
 
 @keyframes paint-on {
@@ -926,33 +915,56 @@ html.intro-landing .site-header .brand__text {
 
 /* ================================================================ province map */
 
+/* The map is the index, so it stands in the middle of the section: photographs of the province on its
+   left, what it is like on its right, and the journeys that go through it underneath. The map itself
+   carries no frame. */
 .island {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
-  gap: var(--space-7);
-  /* Top-aligned on purpose: centring would move the map up and down as the journey list changes
-     length, so a province would slide out from under the pointer. */
-  align-items: start;
+  justify-items: center;
+  gap: var(--space-5);
   margin-top: var(--space-6);
+}
+
+.island__card {
+  display: grid;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+.island__grid {
+  display: grid;
+  /* The middle column is capped rather than left to size itself: an `auto` column takes the widest
+     thing in it, which was the row of nine province buttons - 850px of map column and 139px for the
+     photographs either side. Capped, the map still sits dead centre and the sides get the rest. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 400px) minmax(0, 1fr);
+  /* Small: the description belongs beside the map, not across the room from it. */
+  column-gap: var(--space-3);
+  row-gap: var(--space-5);
+  align-items: start;
+}
+
+.island__centre {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  min-width: 0;
 }
 
 .island__map {
   display: flex;
   justify-content: center;
-  padding: var(--space-6);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background:
-    radial-gradient(circle at 50% 12%, rgba(210, 172, 78, 0.09), transparent 62%),
-    var(--surface);
+  width: 100%;
 }
 
 .province-map {
   width: 100%;
-  max-width: 340px;
+  /* Fills the column it is given rather than sitting in the middle of it: what is left of the column
+     would otherwise be a gap between the island and the description beside it. */
+  max-width: 100%;
   height: auto;
   max-height: 62vh;
-  filter: drop-shadow(0 22px 44px rgb(2 8 16 / 45%));
+  /* Nothing around it at all: no frame, no card, no shadow. The island's own outline and the hairline
+     between provinces are the only edges it needs. */
 }
 
 /* The island is one landmass made of nine shapes, so the shapes carry a hairline border rather
@@ -991,8 +1003,15 @@ html.intro-landing .site-header .brand__text {
 .island__head {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.island__head-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
 }
 
@@ -1027,20 +1046,69 @@ html.intro-landing .site-header .brand__text {
   color: var(--gold-200);
 }
 
-.island__panel {
-  display: grid;
-  gap: var(--space-4);
-  justify-items: start;
-}
-
-.island__card {
+.island__detail {
   display: grid;
   gap: var(--space-3);
+  align-content: start;
+  min-width: 0;
+}
+
+.island__photos {
+  min-width: 0;
+}
+
+.island__photo-list {
+  display: grid;
+  /* Two up, square, like the gallery: the province's photographs read as a set and use the column
+     they have rather than sitting in it as thumbnails. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.island__photo {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.island__photo img {
+  display: block;
   width: 100%;
-  /* Stops the panel jumping about while the pointer runs across the map: the journey list changes
-     length from province to province. */
-  min-height: 360px;
-  padding: var(--space-6);
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--ink-800);
+  transition: border-color var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
+}
+
+.island__photo:hover img {
+  border-color: var(--border-gold);
+  transform: translateY(-2px);
+}
+
+/* One line of the journey or note the photograph came from: enough to say why it is here. */
+.island__photo-caption {
+  color: var(--text-faint);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.island__photos-empty {
+  margin: 0;
+  padding: var(--space-5);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 .island__capital {
@@ -1069,29 +1137,104 @@ html.intro-landing .site-header .brand__text {
   line-height: 1.75;
 }
 
+/* The totals, summed from what the district document states for each district. */
+.island__facts {
+  margin: 0;
+  color: var(--gold-300);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* One province's districts, each one closed until somebody wants it: the panel would otherwise be a
+   wall of prose, and the map is meant to be readable at a glance. */
 .island__districts {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.island__district {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(244, 239, 228, 0.02);
+}
+
+.island__district[open] {
+  border-color: var(--border-gold);
+  background: rgba(195, 154, 46, 0.06);
+}
+
+.island__district-head {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
   list-style: none;
 }
 
-.island__districts li {
-  padding: 0.28rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  letter-spacing: 0.06em;
+/* The default triangle is replaced by the plus/minus, which says what the row does. */
+.island__district-head::-webkit-details-marker {
+  display: none;
 }
 
-/* "Which journeys go through here" - the reason the map is on the page. */
+.island__district-head::after {
+  content: '+';
+  color: var(--gold-300);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.island__district[open] .island__district-head::after {
+  content: '–';
+}
+
+.island__district-name {
+  color: var(--text-heading);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.island__district-facts {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: 0.72rem;
+}
+
+.island__district-sections {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.island__district-row dt {
+  margin-bottom: 3px;
+  color: var(--gold-300);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.island__district-row dd {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+/* "Which journeys go through here" - the reason the map is on the page. It sits in the map's own
+   column, directly under it, so the answer belongs to the province being pointed at. */
 .island__journeys {
   display: grid;
   gap: var(--space-3);
-  margin-top: var(--space-2);
+  width: 100%;
+  margin-top: var(--space-1);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border);
 }
@@ -1163,6 +1306,7 @@ html.intro-landing .site-header .brand__text {
 .island__list {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-2);
   margin: 0;
   padding: 0;
@@ -1193,19 +1337,65 @@ html.intro-landing .site-header .brand__text {
   color: var(--gold-200);
 }
 
-@media (max-width: 900px) {
-  .island {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-6);
+@media (max-width: 1180px) {
+  /* Three columns of prose around a map is one column too many below this width: the map keeps the
+     middle by taking a row of its own, and the rest stacks. `.island__centre` is dissolved with
+     `display: contents` so its pieces - the province's name, the map and its journeys - can take
+     their place among the others in the order they should be read. */
+  .island__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-4);
+  }
+
+  .island__centre {
+    display: contents;
+  }
+
+  .island__head {
+    grid-column: 1 / -1;
+    order: 1;
   }
 
   .island__map {
-    padding: var(--space-5);
+    grid-column: 1 / -1;
+    order: 2;
+  }
+
+  .island__photos {
+    order: 3;
+  }
+
+  .island__detail {
+    order: 4;
+  }
+
+  .island__journeys {
+    grid-column: 1 / -1;
+    order: 5;
+  }
+
+  /* On its own row the map has the whole width to fill, which would make it 1000px tall: it keeps a
+     size that belongs to the page instead. */
+  .province-map {
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 760px) {
+  /* One column, and the map still leads: it is the way into the page. */
+  .island__grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .province-map {
-    max-width: 280px;
+    max-width: 300px;
     max-height: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .island__photo-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -2917,12 +3107,19 @@ html.intro-landing .site-header .brand__text {
   border-top: 1px solid var(--border);
 }
 
-/* --- gallery page: an even grid, and one photograph at a time ---------------------------------- */
+/* --- gallery page: a wall of photographs, and one of them at a time ---------------------------- */
 /*
- * Every tile is the same square with the picture cropped to fill it, and the caption sits under the
- * image rather than over it. That is the whole design: a wall of photographs that reads as a wall,
- * where nothing is hidden behind a caption and no photograph is given a size its neighbours do not
- * have. The viewer (components/ui/Lightbox.jsx) is where a picture gets to be seen properly.
+ * The wall is irregular on purpose. Photographs are laid out down four columns rather than across
+ * rows, and each one is cropped to its own shape - so a tall picture takes more of its column instead
+ * of leaving a hole, and the bottom edge is ragged the way a wall of prints is. Uniform rows of
+ * identical bands read as a spreadsheet; this reads as somebody's photographs.
+ *
+ * The shape each photograph gets comes from a hash of its own key (shapeFor in GalleryPage.jsx), not
+ * from its position and not from Math.random: the wall looks random but does not reshuffle when
+ * somebody reloads, and uploading one new picture does not reshape the rest.
+ *
+ * Captions sit under the pictures rather than across them, and the viewer
+ * (components/ui/Lightbox.jsx) is where a photograph is finally seen at its own proportions.
  */
 .gallery-section {
   position: relative;
@@ -2939,13 +3136,15 @@ html.intro-landing .site-header .brand__text {
 
 .gallery-grid {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--space-5) var(--space-4);
+  column-count: 4;
+  column-gap: var(--space-4);
 }
 
 .gallery-grid__cell {
   min-width: 0;
+  /* A tile is never split across two columns. */
+  break-inside: avoid;
+  margin-bottom: var(--space-4);
 }
 
 .gallery-tile {
@@ -2954,17 +3153,34 @@ html.intro-landing .site-header .brand__text {
   margin: 0;
 }
 
-/* Square, and the button is the picture: the click target and the image are the same box. */
+/* 2:1 by default - and the button is the picture: the click target and the image are the same box. */
 .gallery-tile__media {
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 2 / 1;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--ink-950);
   transition: border-color var(--dur) var(--ease-out-soft), box-shadow var(--dur) var(--ease-out-soft);
+}
+
+/* The shapes the wall mixes. 2:1 leads; the rest are the variation around it. */
+.gallery-tile--panorama .gallery-tile__media {
+  aspect-ratio: 2 / 1;
+}
+
+.gallery-tile--landscape .gallery-tile__media {
+  aspect-ratio: 3 / 2;
+}
+
+.gallery-tile--square .gallery-tile__media {
+  aspect-ratio: 1 / 1;
+}
+
+.gallery-tile--portrait .gallery-tile__media {
+  aspect-ratio: 4 / 5;
 }
 
 button.gallery-tile__media {
@@ -3030,20 +3246,24 @@ button.gallery-tile__media {
 
 @media (max-width: 1080px) {
   .gallery-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-count: 3;
   }
 }
 
 @media (max-width: 780px) {
   .gallery-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4) var(--space-3);
+    column-count: 2;
+    column-gap: var(--space-3);
+  }
+
+  .gallery-grid__cell {
+    margin-bottom: var(--space-3);
   }
 }
 
 @media (max-width: 420px) {
   .gallery-grid {
-    grid-template-columns: minmax(0, 1fr);
+    column-count: 1;
   }
 }
 

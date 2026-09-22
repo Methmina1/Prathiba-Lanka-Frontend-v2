@@ -19,17 +19,28 @@ test('home renders the hero carousel with its own photographs', async ({ page })
   await expect(hero.locator('.hero__slide.is-active')).toHaveCount(1)
   await expect(hero.locator('.hero__dot')).toHaveCount(4)
 
-  // and every slide's image actually loads (WebP included)
-  const images = await hero.locator('.hero__slide img').evaluateAll((nodes) =>
-    nodes.map((node) => ({ src: node.getAttribute('src'), loaded: node.complete && node.naturalWidth > 0 })),
-  )
-  expect(images.map((i) => i.src)).toEqual([
+  // and every slide's image actually loads (WebP included). Polled rather than read once: the four
+  // photographs are lazy, and a single snapshot taken on a busy machine catches one still in flight.
+  await expect
+    .poll(
+      async () =>
+        hero.locator('.hero__slide img').evaluateAll((nodes) => {
+          const pending = nodes.filter((node) => !(node.complete && node.naturalWidth > 0))
+          return pending.map((node) => node.getAttribute('src')).join(', ')
+        }),
+      { message: 'every hero photograph should load' }
+    )
+    .toBe('')
+
+  const sources = await hero
+    .locator('.hero__slide img')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('src')))
+  expect(sources).toEqual([
     '/images/sl/hero-1.jpg',
     '/images/sl/hero-2.webp',
     '/images/sl/hero-3.jpg',
     '/images/sl/hero-4.jpg',
   ])
-  for (const image of images) expect(image.loaded, `${image.src} did not load`).toBe(true)
 
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
 })
@@ -116,7 +127,7 @@ test('journeys, journal and gallery render their covers from the API', async ({ 
   await expect(page.locator('.journal-card__media img').first()).toHaveAttribute('src', '/images/sl/hero-2.webp')
 
   await page.goto('/gallery')
-  // one square tile per gallery row, with the caption written underneath it
+  // one 2:1 tile per gallery row, with the caption written underneath it
   await expect(page.locator('.gallery-grid__cell')).toHaveCount(2)
   await expect(page.locator('.gallery-tile__media img').first()).toBeVisible()
   await expect(page.locator('.gallery-tile__caption').first()).toHaveText('Coast')
@@ -277,12 +288,27 @@ test('the journal page draws Sri Lanka out of its nine provinces', async ({ page
   await expect(page.locator('.island__card h3')).toHaveText('Northern Province')
   await expect(page.locator('.island__capital')).toContainText('Jaffna')
   await expect(page.locator('.island__about')).toContainText('Tamil-speaking')
-  await expect(page.locator('.island__districts li')).toHaveCount(5)
+  // The province's districts, each carrying the facts the district document states and its detail
+  // behind the row - five districts in the north.
+  await expect(page.locator('.island__district')).toHaveCount(5)
+  await expect(page.locator('.island__facts')).toContainText('5 districts')
+  await expect(page.locator('.island__district-name').first()).toHaveText('Jaffna')
+  await expect(page.locator('.island__district-sections').first()).toBeHidden()
+  await page.locator('.island__district-head').first().click()
+  const jaffna = page.locator('.island__district').first()
+  await expect(jaffna.locator('.island__district-sections')).toBeVisible()
+  await expect(jaffna.locator('.island__district-row dt').first()).toHaveText('Geography')
+  await expect(jaffna.locator('.island__district-row dd').first()).toContainText('Jaffna District')
   await expect(page.locator('.island__journeys h4')).toHaveText('No fixed journey stops here yet')
 
   // The fixture catalogue has a Cultural Triangle journey, which is Central.
   await page.getByRole('button', { name: 'Central', exact: true }).click()
   await expect(page.locator('.island__about')).toContainText('The tea country')
+  await expect(page.locator('.island__facts')).toContainText('3 districts')
+  await expect(page.locator('.island__facts')).toContainText('5,674 km²')
+  await expect(page.locator('.island__district')).toHaveCount(3)
+  await expect(page.locator('.island__district-name').first()).toHaveText('Kandy')
+  await expect(page.locator('.island__district-facts').first()).toContainText('1,940 km²')
   await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
   const journey = page.locator('.island__journey').first()
   await expect(journey).toContainText('Classical Heritage')
@@ -294,6 +320,64 @@ test('the journal page draws Sri Lanka out of its nine provinces', async ({ page
   await expect(page.locator('h1')).toHaveText('Classical Heritage')
 
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
+})
+
+test('the province panel answers with photographs, a description and the journeys', async ({ page }) => {
+  await page.goto('/journal')
+  await page.locator('#island').scrollIntoViewIfNeeded()
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+
+  // The map stands on the page by itself: no card, no frame, and centred in the container.
+  const mapBox = await page.locator('.province-map').boundingBox()
+  const containerBox = await page.locator('#island .container').boundingBox()
+  const frame = await page.locator('.island__map').evaluate((node) => {
+    const style = getComputedStyle(node)
+    return { border: style.borderTopWidth, background: style.backgroundColor, padding: style.paddingLeft }
+  })
+  expect(frame.border, 'the map should have no frame').toBe('0px')
+  expect(frame.background, 'the map should have no framed background').toBe('rgba(0, 0, 0, 0)')
+  expect(frame.padding, 'the map should have no frame padding').toBe('0px')
+  expect(
+    Math.abs(mapBox.x + mapBox.width / 2 - (containerBox.x + containerBox.width / 2)),
+    'the map should be centred'
+  ).toBeLessThanOrEqual(1)
+
+  // Top left: photographs of the province. They come from the journeys and notes that name it, so the
+  // fixture catalogue's Central journey supplies one here.
+  const photos = page.locator('.island__photos')
+  await expect(photos.locator('.island__photo img').first()).toHaveAttribute(
+    'src',
+    '/images/sl/seed-package-heritage.jpg'
+  )
+  await expect(photos.locator('.island__photo-caption').first()).toHaveText('Classical Heritage')
+
+  // Top right: what it is like, its districts, and the district document behind them.
+  const detail = page.locator('.island__detail')
+  await expect(detail.locator('.island__about')).toContainText('The tea country')
+  await expect(detail.locator('.island__facts')).toContainText('5,674 km²')
+  await expect(detail.locator('.island__district')).toHaveCount(3)
+  await expect(detail.locator('.island__district-name').first()).toHaveText('Kandy')
+  await expect(detail.locator('.island__district-facts').first()).toContainText('1.4 million people')
+
+  // The district document's own words are behind the row, not paraphrased on top of it.
+  await detail.locator('.island__district-head').first().click()
+  const sections = detail.locator('.island__district').first().locator('.island__district-row')
+  await expect(sections).toHaveCount(5)
+  await expect(sections.first()).toContainText('central highlands')
+  await expect(sections.nth(1)).toContainText('last capital of the Sinhala kingdom')
+
+  // Bottom, under the map and in its own column: the packages belong to the province being pointed at.
+  // Read again here rather than reused: the district rows above have just changed the panel's height.
+  const photoBox = await photos.boundingBox()
+  const detailBox = await detail.boundingBox()
+  const centreBox = await page.locator('.province-map').boundingBox()
+  const journeyBox = await page.locator('.island__journeys').boundingBox()
+  expect(photoBox.x, 'photographs belong on the left').toBeLessThan(centreBox.x)
+  expect(detailBox.x, 'the description belongs on the right').toBeGreaterThan(centreBox.x + centreBox.width)
+  expect(detailBox.x - (centreBox.x + centreBox.width), 'the description belongs close to the map').toBeLessThan(30)
+  expect(journeyBox.y, 'the packages belong below the map').toBeGreaterThanOrEqual(centreBox.y + centreBox.height - 1)
+  expect(Math.abs(journeyBox.x - centreBox.x), 'the packages belong in the map column').toBeLessThanOrEqual(2)
+  await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
 })
 
 test('a province can be held, so the pointer can leave the map', async ({ page }) => {
@@ -505,35 +589,51 @@ test('a customer is sent to the review form, and a visitor to sign in', async ({
   await expect(form.getByRole('button', { name: 'Publish review' })).toBeVisible()
 })
 
-test('the gallery is an even grid, and a photograph opens full size', async ({ page }) => {
+test('the gallery is an irregular wall, and a photograph opens full size', async ({ page }) => {
   await page.goto('/gallery')
 
   await expect(page.locator('.gallery-tile')).toHaveCount(2)
 
-  // Nothing hangs at an angle any more: every tile is the same, evenly sized square, and the caption
-  // is written underneath the picture rather than across it.
-  const boxes = await page.locator('.gallery-tile__media').evaluateAll((nodes) =>
-    nodes.map((node) => {
-      const box = node.getBoundingClientRect()
-      return { w: Math.round(box.width), h: Math.round(box.height) }
-    })
+  // The wall is deliberately not a grid of identical bands: each photograph is cropped to a shape of
+  // its own, so the tiles are different heights. In the fixture the first is a 2:1 panorama and the
+  // second a square, which is enough to prove the shapes are not all the same.
+  const SHAPES = ['gallery-tile--panorama', 'gallery-tile--landscape', 'gallery-tile--square', 'gallery-tile--portrait']
+  const shapes = await page.locator('.gallery-tile').evaluateAll((nodes) =>
+    nodes.map((node) => [...node.classList].find((name) => name.startsWith('gallery-tile--')))
   )
-  expect(
-    new Set(boxes.map((box) => `${box.w}x${box.h}`)).size,
-    'every tile should be the same size'
-  ).toBe(1)
-  expect(boxes[0].w, 'a tile should be square').toBe(boxes[0].h)
+  expect(new Set(shapes).size, `the tiles should not share one shape, got ${shapes.join(', ')}`).toBeGreaterThan(1)
+  for (const shape of shapes) expect(SHAPES, 'an unknown tile shape').toContain(shape)
 
-  // The swap from the shipped photographs to the ones the API returns replaces the tiles, so both
-  // measurements are taken from one tile once its caption is there - reading them across the swap was
-  // how this went flaky.
+  const measured = () =>
+    page.locator('.gallery-tile__media').evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const box = node.getBoundingClientRect()
+        return `${Math.round(box.width)}x${Math.round(box.height)}`
+      })
+    )
+  const before = await measured()
+  expect(new Set(before).size, 'the tiles should be different sizes').toBeGreaterThan(1)
+
+  // Which photograph gets which shape is a hash of the photograph, never a coin toss: the same wall
+  // comes back after a reload, so nothing reshuffles under somebody reading it.
+  await page.reload()
+  await expect(page.locator('.gallery-tile')).toHaveCount(2)
+  expect(await measured(), 'the wall should be the same after a reload').toEqual(before)
+
+  // The caption is written underneath the picture rather than across it. Polled, because a reveal
+  // mid-animation can put the two boxes a hair out of order for one frame.
   const firstTile = page.locator('.gallery-tile').first()
   await expect(firstTile.locator('.gallery-tile__caption')).toHaveText('Coast')
-  const media = await firstTile.locator('.gallery-tile__media').boundingBox()
-  const caption = await firstTile.locator('.gallery-tile__caption').boundingBox()
-  expect(caption.y, 'the caption should sit below the picture').toBeGreaterThanOrEqual(
-    media.y + media.height
-  )
+  await expect
+    .poll(
+      async () => {
+        const media = await firstTile.locator('.gallery-tile__media').boundingBox()
+        const caption = await firstTile.locator('.gallery-tile__caption').boundingBox()
+        return Math.round(caption.y - (media.y + media.height))
+      },
+      { message: 'the caption should sit below the picture' }
+    )
+    .toBeGreaterThanOrEqual(4)
 
   // Clicking a photograph opens the viewer, where the arrows move through the same set.
   await page.locator('.gallery-tile__open').first().click()
@@ -581,7 +681,7 @@ test('the contact page carries the social accounts and the motion', async ({ pag
   const whatsapp = band.getByRole('link', { name: 'Message Prathibha Lanka Voyages on WhatsApp' })
   await expect(facebook).toHaveAttribute('href', 'https://www.facebook.com/share/1KcQJzpSRF/')
   await expect(instagram).toHaveAttribute('href', 'https://www.instagram.com/prathibha_lanka_voyeages/')
-  await expect(tiktok).toHaveAttribute('href', 'https://www.tiktok.com/@prathibha_lanka_voyages')
+  await expect(tiktok).toHaveAttribute('href', 'https://vm.tiktok.com/ZS9AyKrWS8DUb-bXcUA/')
   await expect(whatsapp).toHaveAttribute('href', 'https://wa.me/94760484088')
   await expect(facebook).toHaveAttribute('rel', /noreferrer/)
   await expect(facebook).toHaveAttribute('target', '_blank')

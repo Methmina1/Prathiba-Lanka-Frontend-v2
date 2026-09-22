@@ -207,7 +207,7 @@ test.describe('a visitor who has not signed in', () => {
     )
     await expect(band.getByRole('link', { name: /on TikTok/ })).toHaveAttribute(
       'href',
-      'https://www.tiktok.com/@prathibha_lanka_voyages',
+      'https://vm.tiktok.com/ZS9AyKrWS8DUb-bXcUA/',
     )
     await expect(page.getByRole('link', { name: /Message us on WhatsApp/ })).toHaveAttribute(
       'href',
