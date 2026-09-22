@@ -11,21 +11,30 @@
       content="PrathibaLanka Voyages - private, tailor-made journeys across Sri Lanka. Cultural triangle, wildlife safaris, hill country and the southern coast."
     />
     <!-- Link previews. Facebook and WhatsApp are how these journeys actually get shared, and without
-         these tags a link there shows a bare URL. og:url and og:image have to be absolute, so they
-         are added once the site has its own domain - see the README. -->
+         these tags a link there shows a bare URL. Both have to be absolute, so they are built from
+         %SITE_URL%, which vite.config.js substitutes at build time (SITE_URL, defaulting to the
+         agency's own domain). One card serves every platform: 1200x630 is what all of them fall back
+         to, and public/images/sl/share.jpg is that size. -->
+    <link rel="canonical" href="%SITE_URL%/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="PrathibaLanka Voyages" />
+    <meta property="og:url" content="%SITE_URL%/" />
     <meta property="og:title" content="PrathibaLanka Voyages | Private Journeys Through Sri Lanka" />
     <meta
       property="og:description"
       content="Private, tailor-made journeys across Sri Lanka - the cultural triangle, wildlife safaris, the hill country and the southern coast."
     />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="%SITE_URL%/images/sl/share.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Sri Lanka, arranged with care by PrathibaLanka Voyages" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="PrathibaLanka Voyages | Private Journeys Through Sri Lanka" />
     <meta
       name="twitter:description"
       content="Private, tailor-made journeys across Sri Lanka - the cultural triangle, wildlife safaris, the hill country and the southern coast."
     />
+    <meta name="twitter:image" content="%SITE_URL%/images/sl/share.jpg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <!-- Caveat is the handwriting on the note beside the social cards; the other two drive the

@@ -102,6 +102,7 @@ npm run check:render  # renders all 25 routes in Node and asserts their content
 npm run test:e2e      # drives the built site in Chromium against a mocked API (Playwright)
 npm run test:roles    # drives the real site against a real backend, as each role
 npm run seed          # load the demo content into a running backend (optional)
+node scripts/seed-production.mjs   # copy this instance's content to another (see below)
 npm run extract:packages   # rate sheet (.xlsx) -> packages.json
 npm run import:packages    # packages.json -> a running backend (see "The package catalogue")
 ```
@@ -477,6 +478,47 @@ of every public page (`components/layout/WhatsAppFab.jsx`). That bubble used to 
 "Begin your journey" button for that job. It is hidden on `/account`, `/login` and `/register`: those
 are a customer's own business, and neither belongs on the admin console's screens either.
 
+## Seeding a production database
+
+A fresh database has the schema and an administrator and nothing else. `scripts/seed-production.mjs`
+fills it from an instance that already has the content — every journey, story, gallery item, photograph
+and page of copy:
+
+```bash
+# preview what would happen
+node scripts/seed-production.mjs --from http://localhost:8080 --to https://prathibalanka.com --dry-run
+
+# do it
+node scripts/seed-production.mjs --from http://localhost:8080 --to https://prathibalanka.com
+```
+
+It talks to both instances through their own APIs as an administrator
+(`BOOTSTRAP_ADMIN_PASSWORD`, or `--admin-password`), so it works against a deployed site without a
+database connection:
+
+| | |
+|---|---|
+| **Media** | Each file is downloaded from the source and uploaded to the target; every URL that pointed at the old copy is rewritten to the new one. Matched on the file's name, so a second run skips what is already there |
+| **Journeys** | Created from the source's own record — title, price, itinerary, status, photograph. Matched on title |
+| **Stories** | Created and then published, carrying their **original `publishedAt`** so a seeded archive is not all dated the day of the import |
+| **Gallery** | Added when the photograph is not already in the target's gallery, with its caption and its link to a journey |
+| **About / Contact** | Replaced, including the media URLs inside them — that copy is meant to be overwritten |
+
+It is additive and idempotent: it never deletes, and a second run reports everything already there.
+Run it against a **copy** first if you want to see it work; the recipe used to prove it is a second
+database on the same Postgres with its own media directory:
+
+```bash
+docker exec -e PGPASSWORD=secret travel_agency_db psql -U travel_admin -d postgres \
+  -c "CREATE DATABASE travel_agency_staging OWNER travel_admin;"
+# boot the API against it on another port, with MEDIA_DIR=.staging-media, then:
+node scripts/seed-production.mjs --from http://localhost:8080 --to http://localhost:8090
+```
+
+**What it cannot move**, because the API deliberately has no route that writes them: customer accounts
+(people register themselves), bookings, enquiries and reviews. Those are records of things people did,
+not content. The administrator on the target comes from `BOOTSTRAP_ADMIN_PASSWORD` on its first boot.
+
 ## Deployment
 
 The front end ships as an nginx image that serves the built bundle **and** proxies `/api` and
@@ -493,9 +535,17 @@ mixed-content risk, and the backend's address can change without rebuilding the 
 
 | Setting | When | Purpose |
 |---|---|---|
-| `VITE_API_BASE_URL` | build (`--build-arg`) | API base. `/` Ã¢â‚¬â€ the image default Ã¢â‚¬â€ means same-origin through the proxy |
+| `VITE_API_BASE_URL` | build (`--build-arg`) | API base. `/` — the image default — means same-origin through the proxy |
+| `SITE_URL` | build | The address the site is published at, for the canonical link and the `og:url`/`og:image` sharing tags. Defaults to `https://prathibalanka.com`; set it to the Railway domain if the site is not on the agency's domain yet |
 | `BACKEND_URL` | runtime | Where nginx forwards `/api` and `/media`. Defaults to `http://backend.railway.internal:8080` |
 | `PORT` | runtime | Port nginx listens on. Railway injects it; 80 otherwise |
+
+`index.html` carries `%SITE_URL%` rather than a hard-coded domain, and `vite.config.js` substitutes it at
+build time — the tags have to be absolute, and a link preview fetched by WhatsApp or Facebook has no
+page to resolve a relative address against. `public/images/sl/share.jpg` is the picture that goes with
+it: 1200×630, the shape every platform falls back to, cropped from the CTA band photograph by
+`scripts/optimize-images.ps1`'s sibling one-off (the crop is `cta-band.jpg`, weighted above centre so the
+horizon survives).
 
 ### Railway
 
@@ -584,6 +634,7 @@ scripts/
   import-tour-packages.jsx   packages.json -> packages through the admin API
   build-province-map.mjs   public/map + reference districts -> src/data/provinces.js
   build-district-detail.mjs  data/Sri_Lanka_25_Districts.docx -> src/data/districtDetail.js
+  seed-production.mjs      every journey, story, photograph and page of copy -> another instance
   live-roles.mjs           runs the live role suite with one run id for the whole run
   optimize-images.ps1      full-resolution photographs -> web-sized JPEGs
 tests/e2e/
@@ -609,7 +660,7 @@ carries an uploaded one instead. Which is which:
 
 | Where | Comes from | Changed by |
 |---|---|---|
-| Home hero carousel, page header bands, the "fewer places" panel, the CTA band, the contact map panel, the 404 page | `public/images/sl/*.jpg`, mapped slot by slot in `src/data/photos.js` | replacing the file, or editing that map (a developer change) |
+| Link previews (WhatsApp, Facebook) | `public/images/sl/share.jpg`, 1200x630, named by the `og:image` tag in `index.html` | replacing the file, or editing the `%SITE_URL%`-based tag |`n| Home hero carousel, page header bands, the "fewer places" panel, the CTA band, the contact map panel, the 404 page | `public/images/sl/*.jpg`, mapped slot by slot in `src/data/photos.js` | replacing the file, or editing that map (a developer change) |
 | Journey cards and journey headers | the package's `imageUrl`, seeded per journey by `npm run import:packages` from `data/package-copy.json` | Admin Ã¢â€ â€™ Packages Ã¢â€ â€™ Cover image (media library) |
 | Journal cards, featured story, story cover | the post's `coverImageUrl` | Admin Ã¢â€ â€™ Journal Ã¢â€ â€™ Cover image (media library) |
 | Gallery, home gallery strip | gallery items (image or short video) | Admin Ã¢â€ â€™ Gallery, files from Admin Ã¢â€ â€™ Media library |

@@ -86,3 +86,4 @@ The four hero photographs double as the covers of the four theme posts in the jo
 coast, wildlife, culture, golden hour). Each was uploaded to the media library from the file above, so
 every cover is byte-identical to the slide it belongs to - change the hero slide and its journal post
 together if you swap one.
+share.jpg                <- cropped from cta-band.jpg (1200x630, for link previews)
