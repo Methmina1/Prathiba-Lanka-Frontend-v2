@@ -926,13 +926,36 @@ html.intro-landing .site-header .brand__text {
 
 /* ================================================================ province map */
 
-/* The map is the index, so it stands on the page by itself: no card, no frame, centred, with the
-   panel that answers for a province underneath it. */
+/* The map is the index, so it stands in the middle of the section: photographs of the province on its
+   left, what it is like on its right, and the journeys that go through it underneath. The map itself
+   carries no frame. */
 .island {
   display: grid;
   justify-items: center;
   gap: var(--space-5);
   margin-top: var(--space-6);
+}
+
+.island__card {
+  display: grid;
+  gap: var(--space-6);
+  width: 100%;
+}
+
+.island__grid {
+  display: grid;
+  /* Left and right take the same width and the map takes what it needs, so the island sits dead
+     centre however long the description runs. */
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.island__centre {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+  min-width: 0;
 }
 
 .island__map {
@@ -943,9 +966,9 @@ html.intro-landing .site-header .brand__text {
 
 .province-map {
   width: 100%;
-  max-width: 380px;
+  max-width: 360px;
   height: auto;
-  max-height: 66vh;
+  max-height: 62vh;
   /* The only thing left of the frame: a soft shadow, so the island reads as lifted off the page
      rather than pasted onto it. */
   filter: drop-shadow(0 18px 38px rgb(2 8 16 / 40%));
@@ -1030,36 +1053,11 @@ html.intro-landing .site-header .brand__text {
   color: var(--gold-200);
 }
 
-.island__panel {
-  display: grid;
-  gap: var(--space-4);
-  justify-items: center;
-  width: 100%;
-}
-
-.island__card {
-  display: grid;
-  gap: var(--space-4);
-  width: 100%;
-  /* Stops the panel jumping about while the pointer runs across the map: the photographs and the
-     journey list both change length from province to province. */
-  min-height: 380px;
-  padding: var(--space-6);
-}
-
-/* Photographs of the province on the left, what it is like on the right. The journeys that go through
-   it span the whole width underneath - they are what the map is for. */
-.island__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: var(--space-5);
-  align-items: start;
-}
-
 .island__detail {
   display: grid;
   gap: var(--space-3);
   align-content: start;
+  min-width: 0;
 }
 
 .island__photos {
@@ -1145,22 +1143,95 @@ html.intro-landing .site-header .brand__text {
   line-height: 1.75;
 }
 
+/* The totals, summed from what the district document states for each district. */
+.island__facts {
+  margin: 0;
+  color: var(--gold-300);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* One province's districts, each one closed until somebody wants it: the panel would otherwise be a
+   wall of prose, and the map is meant to be readable at a glance. */
 .island__districts {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.island__district {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(244, 239, 228, 0.02);
+}
+
+.island__district[open] {
+  border-color: var(--border-gold);
+  background: rgba(195, 154, 46, 0.06);
+}
+
+.island__district-head {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+  padding: 0.6rem 0.8rem;
+  cursor: pointer;
   list-style: none;
 }
 
-.island__districts li {
-  padding: 0.28rem 0.7rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  color: var(--text-muted);
+/* The default triangle is replaced by the plus/minus, which says what the row does. */
+.island__district-head::-webkit-details-marker {
+  display: none;
+}
+
+.island__district-head::after {
+  content: '+';
+  color: var(--gold-300);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.island__district[open] .island__district-head::after {
+  content: '–';
+}
+
+.island__district-name {
+  color: var(--text-heading);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.island__district-facts {
+  margin-left: auto;
+  color: var(--text-faint);
   font-size: 0.72rem;
-  letter-spacing: 0.06em;
+}
+
+.island__district-sections {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.island__district-row dt {
+  margin-bottom: 3px;
+  color: var(--gold-300);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.island__district-row dd {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
 }
 
 /* "Which journeys go through here" - the reason the map is on the page. */
@@ -1270,16 +1341,24 @@ html.intro-landing .site-header .brand__text {
   color: var(--gold-200);
 }
 
-@media (max-width: 900px) {
-  /* Photographs above the description rather than beside it: the two-column reading only works while
-     there is width for both. */
+@media (max-width: 1180px) {
+  /* Three columns of prose around a map is one column too many below this width: the map keeps the
+     middle of the section but takes a row of its own, with the photographs and the description
+     underneath it. */
   .island__grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .island__card {
-    min-height: 0;
-    padding: var(--space-5);
+  .island__centre {
+    grid-column: 1 / -1;
+    order: -1;
+  }
+}
+
+@media (max-width: 760px) {
+  /* One column, and the map still leads: it is the way into the page. */
+  .island__grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .province-map {

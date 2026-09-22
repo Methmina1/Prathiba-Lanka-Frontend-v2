@@ -288,12 +288,27 @@ test('the journal page draws Sri Lanka out of its nine provinces', async ({ page
   await expect(page.locator('.island__card h3')).toHaveText('Northern Province')
   await expect(page.locator('.island__capital')).toContainText('Jaffna')
   await expect(page.locator('.island__about')).toContainText('Tamil-speaking')
-  await expect(page.locator('.island__districts li')).toHaveCount(5)
+  // The province's districts, each carrying the facts the district document states and its detail
+  // behind the row - five districts in the north.
+  await expect(page.locator('.island__district')).toHaveCount(5)
+  await expect(page.locator('.island__facts')).toContainText('5 districts')
+  await expect(page.locator('.island__district-name').first()).toHaveText('Jaffna')
+  await expect(page.locator('.island__district-sections').first()).toBeHidden()
+  await page.locator('.island__district-head').first().click()
+  const jaffna = page.locator('.island__district').first()
+  await expect(jaffna.locator('.island__district-sections')).toBeVisible()
+  await expect(jaffna.locator('.island__district-row dt').first()).toHaveText('Geography')
+  await expect(jaffna.locator('.island__district-row dd').first()).toContainText('Jaffna District')
   await expect(page.locator('.island__journeys h4')).toHaveText('No fixed journey stops here yet')
 
   // The fixture catalogue has a Cultural Triangle journey, which is Central.
   await page.getByRole('button', { name: 'Central', exact: true }).click()
   await expect(page.locator('.island__about')).toContainText('The tea country')
+  await expect(page.locator('.island__facts')).toContainText('3 districts')
+  await expect(page.locator('.island__facts')).toContainText('5,674 km²')
+  await expect(page.locator('.island__district')).toHaveCount(3)
+  await expect(page.locator('.island__district-name').first()).toHaveText('Kandy')
+  await expect(page.locator('.island__district-facts').first()).toContainText('1,940 km²')
   await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
   const journey = page.locator('.island__journey').first()
   await expect(journey).toContainText('Classical Heritage')
@@ -336,18 +351,32 @@ test('the province panel answers with photographs, a description and the journey
   )
   await expect(photos.locator('.island__photo-caption').first()).toHaveText('Classical Heritage')
 
-  // Top right: what it is like, and which districts it holds.
+  // Top right: what it is like, its districts, and the district document behind them.
   const detail = page.locator('.island__detail')
   await expect(detail.locator('.island__about')).toContainText('The tea country')
-  await expect(detail.locator('.island__districts li')).toHaveCount(3)
+  await expect(detail.locator('.island__facts')).toContainText('5,674 km²')
+  await expect(detail.locator('.island__district')).toHaveCount(3)
+  await expect(detail.locator('.island__district-name').first()).toHaveText('Kandy')
+  await expect(detail.locator('.island__district-facts').first()).toContainText('1.4 million people')
 
-  // Bottom, across the whole panel: the journeys we run through it.
+  // The district document's own words are behind the row, not paraphrased on top of it.
+  await detail.locator('.island__district-head').first().click()
+  const sections = detail.locator('.island__district').first().locator('.island__district-row')
+  await expect(sections).toHaveCount(5)
+  await expect(sections.first()).toContainText('central highlands')
+  await expect(sections.nth(1)).toContainText('last capital of the Sinhala kingdom')
+
+  // Bottom, across the whole panel: the journeys we run through it. The three columns are read again
+  // here rather than reused: the district rows above have just changed the panel's height.
   const photoBox = await photos.boundingBox()
   const detailBox = await detail.boundingBox()
+  const centreBox = await page.locator('.province-map').boundingBox()
   const journeyBox = await page.locator('.island__journeys').boundingBox()
-  expect(photoBox.x, 'photographs belong on the left').toBeLessThan(detailBox.x)
-  expect(journeyBox.y, 'the journeys belong below both').toBeGreaterThanOrEqual(
-    detailBox.y + detailBox.height - 1
+  expect(photoBox.x, 'photographs belong on the left').toBeLessThan(centreBox.x)
+  expect(centreBox.x, 'the map belongs in the middle').toBeGreaterThan(photoBox.x)
+  expect(detailBox.x, 'the description belongs on the right').toBeGreaterThan(centreBox.x + centreBox.width)
+  expect(journeyBox.y, 'the journeys belong below all three').toBeGreaterThanOrEqual(
+    Math.max(photoBox.y + photoBox.height, detailBox.y + detailBox.height) - 1
   )
   expect(journeyBox.width, 'the journeys span the panel').toBeGreaterThan(detailBox.width * 1.5)
   await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
