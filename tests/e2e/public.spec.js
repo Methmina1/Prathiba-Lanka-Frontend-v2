@@ -127,7 +127,7 @@ test('journeys, journal and gallery render their covers from the API', async ({ 
   await expect(page.locator('.journal-card__media img').first()).toHaveAttribute('src', '/images/sl/hero-2.webp')
 
   await page.goto('/gallery')
-  // one square tile per gallery row, with the caption written underneath it
+  // one 2:1 tile per gallery row, with the caption written underneath it
   await expect(page.locator('.gallery-grid__cell')).toHaveCount(2)
   await expect(page.locator('.gallery-tile__media img').first()).toBeVisible()
   await expect(page.locator('.gallery-tile__caption').first()).toHaveText('Coast')
@@ -594,8 +594,8 @@ test('the gallery is an even grid, and a photograph opens full size', async ({ p
 
   await expect(page.locator('.gallery-tile')).toHaveCount(2)
 
-  // Nothing hangs at an angle any more: every tile is the same, evenly sized square, and the caption
-  // is written underneath the picture rather than across it.
+  // Nothing hangs at an angle any more: every tile is the same 2:1 band, and the caption is written
+  // underneath the picture rather than across it.
   const boxes = await page.locator('.gallery-tile__media').evaluateAll((nodes) =>
     nodes.map((node) => {
       const box = node.getBoundingClientRect()
@@ -606,7 +606,10 @@ test('the gallery is an even grid, and a photograph opens full size', async ({ p
     new Set(boxes.map((box) => `${box.w}x${box.h}`)).size,
     'every tile should be the same size'
   ).toBe(1)
-  expect(boxes[0].w, 'a tile should be square').toBe(boxes[0].h)
+  expect(
+    boxes[0].w / boxes[0].h,
+    `a tile should be twice as wide as it is tall, got ${boxes[0].w}x${boxes[0].h}`
+  ).toBeCloseTo(2, 1)
 
   // The swap from the shipped photographs to the ones the API returns replaces the tiles, so both
   // measurements are taken from one tile once its caption is there - and the comparison is polled,

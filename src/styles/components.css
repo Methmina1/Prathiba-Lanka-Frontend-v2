@@ -3120,10 +3120,12 @@ html.intro-landing .site-header .brand__text {
 
 /* --- gallery page: an even grid, and one photograph at a time ---------------------------------- */
 /*
- * Every tile is the same square with the picture cropped to fill it, and the caption sits under the
- * image rather than over it. That is the whole design: a wall of photographs that reads as a wall,
- * where nothing is hidden behind a caption and no photograph is given a size its neighbours do not
- * have. The viewer (components/ui/Lightbox.jsx) is where a picture gets to be seen properly.
+ * Every tile is the same 2:1 landscape band with the picture cropped to fill it, and the caption sits
+ * under the image rather than over it. That is the whole design: a wall of photographs that reads as a
+ * wall, where nothing is hidden behind a caption and no photograph is given a size its neighbours do
+ * not have. The wide shape suits what these are - coast, hills, the road - and keeps a long gallery
+ * from becoming a column of small squares. The viewer (components/ui/Lightbox.jsx) is where a picture
+ * gets to be seen properly, at its own proportions.
  */
 .gallery-section {
   position: relative;
@@ -3155,12 +3157,12 @@ html.intro-landing .site-header .brand__text {
   margin: 0;
 }
 
-/* Square, and the button is the picture: the click target and the image are the same box. */
+/* 2:1, and the button is the picture: the click target and the image are the same box. */
 .gallery-tile__media {
   position: relative;
   display: block;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 2 / 1;
   overflow: hidden;
   border: 1px solid var(--border);
   border-radius: var(--radius);
