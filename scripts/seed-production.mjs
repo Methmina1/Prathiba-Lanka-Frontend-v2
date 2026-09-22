@@ -6,6 +6,13 @@
  *   node scripts/seed-production.mjs --from http://localhost:8080 --to https://prathibalanka.com
  *   node scripts/seed-production.mjs --from http://localhost:8080 --to https://<api> --dry-run
  *   node scripts/seed-production.mjs --from ... --to ... --only packages,journal
+ *   node scripts/seed-production.mjs --from ... --to ... --to-password '<the target admin's password>'
+ *
+ * The two instances rarely share an administrator password - a laptop's admin comes from a
+ * developer's environment, production's from whatever was set on its first boot. --admin-password
+ * sets both; --from-password and --to-password override one side each, so the run does not depend on
+ * the two agreeing. An environment variable called PRATHIBALANKA_ADMIN_PASSWORD is easy to have set
+ * without knowing it, and it silently wins over BOOTSTRAP_ADMIN_PASSWORD - the flags win over both.
  *
  * Why a clone rather than a rewritten list of demo content: the agency's real catalogue came out of
  * their rate sheet, their stories and photographs came out of their console, and anything typed into a
@@ -40,6 +47,8 @@ const { values: options } = parseArgs({
     to: { type: 'string' },
     'admin-email': { type: 'string' },
     'admin-password': { type: 'string' },
+    'from-password': { type: 'string' },
+    'to-password': { type: 'string' },
     only: { type: 'string' },
     'dry-run': { type: 'boolean', default: false },
   },
@@ -54,6 +63,9 @@ const adminEmail =
   'prathibhalankavoyages@gmail.com'
 const adminPassword =
   options['admin-password'] ?? process.env.PRATHIBALANKA_ADMIN_PASSWORD ?? process.env.BOOTSTRAP_ADMIN_PASSWORD ?? ''
+/** One password for both instances unless a side overrides it: they rarely match. */
+const fromPassword = options['from-password'] ?? adminPassword
+const toPassword = options['to-password'] ?? adminPassword
 const dryRun = options['dry-run'] === true
 const only = new Set(
   (options.only ?? 'media,packages,journal,gallery,content')
@@ -67,9 +79,10 @@ if (!to) {
   console.error('  node scripts/seed-production.mjs --from http://localhost:8080 --to https://prathibalanka.com')
   process.exit(1)
 }
-if (!adminPassword) {
-  console.error('No admin password. Set BOOTSTRAP_ADMIN_PASSWORD (the variable the API creates the admin from)')
-  console.error('or pass --admin-password. The script signs in to both instances as an administrator.')
+if (!fromPassword || !toPassword) {
+  console.error('No admin password for one of the instances. Set BOOTSTRAP_ADMIN_PASSWORD (the variable')
+  console.error('the API creates the admin from) or pass --admin-password, plus --from-password /')
+  console.error('--to-password when the two instances do not share one.')
   process.exit(1)
 }
 if (from === to) {
@@ -99,14 +112,17 @@ async function call(base, path, { method = 'GET', token, body, form } = {}) {
   return { status: response.status, ok: response.ok, body: payload }
 }
 
-async function signIn(base, label) {
+async function signIn(base, label, password) {
   const { status, body } = await call(base, '/api/auth/login', {
     method: 'POST',
-    body: { email: adminEmail, password: adminPassword },
+    body: { email: adminEmail, password },
   })
   if (!body?.token) {
     console.error(`Could not sign in to the ${label} instance at ${base} as ${adminEmail} (${status}).`)
-    console.error('Check the address, the email, and that BOOTSTRAP_ADMIN_PASSWORD matches the account.')
+    console.error('Check the address and the email. The password is --admin-password, or the')
+    console.error('--from-password / --to-password override for that side, or PRATHIBALANKA_ADMIN_PASSWORD')
+    console.error('/ BOOTSTRAP_ADMIN_PASSWORD in the environment. An environment variable set months ago')
+    console.error('wins over the one you exported in this shell, which is worth checking first.')
     process.exit(1)
   }
   console.log(`  signed in to the ${label} instance at ${base}`)
@@ -368,8 +384,8 @@ console.log(`${dryRun ? 'Dry run: ' : ''}seeding ${to}`)
 console.log(`from ${from}, as ${adminEmail}`)
 console.log(`sections: ${[...only].join(', ')}`)
 
-const sourceToken = await signIn(from, 'source')
-const targetToken = await signIn(to, 'target')
+const sourceToken = await signIn(from, 'source', fromPassword)
+const targetToken = await signIn(to, 'target', toPassword)
 
 // Media first: everything else points at it.
 if (only.has('media')) await copyMedia(sourceToken, targetToken)
