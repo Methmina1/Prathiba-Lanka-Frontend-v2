@@ -926,33 +926,29 @@ html.intro-landing .site-header .brand__text {
 
 /* ================================================================ province map */
 
+/* The map is the index, so it stands on the page by itself: no card, no frame, centred, with the
+   panel that answers for a province underneath it. */
 .island {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
-  gap: var(--space-7);
-  /* Top-aligned on purpose: centring would move the map up and down as the journey list changes
-     length, so a province would slide out from under the pointer. */
-  align-items: start;
+  justify-items: center;
+  gap: var(--space-5);
   margin-top: var(--space-6);
 }
 
 .island__map {
   display: flex;
   justify-content: center;
-  padding: var(--space-6);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background:
-    radial-gradient(circle at 50% 12%, rgba(210, 172, 78, 0.09), transparent 62%),
-    var(--surface);
+  width: 100%;
 }
 
 .province-map {
   width: 100%;
-  max-width: 340px;
+  max-width: 380px;
   height: auto;
-  max-height: 62vh;
-  filter: drop-shadow(0 22px 44px rgb(2 8 16 / 45%));
+  max-height: 66vh;
+  /* The only thing left of the frame: a soft shadow, so the island reads as lifted off the page
+     rather than pasted onto it. */
+  filter: drop-shadow(0 18px 38px rgb(2 8 16 / 40%));
 }
 
 /* The island is one landmass made of nine shapes, so the shapes carry a hairline border rather
@@ -991,8 +987,15 @@ html.intro-landing .site-header .brand__text {
 .island__head {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.island__head-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-3);
 }
 
@@ -1030,17 +1033,90 @@ html.intro-landing .site-header .brand__text {
 .island__panel {
   display: grid;
   gap: var(--space-4);
-  justify-items: start;
+  justify-items: center;
+  width: 100%;
 }
 
 .island__card {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-4);
   width: 100%;
-  /* Stops the panel jumping about while the pointer runs across the map: the journey list changes
-     length from province to province. */
-  min-height: 360px;
+  /* Stops the panel jumping about while the pointer runs across the map: the photographs and the
+     journey list both change length from province to province. */
+  min-height: 380px;
   padding: var(--space-6);
+}
+
+/* Photographs of the province on the left, what it is like on the right. The journeys that go through
+   it span the whole width underneath - they are what the map is for. */
+.island__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.island__detail {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.island__photos {
+  min-width: 0;
+}
+
+.island__photo-list {
+  display: grid;
+  /* Two up: four photographs of a province read as a set rather than as a row of thumbnails. */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.island__photo {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.island__photo img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--ink-800);
+  transition: border-color var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
+}
+
+.island__photo:hover img {
+  border-color: var(--border-gold);
+  transform: translateY(-2px);
+}
+
+/* One line of the journey or note the photograph came from: enough to say why it is here. */
+.island__photo-caption {
+  color: var(--text-faint);
+  font-size: 0.7rem;
+  line-height: 1.35;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.island__photos-empty {
+  margin: 0;
+  padding: var(--space-5);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.85rem;
 }
 
 .island__capital {
@@ -1163,6 +1239,7 @@ html.intro-landing .site-header .brand__text {
 .island__list {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-2);
   margin: 0;
   padding: 0;
@@ -1194,18 +1271,26 @@ html.intro-landing .site-header .brand__text {
 }
 
 @media (max-width: 900px) {
-  .island {
+  /* Photographs above the description rather than beside it: the two-column reading only works while
+     there is width for both. */
+  .island__grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-6);
   }
 
-  .island__map {
+  .island__card {
+    min-height: 0;
     padding: var(--space-5);
   }
 
   .province-map {
-    max-width: 280px;
+    max-width: 300px;
     max-height: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .island__photo-list {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

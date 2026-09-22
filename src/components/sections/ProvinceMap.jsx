@@ -4,35 +4,41 @@ import { api } from '../../api/client'
 import { fallbackPackages } from '../../data/fallback'
 import { MAP_SOURCE, MAP_VIEW_BOX, PROVINCES } from '../../data/provinces'
 import { PROVINCE_COPY } from '../../data/provinceCopy'
-import { journeysInProvince } from '../../data/provincePlaces'
+import { journeysInProvince, provincePhotos } from '../../data/provincePlaces'
 import { useApi } from '../../hooks/useApi'
 import { formatDays } from '../../utils/format'
 import { ArrowRight, Lock, MapPin } from '../ui/Icons'
 import Reveal from '../ui/Reveal'
 
 /** How many journeys the panel lists before it offers the rest. */
-const LISTED = 3
+const LISTED = 4
+
+/** How many photographs of a province the panel shows. */
+const PHOTOS = 4
 
 /**
  * The island, province by province.
  *
- * The nine shapes in src/data/provinces.js are placed where they belong, so the outline that comes
- * out of them is Sri Lanka rather than nine drawings near each other. Running the pointer across the
- * map names each province and lists the journeys whose itineraries go through it - which is the
- * question the map exists to answer - and every one of them is a link into the catalogue.
+ * The nine shapes in src/data/provinces.js are placed where they belong, so the outline that comes out
+ * of them is Sri Lanka rather than nine drawings near each other. The map itself has no frame and sits
+ * in the middle of the page: it is the index, and everything it can tell you appears underneath it the
+ * moment a province is pointed at - photographs of the place on the left, what it is like on the right,
+ * and the journeys that go through it across the bottom.
  *
  * Two ways to move around it, because hovering alone is not enough:
  *
  *   - while nothing is held, the province under the pointer is the one on show;
- *   - clicking a province **holds** it. The pointer can then leave the map, cross the other
- *     provinces on the way to the panel, and the list stays where it is. Clicking the held province
- *     again lets go, and the map goes back to following the pointer.
+ *   - clicking a province **holds** it. The pointer can then leave the map, cross the other provinces
+ *     to reach a photograph or a journey below, and the panel stays where it is. Clicking the held
+ *     province again lets go, and the map goes back to following the pointer.
  *
- * Without the hold, a province in the middle of the map was almost impossible to read: every route
- * to the panel passes over its neighbours.
+ * Hovering is what fills the panel, and it stays private to this component: `onProvince` is only told
+ * what has been *held*, so the journal's note cards below cannot flicker through nine provinces on the
+ * way to the one being aimed at.
  */
 export default function ProvinceMap({ posts = [], onProvince }) {
   const { data: packages } = useApi(() => api.getPackages(), fallbackPackages)
+  const { data: gallery } = useApi(() => api.getGallery(), [])
 
   const [hoveredId, setHoveredId] = useState(null)
   const [heldId, setHeldId] = useState(null)
@@ -40,15 +46,9 @@ export default function ProvinceMap({ posts = [], onProvince }) {
   const activeId = heldId ?? hoveredId ?? 'central'
   const active = PROVINCES.find((province) => province.id === activeId) ?? PROVINCES[0]
   const journeys = journeysInProvince(packages, active.id)
+  const photos = provincePhotos({ packages, posts, gallery }, active.id, PHOTOS)
 
-  /**
-   * A click holds the province; a second click on the same one lets go.
-   *
-   * Holding is also the selection the page acts on: `onProvince` is told which province was chosen
-   * (or null when it is released), so the page can show that province's journal cards. Hovering stays
-   * private to the map - a panel that followed the pointer everywhere would make the cards below it
-   * flicker through nine provinces on the way to the one being aimed at.
-   */
+  /** A click holds the province; a second click on the same one lets go. */
   const toggleHold = (provinceId) => {
     const lettingGo = heldId === provinceId
     setHeldId(lettingGo ? null : provinceId)
@@ -64,8 +64,8 @@ export default function ProvinceMap({ posts = [], onProvince }) {
           <h2>Nine provinces, one island</h2>
           <p className="lede">
             Every story above happened somewhere on this map, and every journey we run crosses at
-            least three of the provinces. Point at one to see what it is known for and which journeys
-            go through it - click it to hold it there while you read.
+            least three of the provinces. Point at one to see photographs of it, what it is like and
+            which journeys go through it - click it to hold it there while you read.
           </p>
         </Reveal>
 
@@ -110,39 +110,84 @@ export default function ProvinceMap({ posts = [], onProvince }) {
             </svg>
           </Reveal>
 
+          <ul className="island__list">
+            {PROVINCES.map((province) => (
+              <li key={province.id}>
+                <button
+                  type="button"
+                  className={`island__pick ${province.id === activeId ? 'is-active' : ''}`}
+                  onClick={() => toggleHold(province.id)}
+                  onMouseEnter={() => setHoveredId(province.id)}
+                  aria-pressed={province.id === heldId}
+                >
+                  {province.name}
+                </button>
+              </li>
+            ))}
+          </ul>
+
           <Reveal className="island__panel" delay={120}>
             <div className="card island__card" aria-live="polite">
               <div className="island__head">
-                <span className="island__capital">
-                  <MapPin width={15} height={15} />
-                  {active.capital}
-                </span>
+                <h3>{active.name} Province</h3>
 
-                <button
-                  type="button"
-                  className={`island__hold ${heldId ? 'is-held' : ''}`}
-                  onClick={() => toggleHold(active.id)}
-                  aria-pressed={Boolean(heldId)}
-                  title={
-                    heldId
-                      ? 'Click to release, and let the map follow the pointer again'
-                      : 'Click to hold this province while you read'
-                  }
-                >
-                  <Lock width={13} height={13} />
-                  {heldId ? 'Held' : 'Hold'}
-                </button>
+                <div className="island__head-tools">
+                  <span className="island__capital">
+                    <MapPin width={15} height={15} />
+                    {active.capital}
+                  </span>
+
+                  <button
+                    type="button"
+                    className={`island__hold ${heldId ? 'is-held' : ''}`}
+                    onClick={() => toggleHold(active.id)}
+                    aria-pressed={Boolean(heldId)}
+                    title={
+                      heldId
+                        ? 'Click to release, and let the map follow the pointer again'
+                        : 'Click to hold this province while you read'
+                    }
+                  >
+                    <Lock width={13} height={13} />
+                    {heldId ? 'Held' : 'Hold'}
+                  </button>
+                </div>
               </div>
 
-              <h3>{active.name} Province</h3>
-              {/* The written description, with the generated one-liner as the fallback. */}
-              <p className="island__about">{PROVINCE_COPY[active.id] ?? active.blurb}</p>
-              <ul className="island__districts">
-                {active.districts.map((district) => (
-                  <li key={district}>{district}</li>
-                ))}
-              </ul>
+              <div className="island__grid">
+                {/* Top left: what the province looks like. */}
+                <div className="island__photos">
+                  {photos.length > 0 ? (
+                    <ul className="island__photo-list">
+                      {photos.map((photo) => (
+                        <li key={photo.src} className="island__photo">
+                          <img src={api.mediaUrl(photo.src)} alt={photo.alt} loading="lazy" />
+                          {photo.caption && (
+                            <span className="island__photo-caption">{photo.caption}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="island__photos-empty">
+                      No photographs from {active.name} yet. Everything we run here is listed below.
+                    </p>
+                  )}
+                </div>
 
+                {/* Top right: what it is like there. */}
+                <div className="island__detail">
+                  {/* The written description, with the generated one-liner as the fallback. */}
+                  <p className="island__about">{PROVINCE_COPY[active.id] ?? active.blurb}</p>
+                  <ul className="island__districts">
+                    {active.districts.map((district) => (
+                      <li key={district}>{district}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Across the bottom: the journeys we run through it. */}
               <div className="island__journeys">
                 <h4>
                   {journeys.length === 0
@@ -159,12 +204,9 @@ export default function ProvinceMap({ posts = [], onProvince }) {
                           <Link className="island__journey" to={`/journeys/${pkg.packageId}`}>
                             <span className="island__journey-name">{pkg.title}</span>
                             <span className="island__journey-meta">
-                              {[
-                                days > 0 && length ? `${days} of ${length} here` : length,
-                                pkg.destination,
-                              ]
+                              {[days > 0 && length ? `${days} of ${length} here` : length, pkg.destination]
                                 .filter(Boolean)
-                                .join(' Â· ')}
+                                .join(' · ')}
                             </span>
                             <ArrowRight width={14} height={14} />
                           </Link>
@@ -174,7 +216,7 @@ export default function ProvinceMap({ posts = [], onProvince }) {
                   </ul>
                 ) : (
                   <p className="island__journey-empty">
-                    We still build trips here â€” tell us your dates and we will draft one.
+                    We still build trips here — tell us your dates and we will draft one.
                   </p>
                 )}
 
@@ -185,24 +227,7 @@ export default function ProvinceMap({ posts = [], onProvince }) {
                   </Link>
                 )}
               </div>
-
             </div>
-
-            <ul className="island__list">
-              {PROVINCES.map((province) => (
-                <li key={province.id}>
-                  <button
-                    type="button"
-                    className={`island__pick ${province.id === activeId ? 'is-active' : ''}`}
-                    onClick={() => toggleHold(province.id)}
-                    onMouseEnter={() => setHoveredId(province.id)}
-                    aria-pressed={province.id === heldId}
-                  >
-                    {province.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
 
             <Link className="link-arrow" to="/journeys">
               See every journey

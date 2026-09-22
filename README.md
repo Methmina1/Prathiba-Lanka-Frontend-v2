@@ -10,7 +10,7 @@ framework, so the palette and layout stay easy to change.
 | `/` | Hero carousel, trust badges, philosophy, signature journeys (two rows of three, then a link to the full catalogue), sustainability, gallery, journal, reviews, FAQ, CTA band |
 | `/journeys` | Full catalogue with destination search (`GET /api/packages`, `GET /api/packages/search`); deep links like `/journeys?destination=yala`; each card opens the full write-up in a dialog. **No prices** Ã¢â‚¬â€ see below |
 | `/journeys/:id` | One journey: overview, the full description, the day-by-day itinerary as a dropdown, gallery strip, reviews for that package (with a way to add one), sticky quote card |
-| `/journal` | **Opens on the province map and nothing else.** Picking a province brings up the notes written about it as cards, with what the province is like and its journeys beside the map; the whole journal sits behind "Read all N stories" |
+| `/journal` | **Opens on the province map and nothing else.** The map has no frame and is centred; hovering a province fills a panel under it - photographs of the province on the left, what it is like on the right, the journeys we run through it across the bottom - and holding one brings up the notes written about it as cards. The whole journal sits behind "Read all N stories" |
 | `/journal/:id` | Full story, then more from the journal |
 | `/gallery` | An even grid of square tiles, captions underneath, and a full-size viewer (arrow keys, Escape) |
 | `/reviews` | Average score, rating distribution, every review, and the way to the review form for a signed-in customer |
@@ -113,7 +113,7 @@ Five suites cover the project between them, from the outside in:
 | `scripts/api-tests.ps1` (backend repo) | a running API | every endpoint over HTTP - 180 checks |
 | `mvn test` (backend repo) | nothing | the Spring context, the mail configuration |
 | `npm run check:render` | nothing | all 25 routes in Node: undefined components, bad hooks, broken props |
-| `npm run test:e2e` | nothing (API mocked) | 43 browser tests: layout, clicks, navigation |
+| `npm run test:e2e` | nothing (API mocked) | 44 browser tests: layout, clicks, navigation |
 | `npm run test:roles` | a running API + `BOOTSTRAP_ADMIN_PASSWORD` | 22 end-to-end journeys through the real UI and the real database, one per role |
 
 `check:render` is the useful one: it renders every page (15 public, 8 screens under `/admin` with a
@@ -147,11 +147,11 @@ npm run test:roles -- -g "confirms the booking"
 
 `test:e2e` covers what a Node render cannot: real geometry, clicks and navigation. It builds the app,
 serves it with `vite preview`, and drives it with Chromium against a mocked API (`tests/e2e/fixtures.js`),
-so it needs no backend. Forty-three tests across three files:
+so it needs no backend. Forty-four tests across three files:
 
 | File | Covers |
 |---|---|
-| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the gallery grid and its viewer** (every tile the same square, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography, **the customer's own enquiry page** (opened by the token from the email, showing the agency's answer and letting them write back) and what an unknown link says |
+| `public.spec.js` | the hero carousel and its four photographs (including that each image actually loads), the sign-in link being absent from the header and present on `/plan`, journey/journal/gallery covers, **no card or journey page showing a price**, a journey detail page and its day-by-day dropdown (three days, first open, the rest closed, "open all days"), the home page's two rows of three and its link to the rest, **the journal opens on the province map** (nine shapes that tile the island at Sri Lanka's proportions, no story cards until a province is chosen, and choosing one brings up its notes - then letting go puts the map back on its own), **the province panel** (the map unframed and centred, and photographs to the left of the description with the journeys across the bottom), **the gallery grid and its viewer** (every tile the same square, the caption under the picture, a click opening the photograph full size, the arrows moving through the set and Escape closing it), **the contact page's social band** (Facebook, Instagram, TikTok and WhatsApp, their labels and the tilt on the cards), **the WhatsApp bubble** (on the public pages, absent on the sign-in and account ones) **and the WhatsApp line on a journey**, **the route to the review form**, the full-description dialog (paragraphs, frozen page behind it, Escape), the About and 404 photography, **the customer's own enquiry page** (opened by the token from the email, showing the agency's answer and letting them write back) and what an unknown link says |
 | `admin.spec.js` | both access rules, all nine console screens, the dashboard stat cards not overlapping, list contents, the status filter refetching, the sidebar, the page-content editor's two sections, **answering an enquiry** (the reply sent by email, the three states a reply can be in - emailed, answered in Gmail, never sent - and recording a reply written by hand) |
 | `mobile.spec.js` | the phone header, the drawer, the hero with no sideways scroll, the console stacked with its own drawer, and no sideways scroll on the pages whose layout is not a plain grid (the gallery tiles, the contact social band, the journal with the map) |
 
@@ -203,11 +203,13 @@ is the agency's own, and it is loaded from the rate sheet (below).
 
 ## The province map
 
-The journal page opens on the map and nothing else: the island is the index. Picking a province (or
-clicking it off the list under the panel) names it, gives its capital, its districts and a line about
-what it is like, lists the journeys whose itineraries go through it, and brings up **the journal notes
-written about it** as cards underneath. Releasing it - clicking the same province again - puts the page
-back to the map alone.
+The journal page opens on the map and nothing else: the island is the index. The map itself carries no
+frame and sits in the middle of the page - it is the way in, not a card among cards - and the panel that
+answers for a province sits underneath it, arranged the way the question is asked: **photographs of the
+province on the left, what it is like on the right, and the journeys we run through it across the
+bottom**. Picking a province (or clicking it off the list under the map) names it, gives its capital and
+its districts, holds that panel, and brings up **the journal notes written about it** as cards
+underneath. Releasing it - clicking the same province again - puts the page back to the map alone.
 
 Nine provinces are drawn in their real positions, so the outline they make is Sri Lanka.
 
@@ -251,12 +253,23 @@ the season that suits it (the whale season at Mirissa, the elephant gathering on
 the east coast being the answer to the south-west monsoon). It lives outside `src/data/provinces.js`
 on purpose - that file is generated, and re-running the map script must not wipe the words.
 
-**Holding a province.** Hovering alone is not enough on this map: a province in the middle of the
-island is almost impossible to read, because every route to the panel on the right passes over its
-neighbours. So a click **holds** the province - the pointer can cross the rest of the map, or leave
-it entirely, and the panel stays put - and a second click on the same province lets go and hands the
-map back to the pointer. The panel carries a Hold/Held button that does the same thing, and `Held`
-on the map's `data-held` attribute is what the browser test asserts against.
+**Holding a province.** Hovering alone is not enough on this map: a province in the middle of the island
+is hard to read while the pointer is still on it, and the route down to the panel underneath passes over
+whatever lies between - from the Western province, straight across the Southern one. So a click **holds**
+the province: the pointer can cross the rest of the map, or leave it entirely, and the panel stays put.
+A second click on the same province lets go and hands the map back to the pointer. The panel carries a
+Hold/Held button that does the same thing, and `Held` on the map's `data-held` attribute is what the
+browser test asserts against. Hovering only ever fills this panel - `onProvince` is told what has been
+*held*, so the journal cards below cannot flicker through nine provinces on the way to the one being
+aimed at.
+
+**Photographs of a province.** `provincePhotos()` in `src/data/provincePlaces.js`, and the same idea as
+everything else here: nothing is tagged. The photographs come from the province's own content, in the
+order that puts the most specific picture first - the photograph of each journey whose itinerary goes
+through it, then the cover of each note written about it, then gallery items linked to any of those
+journeys (which is where pictures actually taken on a trip end up once somebody uploads them in the
+console). So a photograph added in the console appears on the map by itself, and a province nobody has
+photographed yet says so rather than filling the space with something generic.
 
 **Which notes belong to a province?** `journalsInProvince()` in `src/data/provincePlaces.js` answers
 it the same way the journeys are answered: from the places a post names, in its title, its standfirst
@@ -275,8 +288,8 @@ province comes up empty rather than trusting that it does not.
 each journey names - its title, its region, its summary and every line of its day-by-day itinerary -
 so the panel stays right as packages are added or edited in the console, with no extra field to fill
 in. Journeys are ranked by how much of the trip is in that province (`3 of 7 days here`), so the tour
-that is mostly about a place comes above the one that merely passes through it, and the panel lists
-three with a link to the rest. Every entry is a link into the catalogue.
+that is mostly about a place comes above the one that merely passes through it, and the strip across
+the bottom of the panel lists four with a link to the rest. Every entry is a link into the catalogue.
 
 The patterns have to be specific, and the near-misses are the interesting part:
 
@@ -503,7 +516,7 @@ src/
   data/package-copy.json   the written summary, full description and cover for each journey
   data/provinces.js        the nine province shapes, placed on the island (generated)
   data/provinceCopy.js     what to say about each province, for the map panel
-  data/provincePlaces.js   which places belong to which province, for the map's journey list
+  data/provincePlaces.js   which places belong to which province: the map's journeys, its notes and its photographs
   auth/AuthContext.jsx     session (JWT in localStorage), login/register/logout
   hooks/usePageContent.js  loads an editable page section and merges it over the defaults
   styles/theme.css         design tokens

@@ -19,17 +19,28 @@ test('home renders the hero carousel with its own photographs', async ({ page })
   await expect(hero.locator('.hero__slide.is-active')).toHaveCount(1)
   await expect(hero.locator('.hero__dot')).toHaveCount(4)
 
-  // and every slide's image actually loads (WebP included)
-  const images = await hero.locator('.hero__slide img').evaluateAll((nodes) =>
-    nodes.map((node) => ({ src: node.getAttribute('src'), loaded: node.complete && node.naturalWidth > 0 })),
-  )
-  expect(images.map((i) => i.src)).toEqual([
+  // and every slide's image actually loads (WebP included). Polled rather than read once: the four
+  // photographs are lazy, and a single snapshot taken on a busy machine catches one still in flight.
+  await expect
+    .poll(
+      async () =>
+        hero.locator('.hero__slide img').evaluateAll((nodes) => {
+          const pending = nodes.filter((node) => !(node.complete && node.naturalWidth > 0))
+          return pending.map((node) => node.getAttribute('src')).join(', ')
+        }),
+      { message: 'every hero photograph should load' }
+    )
+    .toBe('')
+
+  const sources = await hero
+    .locator('.hero__slide img')
+    .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('src')))
+  expect(sources).toEqual([
     '/images/sl/hero-1.jpg',
     '/images/sl/hero-2.webp',
     '/images/sl/hero-3.jpg',
     '/images/sl/hero-4.jpg',
   ])
-  for (const image of images) expect(image.loaded, `${image.src} did not load`).toBe(true)
 
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
 })
@@ -296,6 +307,52 @@ test('the journal page draws Sri Lanka out of its nine provinces', async ({ page
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
 })
 
+test('the province panel answers with photographs, a description and the journeys', async ({ page }) => {
+  await page.goto('/journal')
+  await page.locator('#island').scrollIntoViewIfNeeded()
+  await page.getByRole('button', { name: 'Central', exact: true }).click()
+
+  // The map stands on the page by itself: no card, no frame, and centred in the container.
+  const mapBox = await page.locator('.province-map').boundingBox()
+  const containerBox = await page.locator('#island .container').boundingBox()
+  const frame = await page.locator('.island__map').evaluate((node) => {
+    const style = getComputedStyle(node)
+    return { border: style.borderTopWidth, background: style.backgroundColor, padding: style.paddingLeft }
+  })
+  expect(frame.border, 'the map should have no frame').toBe('0px')
+  expect(frame.background, 'the map should have no framed background').toBe('rgba(0, 0, 0, 0)')
+  expect(frame.padding, 'the map should have no frame padding').toBe('0px')
+  expect(
+    Math.abs(mapBox.x + mapBox.width / 2 - (containerBox.x + containerBox.width / 2)),
+    'the map should be centred'
+  ).toBeLessThanOrEqual(1)
+
+  // Top left: photographs of the province. They come from the journeys and notes that name it, so the
+  // fixture catalogue's Central journey supplies one here.
+  const photos = page.locator('.island__photos')
+  await expect(photos.locator('.island__photo img').first()).toHaveAttribute(
+    'src',
+    '/images/sl/seed-package-heritage.jpg'
+  )
+  await expect(photos.locator('.island__photo-caption').first()).toHaveText('Classical Heritage')
+
+  // Top right: what it is like, and which districts it holds.
+  const detail = page.locator('.island__detail')
+  await expect(detail.locator('.island__about')).toContainText('The tea country')
+  await expect(detail.locator('.island__districts li')).toHaveCount(3)
+
+  // Bottom, across the whole panel: the journeys we run through it.
+  const photoBox = await photos.boundingBox()
+  const detailBox = await detail.boundingBox()
+  const journeyBox = await page.locator('.island__journeys').boundingBox()
+  expect(photoBox.x, 'photographs belong on the left').toBeLessThan(detailBox.x)
+  expect(journeyBox.y, 'the journeys belong below both').toBeGreaterThanOrEqual(
+    detailBox.y + detailBox.height - 1
+  )
+  expect(journeyBox.width, 'the journeys span the panel').toBeGreaterThan(detailBox.width * 1.5)
+  await expect(page.locator('.island__journeys h4')).toHaveText('1 journey through Central')
+})
+
 test('a province can be held, so the pointer can leave the map', async ({ page }) => {
   await page.goto('/journal')
   await page.locator('#island').scrollIntoViewIfNeeded()
@@ -525,15 +582,20 @@ test('the gallery is an even grid, and a photograph opens full size', async ({ p
   expect(boxes[0].w, 'a tile should be square').toBe(boxes[0].h)
 
   // The swap from the shipped photographs to the ones the API returns replaces the tiles, so both
-  // measurements are taken from one tile once its caption is there - reading them across the swap was
-  // how this went flaky.
+  // measurements are taken from one tile once its caption is there - and the comparison is polled,
+  // because a reveal mid-animation can put the two boxes a hair out of order for one frame.
   const firstTile = page.locator('.gallery-tile').first()
   await expect(firstTile.locator('.gallery-tile__caption')).toHaveText('Coast')
-  const media = await firstTile.locator('.gallery-tile__media').boundingBox()
-  const caption = await firstTile.locator('.gallery-tile__caption').boundingBox()
-  expect(caption.y, 'the caption should sit below the picture').toBeGreaterThanOrEqual(
-    media.y + media.height
-  )
+  await expect
+    .poll(
+      async () => {
+        const media = await firstTile.locator('.gallery-tile__media').boundingBox()
+        const caption = await firstTile.locator('.gallery-tile__caption').boundingBox()
+        return Math.round(caption.y - (media.y + media.height))
+      },
+      { message: 'the caption should sit below the picture' }
+    )
+    .toBeGreaterThanOrEqual(4)
 
   // Clicking a photograph opens the viewer, where the arrows move through the same set.
   await page.locator('.gallery-tile__open').first().click()
