@@ -22,10 +22,28 @@ server {
 
     include /etc/nginx/security-headers.conf;
 
+    # Upstream addresses are looked up per request rather than once at start-up, and that is the
+    # whole reason the two proxy_pass lines below put the backend in a variable instead of writing
+    # ${BACKEND_URL} into the directive directly.
+    #
+    # A literal hostname is resolved when nginx starts and then cached for the life of the container.
+    # The API is redeployed far more often than this service is, and a redeploy can move it to a new
+    # address inside the private network - at which point this container keeps knocking on the old
+    # one, and /api sits there until the read timeout instead of answering. Restarting this service
+    # was the only cure. A resolver plus a variable means a lookup per request instead.
+    #
+    # Two things this costs, both handled below: nginx no longer appends the request URI for us when
+    # proxy_pass contains a variable, so $request_uri is added explicitly; and a resolver has to be
+    # named, which the base image derives from /etc/resolv.conf and exports as NGINX_LOCAL_RESOLVERS
+    # (docker-entrypoint.d/15-local-resolvers.envsh runs before the template is rendered).
+    # valid=10s is what bounds how long an old address can still be used after the API moves.
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s;
+
     # --- the API -------------------------------------------------------------------------------
     # Same origin from the browser's point of view, which is what removes CORS from the deployment.
     location /api/ {
-        proxy_pass ${BACKEND_URL}/api/;
+        set $api "${BACKEND_URL}";
+        proxy_pass $api$request_uri;
         proxy_http_version 1.1;
         proxy_set_header Host              $host;
         proxy_set_header X-Real-IP         $remote_addr;
@@ -47,7 +65,8 @@ server {
     # --- uploaded media ------------------------------------------------------------------------
     # Filenames are UUIDs generated per upload, so a cached copy can never be a stale one.
     location /media/ {
-        proxy_pass ${BACKEND_URL}/media/;
+        set $media "${BACKEND_URL}";
+        proxy_pass $media$request_uri;
         proxy_http_version 1.1;
         proxy_set_header Host              $host;
         proxy_set_header X-Real-IP         $remote_addr;
