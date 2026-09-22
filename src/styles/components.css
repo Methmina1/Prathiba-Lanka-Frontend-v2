@@ -1159,6 +1159,7 @@ html.intro-landing .site-header .brand__text {
   font-size: 0.86rem;
 }
 
+
 .island__list {
   display: flex;
   flex-wrap: wrap;
@@ -1343,39 +1344,24 @@ html.intro-landing .site-header .brand__text {
   }
 }
 
+/* The card's footer is now one row: no price is published, so there is no price block on the left
+   to balance against the links on the right. */
 .package-card__foot {
   display: flex;
-  align-items: flex-end;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: var(--space-3) var(--space-5);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border);
 }
 
-.package-card__price {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.3;
-}
-
-.package-card__price strong {
-  color: var(--gold-200);
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-}
-
-.package-card__price small {
-  color: var(--text-faint);
-  font-size: 0.6rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
 .package-card__meta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-2);
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  margin-left: auto;
 }
 
 .package-card__meta > span {
@@ -1632,6 +1618,93 @@ html.intro-landing .site-header .brand__text {
   margin: var(--space-2) 0 var(--space-5);
   color: var(--text-muted);
   font-size: 0.88rem;
+}
+
+/* --- requesting a journey (the form behind the Request buttons) --- */
+
+/* Two fields on one line: travellers and the date belong together. */
+.plan__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+/* A signed-in customer's request is attached to their account, so the form does not ask for a name
+   and an email - this says whose it will be instead. */
+.plan__signed-in {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+  padding: 0.7rem 1rem;
+  border: 1px dashed var(--border-gold);
+  border-radius: var(--radius);
+  color: var(--gold-300);
+  font-size: 0.84rem;
+}
+
+/* The general enquiry form sits under both columns, as the second thing to reach for. */
+.plan__enquiry {
+  grid-column: 1 / -1;
+}
+
+.plan__aside-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  color: var(--text-faint);
+  font-size: 0.8rem;
+}
+
+.plan__aside-link a {
+  color: var(--gold-300);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* The PIN, once the request is in: the one thing the traveller has to keep, so it is the loudest
+   thing on the card. */
+.plan__form--sent {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.booking-pin {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-5);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  text-align: center;
+}
+
+.booking-pin__label {
+  color: var(--text-faint);
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.booking-pin__value {
+  color: var(--gold-200);
+  font-family: var(--font-display);
+  font-size: 2.1rem;
+  letter-spacing: 0.12em;
+  line-height: 1.1;
+}
+
+.booking-pin__note {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 620px) {
+  .plan__row {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .field {
@@ -1953,25 +2026,49 @@ html.intro-landing .site-header .brand__text {
   gap: var(--space-3);
 }
 
+/* The WhatsApp bubble: on every public page (components/layout/WhatsAppFab.jsx), hidden on the
+   account and sign-in pages. The label is the number, and it slides out when the bubble is pointed
+   at or reached with the keyboard - the WhatsApp mark alone is recognisable, but the number removes
+   any doubt about whose phone it opens. */
 .whatsapp-fab {
   position: fixed;
   right: 20px;
   bottom: 20px;
   z-index: 40;
-  display: grid;
-  place-items: center;
-  width: 52px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
   height: 52px;
-  border-radius: 50%;
+  padding: 0 15px;
+  border-radius: var(--radius-pill);
   background: var(--gold-500);
   color: var(--ink-950);
   box-shadow: var(--shadow-gold);
-  transition: transform var(--dur) var(--ease-out-soft), background var(--dur) var(--ease-out-soft);
+  transition: transform var(--dur) var(--ease-out-soft), background var(--dur) var(--ease-out-soft),
+    gap var(--dur) var(--ease-out-soft);
 }
 
-.whatsapp-fab:hover {
+.whatsapp-fab:hover,
+.whatsapp-fab:focus-visible {
   transform: translateY(-3px) scale(1.04);
   background: var(--gold-400);
+  gap: var(--space-2);
+}
+
+.whatsapp-fab__label {
+  max-width: 0;
+  overflow: hidden;
+  opacity: 0;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: max-width var(--dur) var(--ease-out-soft), opacity var(--dur) var(--ease-out-soft);
+}
+
+.whatsapp-fab:hover .whatsapp-fab__label,
+.whatsapp-fab:focus-visible .whatsapp-fab__label {
+  max-width: 12rem;
+  opacity: 1;
 }
 
 /* ================================================================ footer */
@@ -2216,8 +2313,12 @@ html.intro-landing .site-header .brand__text {
   .whatsapp-fab {
     right: 14px;
     bottom: 14px;
-    width: 46px;
     height: 46px;
+    padding: 0 12px;
+  }
+  /* No room for the number on a phone: the mark alone, at the smallest tap target we allow. */
+  .whatsapp-fab__label {
+    display: none;
   }
 }
 
@@ -2406,31 +2507,180 @@ html.intro-landing .site-header .brand__text {
   font-size: 1.08rem;
 }
 
-.itinerary {
-  display: grid;
-  gap: var(--space-4);
-  margin: var(--space-5) 0 0;
-  padding: 0;
-  list-style: none;
+/* --- the day-by-day dropdown ---------------------------------------------------------------- */
+/* Each day is a row that opens in place. The panel animates with grid-template-rows 0fr -> 1fr,
+   which is a height transition without JavaScript measuring anything; the inner element carries the
+   overflow so the text is clipped rather than squashed while it grows. */
+.days {
+  margin-top: var(--space-5);
 }
 
-.itinerary li {
+.days__toolbar {
   display: flex;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--border);
 }
 
-.itinerary li:last-child {
-  padding-bottom: 0;
+.days__count {
+  color: var(--text-faint);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.days__toggle-all {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--gold-300);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.days__toggle-all:hover {
+  background: var(--accent-soft);
+  color: var(--gold-200);
+}
+
+.days__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: day;
+}
+
+.days__item {
+  border-bottom: 1px solid var(--border);
+}
+
+.days__item:last-child {
   border-bottom: 0;
 }
 
-.itinerary__step {
-  flex: 0 0 auto;
+.days__heading {
+  margin: 0;
+}
+
+.days__button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4) 0;
+  border: 0;
+  background: none;
+  color: var(--text-heading);
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--dur) var(--ease-out-soft);
+}
+
+.days__button:hover {
+  color: var(--gold-200);
+}
+
+.days__number {
   color: var(--gold-400);
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 1.15rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.days__summary {
+  color: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.days__chevron {
+  color: var(--text-faint);
+  transition: transform var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.days__item.is-open .days__chevron {
+  transform: rotate(180deg);
+  color: var(--gold-400);
+}
+
+.days__item.is-open .days__summary {
+  color: var(--gold-200);
+}
+
+/* Closed panels are visibility:hidden rather than display:none or [hidden]: `display: none` cannot
+   be transitioned from, so the day would snap open; visibility takes the content out of the tab
+   order and the accessibility tree while the height still animates, and the switch is delayed so a
+   closing day finishes collapsing before it disappears. */
+.days__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  visibility: hidden;
+  transition: grid-template-rows var(--dur) var(--ease-out-soft), visibility 0s linear var(--dur);
+}
+
+.days__item.is-open .days__panel {
+  grid-template-rows: 1fr;
+  visibility: visible;
+  transition: grid-template-rows var(--dur) var(--ease-out-soft), visibility 0s;
+}
+
+.days__panel-inner {
+  overflow: hidden;
+}
+
+.days__panel-inner > * {
+  margin-bottom: var(--space-5);
+}
+
+.days__steps {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0 0 0 var(--space-5);
+  list-style: none;
+}
+
+/* The stops a day is strung from, marked with a small gold diamond rather than a bullet. */
+.days__steps li {
+  position: relative;
+  color: var(--text-body);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.days__steps li::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-5) * -1);
+  top: 0.62em;
+  width: 6px;
+  height: 6px;
+  rotate: 45deg;
+  background: var(--gold-500);
+  opacity: 0.75;
+}
+
+.days__panel p {
+  margin: 0;
+  color: var(--text-body);
+  line-height: 1.75;
+}
+
+/* The empty reviews block on a journey page: one line and, for a customer, the way to change it. */
+.detail__reviews-empty {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  margin-top: var(--space-4);
 }
 
 .detail__strip {
@@ -2491,24 +2741,32 @@ html.intro-landing .site-header .brand__text {
   font-size: 0.9rem;
 }
 
-.quote-card__price {
-  display: flex;
-  flex-direction: column;
+/* No published price: the block says how pricing works instead of naming a figure. */
+.quote-card__quote {
+  display: grid;
+  gap: var(--space-1);
   margin-bottom: var(--space-5);
 }
 
-.quote-card__price strong {
+.quote-card__quote strong {
   color: var(--gold-200);
   font-family: var(--font-display);
-  font-size: 2.2rem;
-  line-height: 1.15;
+  font-size: 1.6rem;
+  line-height: 1.2;
 }
 
-.quote-card__price small {
+.quote-card__quote small {
   color: var(--text-faint);
   font-size: 0.6rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+.quote-card__quote p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.6;
 }
 
 .quote-card__facts {
@@ -2548,6 +2806,16 @@ html.intro-landing .site-header .brand__text {
 
 .quote-card__phone:hover {
   color: var(--gold-200);
+}
+
+/* Two contact lines on the same card: the WhatsApp one is tinted so it reads as a different channel
+   rather than another way of writing the same thing. Gold on ink is 7.56:1, emerald-300 on ink 8.2:1. */
+.quote-card__phone--whatsapp {
+  color: var(--emerald-300);
+}
+
+.quote-card__phone--whatsapp:hover {
+  color: #86efac;
 }
 
 /* --- journal list and post --- */
@@ -2649,9 +2917,401 @@ html.intro-landing .site-header .brand__text {
   border-top: 1px solid var(--border);
 }
 
-/* --- gallery page --- */
-.mosaic--page {
-  grid-auto-rows: 240px;
+/* --- gallery page: an even grid, and one photograph at a time ---------------------------------- */
+/*
+ * Every tile is the same square with the picture cropped to fill it, and the caption sits under the
+ * image rather than over it. That is the whole design: a wall of photographs that reads as a wall,
+ * where nothing is hidden behind a caption and no photograph is given a size its neighbours do not
+ * have. The viewer (components/ui/Lightbox.jsx) is where a picture gets to be seen properly.
+ */
+.gallery-section {
+  position: relative;
+}
+
+/* A soft light behind the top of the grid, so the wall is not flat ink. */
+.gallery-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(195, 154, 46, 0.07), transparent 62%);
+  pointer-events: none;
+}
+
+.gallery-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5) var(--space-4);
+}
+
+.gallery-grid__cell {
+  min-width: 0;
+}
+
+.gallery-tile {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+/* Square, and the button is the picture: the click target and the image are the same box. */
+.gallery-tile__media {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--ink-950);
+  transition: border-color var(--dur) var(--ease-out-soft), box-shadow var(--dur) var(--ease-out-soft);
+}
+
+button.gallery-tile__media {
+  padding: 0;
+  cursor: zoom-in;
+}
+
+.gallery-tile__media img,
+.gallery-tile__media svg,
+.gallery-tile__media video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out-soft);
+}
+
+.gallery-tile__media:hover img,
+.gallery-tile__media:hover svg {
+  transform: scale(1.04);
+}
+
+.gallery-tile__media:hover,
+.gallery-tile__media:focus-visible {
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-md);
+}
+
+/* The magnification mark, which says the picture can be opened before it is clicked. */
+.gallery-tile__hint {
+  position: absolute;
+  right: var(--space-3);
+  bottom: var(--space-3);
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(6, 9, 8, 0.68);
+  color: var(--ivory-100);
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out-soft), transform var(--dur) var(--ease-out-soft);
+  transform: translateY(4px);
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+.gallery-tile__media:hover .gallery-tile__hint,
+.gallery-tile__media:focus-visible .gallery-tile__hint {
+  opacity: 1;
+  transform: none;
+}
+
+.gallery-tile__caption {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.gallery-line {
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 1080px) {
+  .gallery-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 780px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4) var(--space-3);
+  }
+}
+
+@media (max-width: 420px) {
+  .gallery-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --- the viewer: one photograph, full size ----------------------------------------------------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  background: rgba(4, 8, 7, 0.92);
+  backdrop-filter: blur(8px);
+  animation: story-fade var(--dur) var(--ease-out-soft);
+}
+
+.lightbox__panel {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 1400px);
+  max-height: 100%;
+  outline: none;
+}
+
+.lightbox__figure {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  max-height: calc(100vh - var(--space-9));
+}
+
+.lightbox__image {
+  display: block;
+  max-width: 100%;
+  max-height: 78vh;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  object-fit: contain;
+}
+
+.lightbox__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  color: var(--ivory-200);
+}
+
+.lightbox__caption {
+  font-size: 0.95rem;
+}
+
+.lightbox__count {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+
+.lightbox__close {
+  position: absolute;
+  top: calc(var(--space-6) * -1);
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: rgba(6, 9, 8, 0.7);
+  color: var(--ivory-100);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.lightbox__close:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-300);
+}
+
+/* On the backdrop, not in the panel: the panel is only as wide as the photograph, so an arrow
+   offset from its edge would fall off a narrow screen. The backdrop is fixed, so these anchor to it. */
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  transform: translateY(-50%);
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: rgba(6, 9, 8, 0.6);
+  color: var(--ivory-100);
+  cursor: pointer;
+  transition: border-color var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft),
+    background var(--dur) var(--ease-out-soft);
+}
+
+.lightbox__nav:hover {
+  border-color: var(--gold-500);
+  background: rgba(6, 9, 8, 0.85);
+  color: var(--gold-300);
+}
+
+.lightbox__nav--prev {
+  left: var(--space-5);
+}
+
+.lightbox__nav--prev svg {
+  transform: rotate(180deg);
+}
+
+.lightbox__nav--next {
+  right: var(--space-5);
+}
+
+@media (max-width: 900px) {
+  .lightbox {
+    padding: var(--space-4) var(--space-3) var(--space-6);
+  }
+  .lightbox__close {
+    top: 0;
+  }
+  .lightbox__panel {
+    padding-top: var(--space-7);
+  }
+  .lightbox__nav {
+    width: 40px;
+    height: 40px;
+    background: rgba(6, 9, 8, 0.78);
+  }
+  .lightbox__nav--prev {
+    left: var(--space-2);
+  }
+  .lightbox__nav--next {
+    right: var(--space-2);
+  }
+  .lightbox__image {
+    max-height: 70vh;
+  }
+}
+/* --- the customer's own enquiry ---------------------------------------------------------------- */
+/*
+ * Reached from the link in the acknowledgement email, opened by the token in it. It is somebody's
+ * private correspondence rather than a marketing page, so it is a narrow column of plain cards: what
+ * they sent, what came back, and a box to write again.
+ */
+.enquiry .container {
+  max-width: 820px;
+}
+
+.enquiry__head {
+  display: grid;
+  gap: var(--space-3);
+  justify-items: start;
+  margin-bottom: var(--space-6);
+}
+
+.enquiry__head h1 {
+  font-size: clamp(1.7rem, 3.4vw, 2.4rem);
+}
+
+.enquiry__meta {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.enquiry__meta strong {
+  color: var(--gold-200);
+}
+
+.enquiry__card {
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.enquiry__card h2,
+.enquiry__thread h2,
+.enquiry__form h2 {
+  margin-bottom: var(--space-3);
+  font-size: 1.25rem;
+}
+
+/* Their own words, kept as they typed them. */
+.enquiry__sent {
+  margin: 0;
+  color: var(--text-body);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.enquiry__thread {
+  margin-bottom: var(--space-6);
+}
+
+.enquiry__waiting {
+  padding: var(--space-5);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+.thread {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.thread__item {
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+/* The agency's answers carry the gold; their own follow-ups stay quieter. */
+.thread__item--agency {
+  border-left: 3px solid var(--gold-500);
+}
+
+.thread__item--customer {
+  border-left: 3px solid var(--border-strong);
+  background: var(--surface-alt);
+}
+
+.thread__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  font-size: 0.78rem;
+}
+
+.thread__meta strong {
+  color: var(--text-heading);
+  letter-spacing: 0.04em;
+}
+
+.thread__meta span {
+  color: var(--text-faint);
+}
+
+.thread__body {
+  margin: 0;
+  color: var(--text-body);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.enquiry__form {
+  padding: var(--space-6);
+}
+
+@media (max-width: 620px) {
+  .enquiry__card,
+  .enquiry__form,
+  .thread__item {
+    padding: var(--space-5);
+  }
 }
 
 /* --- reviews page --- */
@@ -2867,6 +3527,429 @@ html.intro-landing .site-header .brand__text {
   border-top: 1px solid var(--border);
 }
 
+/* --- contact: the effects layer ------------------------------------------------------------- */
+/*
+ * The contact page is the one page allowed to move. Everything here is scoped to .contact-page so
+ * no other page inherits it, and it is all CSS: the global prefers-reduced-motion block at the end
+ * of this file switches every animation and transition off in one go.
+ */
+.contact-main {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Two soft lights behind the cards and the form, drifting in opposite directions. */
+.contact-main::before,
+.contact-main::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  width: 44vw;
+  height: 44vw;
+  max-width: 600px;
+  max-height: 600px;
+  border-radius: 50%;
+  filter: blur(64px);
+  pointer-events: none;
+}
+
+.contact-main::before {
+  top: -14%;
+  left: -12%;
+  background: radial-gradient(circle, rgba(195, 154, 46, 0.16), transparent 68%);
+  animation: contact-drift-a 24s var(--ease-in-out-soft) infinite alternate;
+}
+
+.contact-main::after {
+  right: -16%;
+  bottom: -20%;
+  background: radial-gradient(circle, rgba(28, 128, 85, 0.18), transparent 68%);
+  animation: contact-drift-b 28s var(--ease-in-out-soft) infinite alternate;
+}
+
+.contact-main .container {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes contact-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(7%, 6%, 0) scale(1.12);
+  }
+}
+
+@keyframes contact-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(-6%, -7%, 0) scale(1);
+  }
+}
+
+/* The thread the four cards hang from: dashes that travel slowly along it. */
+.contact-cards::before {
+  content: '';
+  position: absolute;
+  top: 38px;
+  right: 7%;
+  left: 7%;
+  height: 1px;
+  background-image: linear-gradient(90deg, var(--border-gold) 0 7px, transparent 7px 15px);
+  background-size: 15px 1px;
+  background-repeat: repeat-x;
+  opacity: 0.45;
+  animation: thread-travel 26s linear infinite;
+}
+
+@keyframes thread-travel {
+  to {
+    background-position: 300px 0;
+  }
+}
+
+.contact-card {
+  position: relative;
+  border-radius: var(--radius);
+  transition: transform var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft),
+    box-shadow var(--dur) var(--ease-out-soft);
+}
+
+.contact-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(120% 130% at 50% 0%, rgba(195, 154, 46, 0.14), transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease-out-soft);
+}
+
+.contact-card:hover {
+  transform: translateY(-6px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-md);
+}
+
+.contact-card:hover::after {
+  opacity: 1;
+}
+
+.contact-card__icon {
+  position: relative;
+  transition: transform var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.contact-card__icon::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 1px solid var(--border-gold);
+  border-radius: 50%;
+  opacity: 0;
+}
+
+.contact-card:hover .contact-card__icon {
+  transform: rotate(-6deg) scale(1.06);
+  color: var(--gold-300);
+}
+
+.contact-card:hover .contact-card__icon::after {
+  animation: ring-pulse 1.7s var(--ease-out-soft) infinite;
+}
+
+@keyframes ring-pulse {
+  from {
+    opacity: 0.7;
+    transform: scale(0.86);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+.contact-panel--lift,
+.contact-panel--map {
+  transition: transform var(--dur) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft);
+}
+
+.contact-panel--lift:hover,
+.contact-panel--map:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-gold);
+}
+
+/* A slow drift on the map photograph, so the panel is not a still picture. */
+.contact-panel--map img {
+  animation: map-drift 32s var(--ease-in-out-soft) infinite alternate;
+}
+
+@keyframes map-drift {
+  from {
+    transform: scale(1.02);
+  }
+  to {
+    transform: scale(1.14) translate3d(-2%, -1.5%, 0);
+  }
+}
+
+/* The office marker, pulsing where it sits on that map. */
+.contact-panel__pin {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold-400);
+  animation: pin-pulse 2.6s var(--ease-out-soft) infinite;
+}
+
+@keyframes pin-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(210, 172, 78, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(210, 172, 78, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(210, 172, 78, 0);
+  }
+}
+
+/* --- contact: where we post ------------------------------------------------------------------ */
+.contact-social {
+  position: relative;
+  overflow: hidden;
+}
+
+.social-wall {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  align-items: stretch;
+}
+
+.social-wall__cell {
+  min-width: 0;
+}
+
+/* Four accounts and the note: the note takes the rest of the last row rather than leaving a hole
+   beside it. It goes back to one column once the wall itself is a single column. */
+@media (min-width: 1081px) {
+  .social-wall__cell--note {
+    grid-column: span 2;
+  }
+}
+
+/* A card per account, tilted like the gallery prints and straightened on hover. The brand colour is
+   only ever a soft light behind the card and a tint on the icon - the type stays ivory, because a
+   blue or pink on ink is not readable. */
+.social-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-4);
+  height: 100%;
+  padding: var(--space-6);
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--ivory-100);
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform var(--dur-slow) var(--ease-out-soft), border-color var(--dur) var(--ease-out-soft),
+    box-shadow var(--dur-slow) var(--ease-out-soft);
+}
+
+.social-wall__cell:nth-child(1) .social-card {
+  --tilt: -1.2deg;
+}
+
+.social-wall__cell:nth-child(2) .social-card {
+  --tilt: 1deg;
+}
+
+.social-card:hover,
+.social-card:focus-visible {
+  transform: rotate(0deg) translateY(-6px);
+  border-color: var(--border-gold);
+  box-shadow: var(--shadow-lg);
+}
+
+.social-card__glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity var(--dur) var(--ease-out-soft);
+}
+
+.social-card--facebook .social-card__glow {
+  background: radial-gradient(85% 70% at 12% 0%, rgba(24, 119, 242, 0.34), transparent 62%);
+}
+
+.social-card--instagram .social-card__glow {
+  background: radial-gradient(85% 70% at 12% 0%, rgba(225, 48, 108, 0.3), transparent 62%),
+    radial-gradient(60% 55% at 92% 100%, rgba(131, 58, 180, 0.28), transparent 66%);
+}
+
+.social-card--tiktok .social-card__glow {
+  background: radial-gradient(85% 70% at 12% 0%, rgba(37, 244, 238, 0.2), transparent 62%),
+    radial-gradient(60% 55% at 92% 100%, rgba(254, 44, 85, 0.26), transparent 66%);
+}
+
+.social-card--whatsapp .social-card__glow {
+  background: radial-gradient(85% 70% at 12% 0%, rgba(37, 211, 102, 0.3), transparent 62%);
+}
+
+.social-card:hover .social-card__glow {
+  opacity: 0.85;
+}
+
+.social-card__top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.social-card__icon {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  transition: transform var(--dur) var(--ease-out-soft), color var(--dur) var(--ease-out-soft);
+}
+
+.social-card:hover .social-card__icon {
+  transform: rotate(-5deg) scale(1.06);
+}
+
+.social-card--facebook:hover .social-card__icon {
+  color: #9dc0ff;
+}
+
+.social-card--instagram:hover .social-card__icon {
+  color: #ffb4c8;
+}
+
+.social-card--tiktok:hover .social-card__icon {
+  color: #8ff3ef;
+}
+
+.social-card--whatsapp:hover .social-card__icon {
+  color: #86efac;
+}
+
+.social-card__label {
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.social-card__handle {
+  position: relative;
+  align-self: start;
+  color: var(--ivory-100);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.social-card__go {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--gold-300);
+  font-size: 0.74rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.social-card__go svg {
+  transition: transform var(--dur) var(--ease-out-soft);
+}
+
+.social-card:hover .social-card__go svg {
+  transform: translateX(5px);
+}
+
+/* The note beside the accounts, on paper like the gallery prints. */
+.social-note {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-6);
+  border-radius: 3px;
+  background: linear-gradient(158deg, #f8f4ea 0%, #ece4d3 100%);
+  box-shadow: 0 18px 34px rgba(0, 0, 0, 0.45);
+  transform: rotate(1.4deg);
+  transition: transform var(--dur-slow) var(--ease-out-soft), box-shadow var(--dur-slow) var(--ease-out-soft);
+}
+
+.social-note:hover {
+  transform: rotate(0deg) translateY(-6px);
+  box-shadow: 0 30px 54px rgba(0, 0, 0, 0.55);
+}
+
+.social-note strong {
+  color: #1c211f;
+  font-family: var(--font-hand);
+  font-size: 1.6rem;
+  line-height: 1.15;
+}
+
+.social-note p {
+  margin: 0;
+  color: #40453f;
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+.social-note__pin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  translate: -50% 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f0dcae, #a47f1f 70%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 1080px) {
+  .social-wall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .social-wall__cell--note {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 680px) {
+  .social-wall {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .social-wall__cell--note {
+    grid-column: auto;
+  }
+  /* No thread between cards once they are stacked. */
+  .contact-cards::before {
+    display: none;
+  }
+}
+
 @media (max-width: 1080px) {
   .detail,
   .contact-split {
@@ -2891,9 +3974,6 @@ html.intro-landing .site-header .brand__text {
   .detail__strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .mosaic--page {
-    grid-auto-rows: 190px;
-  }
 }
 
 @media (max-width: 620px) {
@@ -2909,8 +3989,7 @@ html.intro-landing .site-header .brand__text {
   .searchbar .btn {
     flex: 1 1 auto;
   }
-  .detail__strip,
-  .mosaic--page {
+  .detail__strip {
     grid-template-columns: minmax(0, 1fr);
   }
   .timeline {
@@ -3068,6 +4147,12 @@ html.intro-landing .site-header .brand__text {
 
 .account-heading {
   margin-bottom: var(--space-5);
+}
+
+/* Links from the reviews pages arrive as /account#review: the form has to clear the sticky header
+   when the browser (or the page's own effect) scrolls it into view. */
+#review {
+  scroll-margin-top: calc(var(--header-height) + var(--space-5));
 }
 
 .account-grid {

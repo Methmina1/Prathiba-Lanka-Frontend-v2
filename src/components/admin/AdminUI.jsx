@@ -1,10 +1,16 @@
 import { useEffect } from 'react'
 import { Close } from '../ui/Icons'
 
-/** Status chip shared by every admin table. */
-export function StatusPill({ value }) {
+/**
+ * Status chip shared by every admin table.
+ *
+ * `label` exists because the stored status and the word the agency uses are not always the same:
+ * a booking the console cancels is stored as REJECTED (the value the API has always returned), and
+ * showing "REJECTED" beside a button that says Cancel reads like two different things happened.
+ */
+export function StatusPill({ value, label }) {
   if (!value) return null
-  return <span className={`adm-pill adm-pill--${String(value).toLowerCase()}`}>{value}</span>
+  return <span className={`adm-pill adm-pill--${String(value).toLowerCase()}`}>{label ?? value}</span>
 }
 
 export function Notice({ kind = 'info', children }) {

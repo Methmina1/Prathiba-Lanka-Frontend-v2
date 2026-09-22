@@ -2,7 +2,6 @@ import Hero from '../components/sections/Hero'
 import TrustBar from '../components/sections/TrustBar'
 import Philosophy from '../components/sections/Philosophy'
 import Packages from '../components/sections/Packages'
-import ProvinceMap from '../components/sections/ProvinceMap'
 import Sustainability from '../components/sections/Sustainability'
 import Gallery from '../components/sections/Gallery'
 import Journal from '../components/sections/Journal'
@@ -10,6 +9,8 @@ import Reviews from '../components/sections/Reviews'
 import Faq from '../components/sections/Faq'
 import CtaBand from '../components/sections/CtaBand'
 
+// The province map moved to the journal page (it is reading material rather than a home-page
+// section); see pages/JournalPage.jsx.
 export default function Home() {
   return (
     <main className="page-enter">
@@ -17,7 +18,6 @@ export default function Home() {
       <TrustBar />
       <Philosophy />
       <Packages />
-      <ProvinceMap />
       <Sustainability />
       <Gallery />
       <Journal />

@@ -8,7 +8,8 @@
  *
  * Files are named after the slot rather than the photo: to swap one, replace the file, or point the
  * slot at a different file here. The originals the site was built from are in
- * public/images/Sri lanka, and scripts/optimize-images.ps1 produces web-sized copies of them.
+ * images-originals/Sri lanka - deliberately outside public/, which Vite copies verbatim into the
+ * build - and scripts/optimize-images.ps1 produces the web-sized copies that ship.
  */
 export const PHOTOS = {
   /**
@@ -34,8 +35,13 @@ export const PHOTOS = {
     plan: '/images/sl/page-plan.jpg',
   },
 
-  /** Framed 4/5 portrait in the home "fewer places" section. */
-  philosophy: '/images/sl/philosophy.jpg',
+  /**
+   * Framed 4/5 portrait in the home "fewer places" section.
+   *
+   * A photograph from the gallery set (see the gallery page): the picture this slot used to carry
+   * was replaced at the client's request.
+   */
+  philosophy: '/images/sl/seed-gallery-17.jpg',
   /** Stand-in for the About story frame until an image is set in the console. */
   aboutStory: '/images/sl/about-story.jpg',
   /** Backdrop of the "Start a conversation" band. */

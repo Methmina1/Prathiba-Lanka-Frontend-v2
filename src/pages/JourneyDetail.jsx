@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { api } from '../api/client'
 import { fallbackPackages } from '../data/fallback'
-import { CONTACT_FALLBACK } from '../data/social'
+import { CONTACT_FALLBACK, whatsappFrom } from '../data/social'
 import { useAuth } from '../auth/AuthContext'
 import { usePageContent } from '../hooks/usePageContent'
 import { useResource } from '../hooks/useResource'
@@ -10,8 +10,9 @@ import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
 import MediaFigure from '../components/ui/MediaFigure'
-import { ArrowRight, Calendar, Check, Mail, MapPin, Phone, Star, Users } from '../components/ui/Icons'
-import { firstSentence, formatDate, formatDays, formatPrice, toLines, toParagraphs } from '../utils/format'
+import DayAccordion from '../components/ui/DayAccordion'
+import { ArrowRight, Calendar, Check, Mail, MapPin, Phone, Star, Users, WhatsApp } from '../components/ui/Icons'
+import { firstSentence, formatDate, formatDays, toLines, toParagraphs } from '../utils/format'
 
 const SCENERY = ['temple', 'safari', 'tea', 'coast', 'train', 'hills']
 
@@ -58,11 +59,12 @@ export default function JourneyDetail() {
   const reviews = useRelatedList(status === 'ready', () => api.getReviewsByPackage(id), id)
 
   // The quote card shows whichever contact detail the agency actually publishes.
-  const { mayBook } = useAuth()
+  const { mayBook, session } = useAuth()
   const { content: contact } = usePageContent('contact')
   const contactCards = contact.cards ?? []
   const phone = contactCards.find((card) => card.href?.startsWith('tel:') && card.value)
   const email = contactCards.find((card) => card.href?.startsWith('mailto:') && card.value)
+  const whatsapp = whatsappFrom(contactCards)
 
   if (!pkg) {
     return (
@@ -85,9 +87,8 @@ export default function JourneyDetail() {
   }
 
   const scenery = pkg.scenery ?? SCENERY[Number(pkg.packageId) % SCENERY.length] ?? 'hills'
-  const price = formatPrice(pkg.price)
   // One line per day, not one paragraph per blank line: a 20-day itinerary stored as 20 lines has
-  // to become 20 steps. The write-up is the other way round - paragraphs, split on blank lines.
+  // to become 20 days. The write-up is the other way round - paragraphs, split on blank lines.
   const itinerary = toLines(pkg.itinerary)
   const story = toParagraphs(pkg.longDescription)
 
@@ -130,14 +131,7 @@ export default function JourneyDetail() {
             {itinerary.length > 0 && (
               <Reveal delay={80}>
                 <h3 className="detail__subhead">Day by day</h3>
-                <ul className="itinerary">
-                  {itinerary.map((line, index) => (
-                    <li key={index}>
-                      <span className="itinerary__step">{String(index + 1).padStart(2, '0')}</span>
-                      <p>{line}</p>
-                    </li>
-                  ))}
-                </ul>
+                <DayAccordion lines={itinerary} />
               </Reveal>
             )}
 
@@ -173,7 +167,18 @@ export default function JourneyDetail() {
             <Reveal delay={140}>
               <h3 className="detail__subhead">Travellers who took this journey</h3>
               {reviews.length === 0 ? (
-                <p className="muted">No reviews for this journey yet.</p>
+                <div className="detail__reviews-empty">
+                  <p className="muted">
+                    No reviews for this journey yet. They are written by customers who have been out
+                    with us, and appear here unedited.
+                  </p>
+                  {mayBook && (
+                    <Link className="link-arrow" to={session ? '/account#review' : '/login?next=/account'}>
+                      {session ? 'Be the first to review it' : 'Sign in to review it'}
+                      <ArrowRight width={15} height={15} />
+                    </Link>
+                  )}
+                </div>
               ) : (
                 <div className="grid grid--2">
                   {reviews.slice(0, 2).map((review) => (
@@ -197,16 +202,16 @@ export default function JourneyDetail() {
 
           <aside className="detail__side">
             <div className="card quote-card">
-              <div className="quote-card__price">
-                {price ? (
-                  <>
-                    <small>from</small>
-                    <strong>{price}</strong>
-                    <small>per person</small>
-                  </>
-                ) : (
-                  <strong>On request</strong>
-                )}
+              {/* No price is published anywhere on the site: every journey is costed against the
+                  traveller's own dates, party size and hotel choices, so a figure on the page would
+                  be a number nobody is actually offered. Staff confirm the agreed price in the
+                  console. */}
+              <div className="quote-card__quote">
+                <small>Pricing</small>
+                <strong>Quoted for your trip</strong>
+                <p>
+                  Costed to your dates, party and hotels - ask and it comes back with the itinerary.
+                </p>
               </div>
 
               <ul className="quote-card__facts">
@@ -235,17 +240,18 @@ export default function JourneyDetail() {
               </ul>
 
               {/* Staff cannot book - the backend refuses an admin token with 403 - so they are not
-                  offered the request button. The price and the facts still show. */}
+                  offered the request button. The facts still show. */}
               {mayBook ? (
                 <>
-                  <Link className="btn btn--cta btn--sweep btn--block" to="/plan">
+                  {/* The journey is carried in the URL so the request form opens with it chosen. */}
+                  <Link className="btn btn--cta btn--sweep btn--block" to={`/plan?package=${pkg.packageId}`}>
                     Request this journey
                     <ArrowRight width={15} height={15} />
                   </Link>
 
                   <p className="quote-card__note">
-                    No payment now. We reply with an itinerary and a price, usually within one
-                    working day.
+                    No payment now. You get a PIN straight away, and we reply with an itinerary and a
+                    price, usually within one working day.
                   </p>
                 </>
               ) : (
@@ -254,6 +260,20 @@ export default function JourneyDetail() {
                   <ArrowRight width={15} height={15} />
                 </Link>
               )}
+
+              {/* WhatsApp leads: it is the channel the agency answers on, and this is the page where
+                  somebody is deciding. The number is the contact card from Admin -> Contact, not a
+                  constant, so changing it there changes it here. */}
+              <a
+                className="quote-card__phone quote-card__phone--whatsapp"
+                href={whatsapp.href}
+                target="_blank"
+                rel="noreferrer noopener"
+                aria-label={`Ask about ${pkg.title} on WhatsApp: ${whatsapp.value}`}
+              >
+                <WhatsApp width={15} height={15} />
+                {whatsapp.value}
+              </a>
 
               {/* The agency's real contact details, from the same cards the contact page edits.
                   There is no published phone number yet, so this falls back to email. */}

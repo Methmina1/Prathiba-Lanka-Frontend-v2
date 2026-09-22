@@ -14,17 +14,9 @@ function sceneryFor(pkg, index) {
   return ['temple', 'safari', 'tea', 'coast'][index % 4]
 }
 
-function formatPrice(price) {
-  if (price === null || price === undefined || price === '') return null
-  const value = Number(price)
-  if (Number.isNaN(value)) return null
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value)
-}
-
 export default function PackageCard({ pkg, index = 0, onReadStory }) {
   const { mayBook } = useAuth()
   const scenery = sceneryFor(pkg, index)
-  const price = formatPrice(pkg.price)
   const days = pkg.durationDays ? `${pkg.durationDays} days` : null
   // The card carries two lines of the short description; the written-up version opens in a dialog
   // where the page provides one.
@@ -57,18 +49,9 @@ export default function PackageCard({ pkg, index = 0, onReadStory }) {
         )}
 
         <div className="package-card__foot">
-          <div className="package-card__price">
-            {price ? (
-              <>
-                <small>from</small>
-                <strong>{price}</strong>
-                <small>per person</small>
-              </>
-            ) : (
-              <small>Price on request</small>
-            )}
-          </div>
-
+          {/* No price on the card: every journey is quoted against the traveller's own dates and
+              party size, so a "from" figure on a card is a number nobody is actually offered. The
+              price stays in the console, where staff confirm bookings with it. */}
           <div className="package-card__meta">
             {pkg.maxCapacity ? (
               <span>
@@ -81,7 +64,7 @@ export default function PackageCard({ pkg, index = 0, onReadStory }) {
               <ArrowRight width={15} height={15} />
             </Link>
             {mayBook && (
-              <Link className="link-arrow" to="/plan">
+              <Link className="link-arrow" to={`/plan?package=${pkg.packageId}`}>
                 Request
                 <ArrowRight width={15} height={15} />
               </Link>

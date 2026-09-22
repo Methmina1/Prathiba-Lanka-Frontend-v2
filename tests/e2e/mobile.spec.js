@@ -62,3 +62,30 @@ test('the console stacks on a phone and the sidebar becomes a drawer', async ({ 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   expect(overflow, 'the console scrolls horizontally').toBeLessThanOrEqual(1)
 })
+
+test('the pages with new layout beyond a grid still fit the phone', async ({ page }) => {
+  // The gallery grid and the contact cards are the wide things here, and the journal opens on a
+  // nine-province map.
+  for (const path of ['/gallery', '/contact', '/journal']) {
+    await page.goto(path)
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    )
+    expect(overflow, `${path} scrolls horizontally`).toBeLessThanOrEqual(1)
+  }
+
+  // And a tile is still inside the page on one column. Asserted as a condition that Playwright
+  // retries rather than as a measurement taken once: the mocked gallery fills in after the first
+  // render, and a single boundingBox() could be read off a node that had just been replaced.
+  await page.goto('/gallery')
+  const firstTile = page.locator('.gallery-tile__media').first()
+  await expect(firstTile).toBeVisible()
+  await expect
+    .poll(async () =>
+      firstTile.evaluate((node) => {
+        const box = node.getBoundingClientRect()
+        return box.x >= 0 && box.x + box.width <= 390
+      })
+    )
+    .toBe(true)
+})

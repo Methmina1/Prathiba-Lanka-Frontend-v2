@@ -87,7 +87,16 @@ export const CONTACT_DEFAULTS = {
   },
   // A card with an empty value cannot be saved (the content validator requires one), so "no phone
   // number yet" means no phone card: add it back from Admin -> Contact when there is a number.
+  // WhatsApp is a card rather than a data-file constant so the number can be changed in the console;
+  // the site's own WhatsApp links read it from here (see whatsappFrom in data/social.js).
   cards: [
+    {
+      icon: 'whatsapp',
+      label: 'WhatsApp',
+      value: '+94 76 048 4088',
+      href: 'https://wa.me/94760484088',
+      note: 'Fastest way to reach us',
+    },
     {
       icon: 'mail',
       label: 'Email',

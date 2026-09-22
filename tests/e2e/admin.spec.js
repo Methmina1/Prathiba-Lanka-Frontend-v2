@@ -50,7 +50,8 @@ test('a customer still gets the booking flow', async ({ page }) => {
   await expect(page.locator('.footer__links a[href="/plan"]')).toHaveCount(1)
 
   await page.goto('/journeys')
-  await expect(page.locator('.package-card__meta a[href="/plan"]').first()).toBeVisible()
+  // The journey is carried in the URL so the request form opens with it selected.
+  await expect(page.locator('.package-card__meta a[href^="/plan"]').first()).toBeVisible()
 
   await page.goto('/plan')
   await expect(page.locator('h1')).toHaveText('Plan your journey')
@@ -142,8 +143,48 @@ test('a status filter refetches and changes the table', async ({ page }) => {
   await expect(page.locator('.adm-table')).toContainText('E5F6A7B8')
   await expect(page.locator('.adm-table')).not.toContainText('A1B2C3D4')
 
-  await page.getByRole('button', { name: 'Rejected' }).click()
+  // The stored status is REJECTED; the console says Cancelled, which is the agency's word for it.
+  await page.getByRole('button', { name: 'Cancelled' }).click()
   await expect(page.locator('.adm-empty')).toBeVisible()
+})
+
+test('the console says what became of each reply, and sends the one you write', async ({ page }) => {
+  await signIn(page, ADMIN_SESSION)
+  await page.goto('/admin/queries')
+
+  // The waiting list is the default view, and the reference staff quote in Gmail is on every row.
+  await expect(page.locator('.adm-table')).toContainText('#3')
+
+  // All three outcomes are told apart, which is the point: an enquiry answered from the agency's own
+  // inbox and one whose reply never left are not the same thing.
+  await page.getByRole('button', { name: 'All' }).click()
+  const table = page.locator('.adm-table')
+  await expect(table).toContainText('Reply emailed')
+  await expect(table).toContainText('Answered from your inbox')
+  await expect(table).toContainText('Reply not sent')
+
+  // Answering the one that is waiting: the dialog quotes what they asked, and saving sends it.
+  await page.getByRole('button', { name: 'Waiting for a reply' }).click()
+  await page.locator('.adm-table tbody tr').first().getByRole('button', { name: 'Reply' }).click()
+
+  const dialog = page.locator('.adm-dialog')
+  await expect(dialog).toContainText('Is December a good time?')
+  await expect(dialog).toContainText('one@example.com')
+
+  await dialog.getByLabel('Your reply').fill('Yes - December is one of our best months.')
+  await dialog.getByRole('button', { name: 'Send reply by email' }).click()
+
+  await expect(page.locator('.adm-notice')).toContainText('on its way to one@example.com')
+  // What the server returned is what the panel then shows: the reply is on the thread, recorded as
+  // written rather than emailed, because that is what the row actually says until the mail worker runs.
+  await expect(dialog.locator('.adm-thread__body')).toContainText('one of our best months')
+  await expect(dialog.locator('.adm-thread__meta')).toContainText('written in your inbox')
+
+  // The other route: the answer went out from Gmail, so it is recorded without pretending otherwise.
+  await dialog.getByLabel(/Add to the conversation/).fill('Rang them back about the transfer.')
+  await dialog.getByRole('button', { name: 'I answered from my inbox' }).click()
+  await expect(page.locator('.adm-notice')).toContainText('Nothing was sent by the site')
+  await expect(dialog.locator('.adm-thread__body').last()).toContainText('Rang them back')
 })
 
 test('the sidebar moves between screens and the console keeps its own chrome', async ({ page }) => {

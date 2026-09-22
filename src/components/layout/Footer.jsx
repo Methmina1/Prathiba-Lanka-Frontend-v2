@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Facebook, Instagram, Mail, MapPin, Phone } from '../ui/Icons'
-import { CONTACT_FALLBACK, SOCIAL_LINKS } from '../../data/social'
+import { Facebook, Instagram, Mail, MapPin, Phone, TikTok, WhatsApp } from '../ui/Icons'
+import { CONTACT_FALLBACK, SOCIAL_LINKS, whatsappFrom } from '../../data/social'
 import { useAuth } from '../../auth/AuthContext'
 import { usePageContent } from '../../hooks/usePageContent'
 
@@ -20,7 +20,7 @@ const JOURNEYS = [
   { label: 'Southern Coast', to: '/journeys?destination=galle' },
 ]
 
-const SOCIAL_ICONS = { facebook: Facebook, instagram: Instagram }
+const SOCIAL_ICONS = { facebook: Facebook, instagram: Instagram, tiktok: TikTok, whatsapp: WhatsApp }
 
 export default function Footer() {
   // The same contact details the Contact page shows, so editing them once updates both.
@@ -30,6 +30,7 @@ export default function Footer() {
   const phone = cards.find((card) => card.href?.startsWith('tel:') && card.value)
   const email = cards.find((card) => card.href?.startsWith('mailto:') && card.value)
   const office = cards.find((card) => card.icon === 'map')
+  const whatsapp = whatsappFrom(cards)
 
   return (
     <footer className="site-footer" id="contact">
@@ -90,7 +91,16 @@ export default function Footer() {
         <div className="footer__col">
           <h4>Talk to us</h4>
           <ul className="footer__contact">
-            {/* No number yet: the line goes rather than showing a placeholder nobody can dial. */}
+            {/* No voice number yet: the line goes rather than showing a placeholder nobody can dial.
+                WhatsApp is the channel the agency actually answers on, so it leads. */}
+            {whatsapp.value && (
+              <li>
+                <WhatsApp width={16} height={16} />
+                <a href={whatsapp.href} target="_blank" rel="noreferrer noopener">
+                  {whatsapp.value}
+                </a>
+              </li>
+            )}
             {(phone?.value ?? CONTACT_FALLBACK.phone) ? (
               <li>
                 <Phone width={16} height={16} />

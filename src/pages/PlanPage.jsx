@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
+import BookingForm from '../components/plan/BookingForm'
 import EnquiryForm from '../components/plan/EnquiryForm'
 import TrackBooking from '../components/plan/TrackBooking'
 import TrustBar from '../components/sections/TrustBar'
@@ -15,6 +16,10 @@ const STEPS = [
 export default function PlanPage() {
   const { session, email, mayBook, signOut } = useAuth()
   const isAdmin = session?.role === 'ROLE_ADMIN'
+  // The "Request" button on a journey card arrives as /plan?package=12, so the form is already
+  // pointing at the journey that was asked about.
+  const [params] = useSearchParams()
+  const requestedPackage = params.get('package') ?? ''
 
   // Staff do not book trips. Rather than showing an administrator the enquiry and tracking forms and
   // letting the backend refuse them, the page says why and points at the console.
@@ -70,8 +75,8 @@ export default function PlanPage() {
           <span className="eyebrow eyebrow--onDark">Start here</span>
           <h1 className="display">Plan your journey</h1>
           <p>
-            Send us the outline of a trip, or look up a request you have already made with its PIN.
-            No account needed for either.
+            Request a journey and you get a PIN straight away, or look up a request you have already
+            made with its PIN. No account needed for either.
           </p>
         </div>
       </section>
@@ -81,14 +86,19 @@ export default function PlanPage() {
       <section className="section">
         <div className="container">
           <div className="plan">
+            {/* The request form leads: it is what the buttons on the journey cards open. */}
             <Reveal variant="reveal--right">
-              <EnquiryForm />
+              <BookingForm initialPackageId={requestedPackage} />
             </Reveal>
             <Reveal delay={140} variant="reveal--right">
               <TrackBooking />
             </Reveal>
 
-            <Reveal delay={200}>
+            <Reveal delay={200} className="plan__enquiry">
+              <EnquiryForm />
+            </Reveal>
+
+            <Reveal delay={260}>
               <div className="card plan__account">
                 <div>
                   <span className="eyebrow">Your account</span>

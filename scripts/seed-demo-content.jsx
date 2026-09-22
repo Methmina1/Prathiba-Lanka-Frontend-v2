@@ -145,6 +145,102 @@ const JOURNAL = [
       'Our advice is simple: do not plan anything for the last hour of daylight. Put yourself somewhere with a western horizon, order something cold, and let the day finish itself.',
     ].join('\n\n'),
   },
+
+  // One note per province, so the map on this page always has something to show for whichever
+  // province a reader picks. Each one names the province and the places in it, which is what the map
+  // matches on (see src/data/provinceJournals.js) - so a note keeps working after it is edited in
+  // the console, as long as the places stay in the text.
+  {
+    title: 'The north: Jaffna, and the road that only opened recently',
+    description:
+      'Palm-lined, Tamil-speaking and thirty years off most itineraries. The far north rewards the extra drive.',
+    photo: 'seed-gallery-16.jpg',
+    content: [
+      'For most of the last forty years the north was closed, and the island is still catching up with it. What that leaves a traveller is a region with excellent roads, very few other visitors and a culture that is visibly its own: Hindu kovils with their gopurams painted in primary colours, a library that was a symbol of the place before the war, and Tamil spoken everywhere.',
+      'Jaffna is the centre of it. Walk the old Dutch fort, eat a crab curry that will recalibrate your idea of heat, and take a boat out to Nagadeepa or Delft, an island of wild ponies and coral walls that feels a century away from Colombo.',
+      'Come between May and September, when the peninsula is dry and the rest of the island is not. Carry cash: card machines are fewer here, and the distance from the nearest alternative makes the north a place to plan rather than to improvise.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Anuradhapura and Polonnaruwa: two capitals, three hours apart',
+    description: 'The island\u2019s first cities, and the easiest place to understand how old Sri Lanka actually is.',
+    photo: 'seed-gallery-09.jpg',
+    content: [
+      'Anuradhapura was a capital for a thousand years, and its scale still surprises people. The stupas are the size of cathedrals and older than most of Europe\u2019s. The sacred Bo tree here was grown from a cutting of the one under which the Buddha is said to have found enlightenment, which makes it the oldest documented tree in the world.',
+      'Polonnaruwa, three hours east, is the later capital and the easier one to read: a compact medieval city you can cover by bicycle in a morning, with the four great Buddha figures of the Gal Vihara carved straight into a granite face. It is the site people underrate beforehand and talk about longest afterwards.',
+      'This is the dry zone, so it is hot - start early, carry water, and be barefoot-ready for the temples. The season that suits it best is May to September, when the west coast is wet and this part of the island is at its clearest.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Wilpattu and the North Western coast',
+    description: 'The island\u2019s largest national park, quieter than Yala and full of lakes.',
+    photo: 'seed-package-wildlife.jpg',
+    content: [
+      'Wilpattu is the oldest and largest of Sri Lanka\u2019s national parks, and it works differently to Yala. Instead of a dry scrubland of jeeps and dust, it is a country of villus - shallow, rain-fed lakes in the forest - which means fewer vehicles, longer drives, and a real chance of having a leopard sighting entirely to yourself.',
+      'The park is the reason to come, but the coast below it is not to be missed: Kalpitiya is a long sand spit with kitesurfing on one side and dolphins offshore, and Chilaw and Puttalam are the heart of the island\u2019s prawn and coconut country. The fishing towns here are working towns rather than resorts, which is the point.',
+      'Slots in Wilpattu are limited and the park closes for part of the year, so this is one to plan rather than turn up for. Half board at a tented camp inside the buffer zone, two dawn drives and a slow afternoon is the shape that works.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Colombo, Negombo and the west coast',
+    description: 'Where most journeys begin: the capital, the airport coast, and the first evening.',
+    photo: 'seed-gallery-01.jpg',
+    content: [
+      'Almost everybody lands at Katunayake, and the thirty minutes between the airport and Negombo is the softest introduction to the country you will get. Negombo is a working fishing town: the lagoon fills with sails at dusk, the fish market runs on its own clock, and the beach is a place to walk rather than to swim.',
+      'Colombo itself is worth a day if you have one. The Gangaramaya and Seema Malaka temples, the old quarter of Pettah with its market streets sorted by trade, the National Museum for the history you are about to drive through, and Galle Face Green at sunset with the whole city out walking.',
+      'The west coast is the winter coast: from November to April the sea is calm, the sun sets over the water, and Bentota, Hikkaduwa and Kalutara make easy first or last stops. It is also the most built-up stretch of the island, so treat it as a gateway rather than the destination.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Kandy, the highlands and the road to Sigiriya',
+    description: 'The hill capital, the cave temples and the rock fortress: the middle of the island, and its most photographed.',
+    photo: 'seed-journal-sigiriya.jpg',
+    content: [
+      'Kandy is the last royal capital, and it still behaves like one: the lake in the middle of the city, the Temple of the Tooth holding the island\u2019s most sacred relic, and drumming you can hear from the streets at dusk. Time a visit for the evening puja and the whole place makes sense.',
+      'North of it, in Matale district, is the triangle everybody comes for. Sigiriya is the one to climb at dawn, before the coaches arrive and while the rock is still cool. Dambulla\u2019s cave temples are the quieter masterpiece: five caves, painted ceiling to floor, and a Buddha in every posture.',
+      'Then climb into the tea country. Nuwara Eliya sits at nearly two thousand metres, which is why it has a racecourse, a golf course and a climate that requires a jacket. The train from Kandy to Ella is one of the great railway journeys anywhere, and it costs about a pound.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Trincomalee, Batticaloa and the east coast',
+    description: 'The other monsoon, the other coast, and the best swimming from May to September.',
+    photo: 'seed-package-coast.jpg',
+    content: [
+      'The east coast runs on the opposite calendar to the south-west, which is the single most useful thing to know about Sri Lanka\u2019s weather. From May to September, when it rains on the west coast, Trincomalee, Nilaveli, Passikudah and Arugam Bay are dry, calm and warm.',
+      'Trincomalee is a natural deep-water harbour with a Hindu temple on the headland above it, and Pigeon Island a short boat ride away is the best snorkelling on the island: reef sharks, turtles and coral in water you can stand up in. Batticaloa is quieter still, with a lagoon, a singing fish legend and a Dutch fort.',
+      'Arugam Bay is the surf town - a right-hand point break that draws people for the whole season, and a crescent of guesthouses, cafes and fishing boats behind it. Book ahead for June to August, when everyone who knows arrives at once.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Ella, Bandarawela and the Uva hills',
+    description: 'The prettiest train ride on the island, and the walking that follows it.',
+    photo: 'seed-package-hillcountry.jpg',
+    content: [
+      'Ella is a village in a gap in the mountains, and the view from it is why people stay longer than they planned. The Nine Arches Bridge, Little Adam\u2019s Peak and Ella Rock are the three walks everybody does; the first is a twenty-minute stroll, the last is a half-day and worth the early start.',
+      'Uva is tea country with fewer visitors than the estates around Nuwara Eliya. A factory tour here is still a working tour rather than a show, and the high-grown leaf from these hills goes into some of the best tea the island makes.',
+      'The train from Kandy or Nuwara Eliya to Ella is the reason to come this way at all: three hours of tea slopes, tunnels and viaducts, with the doors open and people hanging out of them. Second class reserved is the sweet spot - first class has sealed windows.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Adam\u2019s Peak, Sinharaja and the gem country',
+    description: 'A pilgrimage at two in the morning, and the last of the island\u2019s rainforest.',
+    photo: 'seed-gallery-05.jpg',
+    content: [
+      'Adam\u2019s Peak - Sri Pada, the sacred footprint - is climbed at night. You start around two in the morning so that you reach the summit for sunrise, and the path is lit, stepped and lined with tea stalls and pilgrims of three faiths who come for the same view from different directions. It is a genuinely hard climb and an unforgettable one.',
+      'The season for it is December to May; outside that the summit is lost in cloud and often closed. Ratnapura, the town below, is the island\u2019s gem capital - sapphires, rubies and the famous star stones - and a place to buy from a licensed dealer rather than a roadside stall.',
+      'Sinharaja, to the south-west, is the island\u2019s last great tract of primary rainforest and a UNESCO site. It is not a safari: you walk in with a guide, quietly, and look for mixed-species flocks, endemic birds, and the occasional green pit viper asleep in a branch. Leeches are part of the deal. Long trousers are not optional.',
+    ].join('\n\n'),
+  },
+  {
+    title: 'Galle, Mirissa and the south coast',
+    description: 'The fort, the whales, and the beaches everybody pictures when they picture Sri Lanka.',
+    photo: 'cover-galle-fort.jpg',
+    content: [
+      'Galle Fort is the best-preserved colonial sea fort in Asia: Dutch walls, streets of villas and shops inside them, and a lighthouse at the point. Stay inside the walls for a night if you can - the fort is at its best before the day-trippers arrive and after they leave.',
+      'West of it, the coast turns into the beaches people come for. Unawatuna for swimming, Mirissa for the bay and the whale watching, Tangalle and Hiriketiya further east for something quieter. The stilt fishermen of Koggala are a few minutes along the road.',
+      'Blue whales pass Mirissa between November and April, and the boats leave before dawn. Take the trip with a licensed operator that keeps its distance, and treat a sighting as a gift rather than a booking. The rest of the year the south coast is for hammocks, rice and curry, and the long slow end of a trip.',
+    ].join('\n\n'),
+  },
 ]
 
 /** Gallery captions stay empty: describe the photographs yourself in the console. */

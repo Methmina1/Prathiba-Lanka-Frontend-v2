@@ -868,6 +868,124 @@
   gap: var(--space-2);
 }
 
+/* ---------------------------------------------------------------- enquiries */
+
+/*
+ * The thread and the state of the last reply.
+ *
+ * The state line is the point of this block: an enquiry answered from the agency's own inbox and one
+ * whose reply never left look identical in a status column, and telling them apart is the difference
+ * between a waiting list staff trust and one they learn to ignore.
+ */
+.adm-reply-state {
+  margin-top: 4px;
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.adm-reply-state--sent {
+  color: var(--adm-success);
+}
+
+.adm-reply-state--outside {
+  color: var(--adm-muted);
+}
+
+.adm-reply-state--failed {
+  color: var(--adm-danger);
+}
+
+.adm-flag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.adm-flag--attention {
+  background: var(--adm-warning-soft);
+  color: var(--adm-warning);
+}
+
+/* What they asked, quoted above the reply box so nobody answers the wrong enquiry. */
+.adm-field__label {
+  color: var(--adm-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.adm-quote {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--adm-border);
+  border-left: 3px solid var(--adm-border-strong);
+  border-radius: var(--adm-radius);
+  background: var(--adm-surface-alt);
+}
+
+.adm-quote strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.88rem;
+}
+
+.adm-quote p {
+  margin: 0;
+  color: var(--adm-muted);
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+}
+
+.adm-thread {
+  display: grid;
+  gap: var(--space-2);
+  max-height: 260px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.adm-thread__item {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--adm-border);
+  border-radius: var(--adm-radius);
+  background: var(--adm-surface-alt);
+}
+
+/* Their messages on the left of the eye, ours on the right: the shape of a conversation. */
+.adm-thread__item--agency {
+  border-left: 3px solid var(--adm-primary);
+  background: var(--adm-primary-soft);
+}
+
+.adm-thread__item--customer {
+  border-left: 3px solid var(--adm-border-strong);
+}
+
+.adm-thread__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 0.74rem;
+}
+
+.adm-thread__meta span {
+  color: var(--adm-muted);
+}
+
+.adm-thread__body {
+  margin: 0;
+  font-size: 0.86rem;
+  white-space: pre-wrap;
+}
+
 /* ---------------------------------------------------------------- auth guard */
 
 .adm-denied {

@@ -1,0 +1,9 @@
+# The public site is open; the two private areas are not. This is a request to crawlers, not a
+# security control - /api/admin/** already answers 403 without an admin token, and /account needs a
+# customer session.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /login
+Disallow: /register

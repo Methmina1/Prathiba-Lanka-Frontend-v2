@@ -32,21 +32,53 @@ const ROUTES = {
     '/images/sl/hero-2.webp',
     '/images/sl/hero-3.jpg',
     '/images/sl/hero-4.jpg',
-    '/images/sl/philosophy.jpg',
+    // the "fewer places" frame, which now uses a gallery photograph
+    '/images/sl/seed-gallery-17.jpg',
     '/images/sl/cta-band.jpg',
     '/images/sl/tile-1.jpg',
   ],
   '/journeys': ['Signature journeys', 'Search by destination', '/images/sl/page-journeys.jpg'],
   // the sample data ships with the app, so detail routes render without a backend
   '/journeys/demo-1': ['Classical Heritage', 'About this journey', 'Request this journey'],
-  '/journal': ['Stories from the island', 'Read the story', '/images/sl/journal-1.jpg'],
+  // The journal opens on the map alone: the notes appear once a province is picked, and the full
+  // list is behind the button in "Every story".
+  '/journal': [
+    'Stories from the island',
+    'Nine provinces, one island',
+    'Central Province',
+    'Every story',
+    'Read all',
+  ],
   '/journal/demo-1': ['When to visit Sri Lanka', 'All stories', '/images/sl/journal-1.jpg'],
+  // a plain grid of square tiles; with no backend the shipped photographs run through it, and those
+  // carry no captions, so only the notice and the first tile can be matched
   '/gallery': ['Where the journeys go', 'Nothing has been uploaded yet', '/images/sl/tile-1.jpg'],
   // No sample reviews ship with the app, so the page renders its empty state without a backend.
-  '/reviews': ['What people said afterwards', 'No reviews yet'],
+  '/reviews': ['What people said afterwards', 'No reviews yet', 'Sign in to write a review'],
+  // The customer's own enquiry: without a backend the lookup cannot finish, so what renders is the
+  // heading and the note that says it is looking. The token is theirs, so no route is special-cased.
+  '/enquiry/demo-token': ['Your enquiry', 'Looking up your enquiry'],
   '/about': ['Arranged by people who live here', 'How we got here', '/images/sl/about-story.jpg'],
-  '/contact': ['Talk to us', 'Track a booking', '/images/sl/contact-map.jpg'],
-  '/plan': ['Plan your journey', 'Request a journey', 'Track a booking', 'Sign in', 'Create an account'],
+  // the social accounts, straight from src/data/social.js - plus the WhatsApp bubble, which is on
+  // every public page
+  '/contact': [
+    'Talk to us',
+    'Track a booking',
+    '/images/sl/contact-map.jpg',
+    'Come along between journeys',
+    '@prathibha_lanka_voyeages',
+    'TikTok',
+    'Message us on WhatsApp',
+  ],
+  '/plan': [
+    'Plan your journey',
+    // the request form (what the Journey cards open) and the general enquiry form beside it
+    'Request a journey',
+    'Ask us something',
+    'Track a booking',
+    'Sign in',
+    'Create an account',
+  ],
   '/login': ['Sign in', 'Create an account'],
   '/register': ['Create an account', 'At least 8 characters'],
   '/nope': ['This path leads nowhere', '/images/sl/not-found.jpg'],
@@ -55,7 +87,8 @@ const ROUTES = {
 // the staff console, rendered with an admin session
 const ADMIN_ROUTES = {
   '/admin': ['Admin console', 'Awaiting decision', 'New enquiries', 'Packages live'],
-  '/admin/bookings': ['Admin console', 'Pending', 'Confirmed', 'Rejected'],
+  // The console calls the status Cancelled; the API and the database still store REJECTED.
+  '/admin/bookings': ['Admin console', 'Pending', 'Confirmed', 'Cancelled'],
   '/admin/queries': ['Admin console', 'Waiting for a reply'],
   '/admin/packages': ['Admin console', 'New package'],
   '/admin/journal': ['Admin console', 'New story'],
@@ -74,6 +107,22 @@ const HOME_FORBIDDEN = [
   'navbar__auth',
   'Sign in',
 ]
+
+/**
+ * Pages that must not carry something. The WhatsApp bubble is the interesting one: it belongs to the
+ * pages a customer-to-be reads, and not to the sign-in or account pages - see WhatsAppFab.jsx.
+ */
+const PER_ROUTE_FORBIDDEN = {
+  '/': HOME_FORBIDDEN,
+  '/login': ['Message us on WhatsApp'],
+  '/register': ['Message us on WhatsApp'],
+}
+
+/** The bubble itself has to be there on the pages that are for them. */
+const PER_ROUTE_REQUIRED = {
+  '/journeys': ['Message us on WhatsApp'],
+  '/about': ['Message us on WhatsApp'],
+}
 
 const problems = []
 
@@ -98,7 +147,9 @@ const check = (label, path, expected, session, { min = 2000, forbidden = [] } = 
 }
 
 for (const [path, expected] of Object.entries(ROUTES)) {
-  check(path, path, expected, null, { forbidden: path === '/' ? HOME_FORBIDDEN : [] })
+  check(path, path, [...expected, ...(PER_ROUTE_REQUIRED[path] ?? [])], null, {
+    forbidden: PER_ROUTE_FORBIDDEN[path] ?? [],
+  })
 }
 
 for (const [path, expected] of Object.entries(ADMIN_ROUTES)) {

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../../api/client'
 import { useAuth } from '../../auth/AuthContext'
-import { firstSentence, formatDays, formatPrice, toParagraphs } from '../../utils/format'
+import { firstSentence, formatDays, toParagraphs } from '../../utils/format'
 import { ArrowRight, Close } from './Icons'
 
 /**
@@ -37,7 +37,6 @@ export default function StoryDialog({ pkg, onClose }) {
 
   // A journey with no write-up yet still opens something readable rather than an empty dialog.
   const paragraphs = toParagraphs(pkg.longDescription || pkg.description)
-  const price = formatPrice(pkg.price)
   const days = formatDays(pkg.durationDays) ?? (pkg.durationDays ? `${pkg.durationDays} days` : null)
 
   return (
@@ -56,7 +55,7 @@ export default function StoryDialog({ pkg, onClose }) {
             {pkg.destination && <span className="eyebrow">{pkg.destination}</span>}
             <h2 id="story-title">{pkg.title}</h2>
             <p className="story__meta">
-              {[days, price ? `${price} per person` : 'Price on request'].filter(Boolean).join(' · ')}
+              {[days, pkg.destination].filter(Boolean).join(' · ')}
             </p>
           </div>
 

@@ -2,6 +2,7 @@ import { Outlet, Route, Routes } from 'react-router-dom'
 import Header from './components/layout/Header'
 import Footer from './components/layout/Footer'
 import SplashIntro from './components/layout/SplashIntro'
+import WhatsAppFab from './components/layout/WhatsAppFab'
 import ScrollToTop from './components/ScrollToTop'
 import ScrollProgress from './components/ui/ScrollProgress'
 import AdminLayout from './components/admin/AdminLayout'
@@ -16,6 +17,7 @@ import ReviewsPage from './pages/ReviewsPage'
 import About from './pages/About'
 import Contact from './pages/Contact'
 import PlanPage from './pages/PlanPage'
+import EnquiryPage from './pages/EnquiryPage'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Account from './pages/Account'
@@ -40,6 +42,8 @@ function SiteLayout() {
       <Header />
       <Outlet />
       <Footer />
+      {/* Public pages only - it hides itself on the account and sign-in pages. */}
+      <WhatsAppFab />
     </>
   )
 }
@@ -59,6 +63,8 @@ export default function App({ initialSession = null }) {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/plan" element={<PlanPage />} />
+          {/* The customer's own enquiry, opened by the token in their acknowledgement email. */}
+          <Route path="/enquiry/:token" element={<EnquiryPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/account" element={<Account />} />

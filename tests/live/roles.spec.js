@@ -129,7 +129,6 @@ test.describe('a visitor who has not signed in', () => {
     await page.goto('/')
     await expect(page.locator('.hero h1')).toBeVisible()
     await expect(page.locator('#journeys .package-card')).toHaveCount(6)
-    await expect(page.locator('#island .province-map__shape')).toHaveCount(9)
     await expect(page.locator('.navbar__actions a[href="/plan"]')).toHaveCount(1)
     await expect(page.locator('.navbar__account')).toHaveCount(0)
 
@@ -157,10 +156,25 @@ test.describe('a visitor who has not signed in', () => {
     await page.goto(await firstCard.getAttribute('href'))
 
     await expect(page.locator('.detail__story p').first()).toBeVisible()
-    await expect(page.locator('.itinerary li').first()).toBeVisible()
-    expect(await page.locator('.quote-card a[href="/plan"]').count()).toBeGreaterThan(0)
+    const days = page.locator('.days__item')
+    await expect(days.first()).toBeVisible()
+    // The agency's itineraries are written as "stop → stop → stop", so the first day opens into the
+    // stops it is made of rather than one paragraph.
+    await expect(days.first().locator('.days__steps li').first()).toBeVisible()
+    expect(await days.first().locator('.days__steps li').count()).toBeGreaterThan(1)
+    // The request button carries the journey in the URL, so the form opens with it chosen.
+    expect(await page.locator('.quote-card a[href^="/plan"]').count()).toBeGreaterThan(0)
+    // and the page offers WhatsApp about this particular journey
+    await expect(page.locator('.quote-card__phone--whatsapp')).toHaveAttribute(
+      'href',
+      'https://wa.me/94760484088',
+    )
 
     await page.goto('/journal')
+    // The page opens on the map: the province map is the index, and the story cards come from a
+    // province or from "Read all".
+    await expect(page.locator('#island .province-map__shape')).toHaveCount(9)
+    await page.getByRole('button', { name: /^Read all/ }).click()
     // the featured post is the link itself, not a card with a link inside it
     const featured = page.locator('a.feature-post')
     await expect(featured).toBeVisible()
@@ -168,7 +182,7 @@ test.describe('a visitor who has not signed in', () => {
     await expect(page.locator('h1')).toBeVisible()
 
     await page.goto('/gallery')
-    await expect(page.locator('.mosaic__tile').first()).toBeVisible()
+    await expect(page.locator('.gallery-tile').first()).toBeVisible()
 
     await page.goto('/reviews')
     await expect(page.locator('h1')).toContainText('What people said')
@@ -181,6 +195,24 @@ test.describe('a visitor who has not signed in', () => {
       'prathibhalankavoyages@gmail.com',
     )
     await expect(page.locator('.contact-card', { hasText: 'Office' })).toContainText('Kurunagala')
+
+    // The WhatsApp number the client gave us, on the card, in the social band it sits in, and in the
+    // bubble that follows a visitor around the site - all read from the one contact card the console
+    // edits, which is what makes this worth asserting against the live database.
+    await expect(page.locator('.contact-card', { hasText: 'WhatsApp' })).toContainText('+94 76 048 4088')
+    const band = page.locator('#follow')
+    await expect(band.getByRole('link', { name: /on WhatsApp/ })).toHaveAttribute(
+      'href',
+      'https://wa.me/94760484088',
+    )
+    await expect(band.getByRole('link', { name: /on TikTok/ })).toHaveAttribute(
+      'href',
+      'https://www.tiktok.com/@prathibha_lanka_voyages',
+    )
+    await expect(page.getByRole('link', { name: /Message us on WhatsApp/ })).toHaveAttribute(
+      'href',
+      'https://wa.me/94760484088',
+    )
 
     expect(errors, `console/page errors: ${errors.join(' | ')}`).toEqual([])
   })
@@ -367,12 +399,67 @@ test.describe('a member of staff', () => {
 
     const row = page.locator('.adm-table tbody tr', { hasText: MARK.enquirySubject })
     await expect(row, `no enquiry matching ${MARK.enquirySubject}`).toBeVisible()
+    await expect(row).toContainText(`#`) // the reference staff quote back at the customer
     await row.getByRole('button', { name: 'Reply' }).click()
 
     const dialog = page.locator('.adm-dialog')
-    await dialog.getByLabel('Your response').fill('Thanks - we will send an outline today.')
-    await dialog.getByRole('button', { name: 'Save response' }).click()
-    await expect(page.locator('.adm-notice')).toContainText(/response saved/i)
+    // The dialog quotes what they asked, so the wrong enquiry cannot be answered by accident.
+    await expect(dialog).toContainText('Automated check of the enquiry form.')
+    await expect(dialog).toContainText(MARK.guestEmail)
+
+    await dialog.getByLabel('Your reply').fill('Thanks - we will send an outline today.')
+    await dialog.getByRole('button', { name: 'Send reply by email' }).click()
+
+    // Saving sends it. The notice names the address it went to rather than claiming success blind.
+    await expect(page.locator('.adm-notice')).toContainText('on its way to')
+    await expect(dialog.locator('.adm-thread__body')).toContainText('we will send an outline today')
+
+    // The panel's own Close, not the dialog header's: both are called Close, and only one of them is
+    // inside the form.
+    await dialog.locator('.adm-form__actions').getByRole('button', { name: 'Close' }).click()
+
+    // Answered enquiries leave the waiting list, and the row says which of the three things happened -
+    // emailed, written in the agency's own inbox, or not sent at all. Which one it is depends on the
+    // transport this instance runs with, so the assertion is that it says one of them.
+    await page.getByRole('button', { name: 'All' }).click()
+    const replied = page.locator('.adm-table tbody tr', { hasText: MARK.enquirySubject })
+    await expect(replied).toContainText(/Reply emailed|Answered from your inbox|Reply not sent/)
+    await expect(replied).not.toContainText('They wrote again')
+  })
+
+  test('the customer reads the answer on their own page and writes back', async ({ page }) => {
+    const token = await adminToken()
+    const { body: queries } = await json('/api/admin/queries', {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    const enquiry = (queries ?? []).find((query) => String(query.subject).includes(RUN))
+    expect(enquiry, `no enquiry matching ${MARK.enquirySubject}`).toBeTruthy()
+    // Staff get the customer's link so it can be pasted into a reply written by hand.
+    expect(enquiry.enquiryUrl, 'the API should hand staff the customer link').toContain('/enquiry/')
+
+    // A different browser, nobody signed in: the token in the link is the whole credential.
+    const visitor = await anotherVisitor(page)
+    await visitor.goto(enquiry.enquiryUrl)
+    await expect(visitor.locator('h1')).toContainText(MARK.enquirySubject)
+    await expect(visitor.locator('.enquiry__meta')).toContainText(`#${enquiry.queryId}`)
+    await expect(visitor.locator('.thread__item--agency')).toContainText('we will send an outline today')
+    // Whether the agency's mail or a person sent it is the agency's business, not the customer's.
+    await expect(visitor.locator('.thread__item--agency')).not.toContainText('emailed')
+
+    await visitor.getByLabel('Your message').fill('Three of us now - does that change the price?')
+    await visitor.getByRole('button', { name: 'Send message' }).click()
+
+    await expect(visitor.locator('.form-note--sent')).toContainText(/with us/i)
+    await expect(visitor.locator('.thread__item--customer')).toContainText('Three of us now')
+    await expect(visitor.locator('.enquiry__head .pill')).toHaveText('Waiting for a reply')
+    await visitor.close()
+
+    // Writing again puts it back in front of staff, flagged, so the waiting list stays worth reading.
+    await asAdmin(page)
+    await page.goto('/admin/queries')
+    const back = page.locator('.adm-table tbody tr', { hasText: MARK.enquirySubject })
+    await expect(back, 'the follow-up should be waiting for a reply').toBeVisible()
+    await expect(back).toContainText('They wrote again')
   })
 
   test('adds, edits and deactivates a package', async ({ page }) => {
@@ -446,6 +533,9 @@ test.describe('a member of staff', () => {
 
     const visitor = await anotherVisitor(page)
     await visitor.goto('/journal')
+    // The journal opens on the map, so the list of every story is behind this button. This is also
+    // the assertion that a post an editor publishes actually reaches the public site.
+    await visitor.getByRole('button', { name: /^Read all/ }).click()
     await expect(visitor.locator('.journal-card, .feature-post').filter({ hasText: MARK.postTitle }).first()).toBeVisible()
     await visitor.close()
 
@@ -487,7 +577,14 @@ test.describe('a member of staff', () => {
 
     const visitor = await anotherVisitor(page)
     await visitor.goto('/gallery')
-    await expect(visitor.locator('.mosaic__tile').first()).toBeVisible()
+    // the gallery is an even grid now: the item just added is one of the tiles, and clicking it opens
+    // the viewer on that photograph
+    const added = visitor.locator('.gallery-tile', { hasText: `E2E ${RUN} gallery` }).first()
+    await expect(added).toBeVisible()
+    await added.locator('.gallery-tile__open').click()
+    await expect(visitor.locator('.lightbox__caption')).toContainText(`E2E ${RUN} gallery`)
+    await visitor.keyboard.press('Escape')
+    await expect(visitor.locator('.lightbox')).toBeHidden()
     await visitor.close()
 
     // put the gallery item and the file back
@@ -509,7 +606,21 @@ test.describe('a member of staff', () => {
     await page.goto('/admin/content')
     await page.getByRole('button', { name: 'Contact page' }).click()
 
-    const office = page.getByLabel('Value').nth(1)
+    // By label, never by position: the cards are a list an editor adds to and reorders, and this
+    // test used to read "the second Value field", which broke the moment WhatsApp was added. The
+    // wait matters - the page fetches the content, so the list is empty for a moment after the tab.
+    const cards = page.locator('.adm-repeat')
+    await expect(cards.first()).toBeVisible()
+
+    const cardValue = async (label) => {
+      for (let index = 0; index < (await cards.count()); index += 1) {
+        const card = cards.nth(index)
+        if ((await card.getByLabel('Label').inputValue()) === label) return card.getByLabel('Value')
+      }
+      throw new Error(`no contact card labelled "${label}"`)
+    }
+
+    const office = await cardValue('Office')
     const original = await office.inputValue()
     expect(original, 'the office card should hold the agency address').toContain('Kurunagala')
 

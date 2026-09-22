@@ -2,8 +2,12 @@
  * Thin wrapper around the Spring Boot API.
  * Set VITE_API_BASE_URL to point at another environment; the default matches the backend's
  * default port, which already whitelists http://localhost:5173 in its CORS configuration.
+ *
+ * The production image builds with VITE_API_BASE_URL=/ (or "") so every request is same-origin and
+ * nginx forwards /api and /media to the backend - no CORS, and the backend's address can change
+ * without rebuilding this bundle. A trailing slash is dropped so paths do not end up doubled.
  */
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080'
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080').replace(/\/+$/, '')
 
 export async function request(path, { timeoutMs = 6000, ...options } = {}) {
   const controller = new AbortController()
@@ -66,6 +70,20 @@ export const api = {
   // public actions
   submitQuery: (payload) => request('/api/contact', { method: 'POST', body: JSON.stringify(payload) }),
   trackBooking: (pin) => request(`/api/bookings/track?pin=${encodeURIComponent(pin)}`),
+
+  /**
+   * The customer's own enquiry, opened by the token from their acknowledgement email.
+   *
+   * No account and no token header: the token in the URL *is* the credential, which is the same trade
+   * the booking PIN makes. Reading is not rate limited, writing is (see the backend's
+   * app.rate-limit.paths), so refreshing this page never answers "too many requests".
+   */
+  getEnquiry: (token) => request(`/api/enquiries/${encodeURIComponent(token)}`),
+  sendEnquiryMessage: (token, message) =>
+    request(`/api/enquiries/${encodeURIComponent(token)}/messages`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    }),
 
   // editable page content (public read; the admin console writes it)
   getPageContent: (section) => request(`/api/content/${section}`),

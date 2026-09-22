@@ -19,7 +19,7 @@
 
 .EXAMPLE
     powershell -ExecutionPolicy Bypass -File scripts/optimize-images.ps1 `
-        -Source "public/images/Sri lanka" -Destination ".image-work"
+        -Source "images-originals/Sri lanka" -Destination ".image-work"
 #>
 [CmdletBinding()]
 param(

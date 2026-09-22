@@ -6,7 +6,7 @@ import { MAP_SOURCE, MAP_VIEW_BOX, PROVINCES } from '../../data/provinces'
 import { PROVINCE_COPY } from '../../data/provinceCopy'
 import { journeysInProvince } from '../../data/provincePlaces'
 import { useApi } from '../../hooks/useApi'
-import { formatDays, formatPrice } from '../../utils/format'
+import { formatDays } from '../../utils/format'
 import { ArrowRight, Lock, MapPin } from '../ui/Icons'
 import Reveal from '../ui/Reveal'
 
@@ -31,7 +31,7 @@ const LISTED = 3
  * Without the hold, a province in the middle of the map was almost impossible to read: every route
  * to the panel passes over its neighbours.
  */
-export default function ProvinceMap() {
+export default function ProvinceMap({ posts = [], onProvince }) {
   const { data: packages } = useApi(() => api.getPackages(), fallbackPackages)
 
   const [hoveredId, setHoveredId] = useState(null)
@@ -41,10 +41,19 @@ export default function ProvinceMap() {
   const active = PROVINCES.find((province) => province.id === activeId) ?? PROVINCES[0]
   const journeys = journeysInProvince(packages, active.id)
 
-  /** A click holds the province; a second click on the same one lets go. */
+  /**
+   * A click holds the province; a second click on the same one lets go.
+   *
+   * Holding is also the selection the page acts on: `onProvince` is told which province was chosen
+   * (or null when it is released), so the page can show that province's journal cards. Hovering stays
+   * private to the map - a panel that followed the pointer everywhere would make the cards below it
+   * flicker through nine provinces on the way to the one being aimed at.
+   */
   const toggleHold = (provinceId) => {
-    setHeldId((current) => (current === provinceId ? null : provinceId))
+    const lettingGo = heldId === provinceId
+    setHeldId(lettingGo ? null : provinceId)
     setHoveredId(provinceId)
+    onProvince?.(lettingGo ? null : provinceId)
   }
 
   return (
@@ -54,9 +63,9 @@ export default function ProvinceMap() {
           <span className="eyebrow">The island</span>
           <h2>Nine provinces, one island</h2>
           <p className="lede">
-            Every journey we run crosses at least three of them. Point at the map to see what each
-            province is known for, and which journeys go through it - click one to hold it there
-            while you read.
+            Every story above happened somewhere on this map, and every journey we run crosses at
+            least three of the provinces. Point at one to see what it is known for and which journeys
+            go through it - click it to hold it there while you read.
           </p>
         </Reveal>
 
@@ -93,7 +102,9 @@ export default function ProvinceMap() {
                     }
                   }}
                 >
-                  <title>{province.name} Province</title>
+                  {/* One string, not text plus a value: React refuses to render an array of children
+                      into a <title>, and warns about it on every server render. */}
+                  <title>{`${province.name} Province`}</title>
                 </path>
               ))}
             </svg>
@@ -142,7 +153,6 @@ export default function ProvinceMap() {
                 {journeys.length > 0 ? (
                   <ul className="island__journey-list">
                     {journeys.slice(0, LISTED).map(({ pkg, days }) => {
-                      const price = formatPrice(pkg.price)
                       const length = formatDays(pkg.durationDays)
                       return (
                         <li key={pkg.packageId}>
@@ -151,10 +161,10 @@ export default function ProvinceMap() {
                             <span className="island__journey-meta">
                               {[
                                 days > 0 && length ? `${days} of ${length} here` : length,
-                                price ? `from ${price}` : 'price on request',
+                                pkg.destination,
                               ]
                                 .filter(Boolean)
-                                .join(' · ')}
+                                .join(' Â· ')}
                             </span>
                             <ArrowRight width={14} height={14} />
                           </Link>
@@ -164,7 +174,7 @@ export default function ProvinceMap() {
                   </ul>
                 ) : (
                   <p className="island__journey-empty">
-                    We still build trips here — tell us your dates and we will draft one.
+                    We still build trips here â€” tell us your dates and we will draft one.
                   </p>
                 )}
 
@@ -175,6 +185,7 @@ export default function ProvinceMap() {
                   </Link>
                 )}
               </div>
+
             </div>
 
             <ul className="island__list">
