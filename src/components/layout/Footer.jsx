@@ -139,9 +139,16 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="container footer__bottom">
+        <div className="container footer__bottom">
         <span>© {new Date().getFullYear()} PrathibhaLanka Voyages. All rights reserved.</span>
         <div className="footer__bottom-meta">
+          <span className="footer__credit">
+            Developed by: Methmina &amp; #Taniya{' @ '}
+            {/* TODO: point this at the TeamNexor page once it exists. */}
+            <a className="footer__credit-link" href="">
+              #TeamNexor
+            </a>
+          </span>
           <Link className="footer__admin" to="/admin">
             Admin sign in
           </Link>

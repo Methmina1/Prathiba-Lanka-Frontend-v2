@@ -73,6 +73,10 @@ export default function Login() {
               />
             </div>
 
+            <p className="auth-card__forgot">
+              <Link to="/forgot-password">Forgot your password?</Link>
+            </p>
+
             <button className="btn btn--cta btn--sweep btn--block" type="submit" disabled={state.status === 'sending'}>
               {state.status === 'sending' ? 'Signing in…' : 'Sign in'}
             </button>

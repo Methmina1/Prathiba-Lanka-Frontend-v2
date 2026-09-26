@@ -8,6 +8,14 @@ const auth = (token) => ({ Authorization: `Bearer ${token}` })
 const json = (token, body) => ({ headers: auth(token), body: JSON.stringify(body) })
 
 export const adminApi = {
+  //changing password
+  changePassword: (token, body) => 
+    request('/api/admin/me/password',
+      {
+        method: 'POST',
+        ...json(token, body)
+      }
+    ),
   // ---- packages -----------------------------------------------------------
   listPackages: (token) => request('/api/admin/packages', { headers: auth(token) }),
   createPackage: (token, body) => request('/api/admin/packages', { method: 'POST', ...json(token, body) }),

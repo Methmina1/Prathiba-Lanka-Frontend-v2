@@ -75,6 +75,17 @@ const GROUPS = [
       },
     ],
   },
+  {
+    label: 'Account',
+    items: [
+      {
+        to: '/admin/settings',
+        label: 'Change password',
+        title: 'Change password',
+        description: 'Update the password used to sign in to this console.',
+      },
+    ],
+  },
 ]
 
 const NAV = GROUPS.flatMap((group) => group.items)

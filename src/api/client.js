@@ -91,6 +91,13 @@ export const api = {
   // customer actions (need a bearer token)
   login: (email, password) =>
     request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+  forgotPassword: (email) => 
+    request('/api/auth/password/forgot', {method: 'POST', body: JSON.stringify({email})}),
+  resetPassword: ({email, code, newPassword}) =>
+    request('/api/auth/password/reset', {
+      method: 'POST',
+      body: JSON.stringify({email, code, newPassword}),
+    }),
   register: (payload) => request('/api/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
   getMyBookings: (token) =>
     request('/api/customer/bookings', { headers: { Authorization: `Bearer ${token}` } }),

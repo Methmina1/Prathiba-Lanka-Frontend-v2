@@ -20,6 +20,7 @@ import PlanPage from './pages/PlanPage'
 import EnquiryPage from './pages/EnquiryPage'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import ForgotPassword from './pages/ForgotPassword'
 import Account from './pages/Account'
 import NotFound from './pages/NotFound'
 import AdminOverview from './pages/admin/Overview'
@@ -31,6 +32,7 @@ import AdminGallery from './pages/admin/Gallery'
 import AdminMedia from './pages/admin/Media'
 import AdminContent from './pages/admin/Content'
 import AdminReviews from './pages/admin/Reviews'
+import AdminSettings from './pages/admin/Settings'
 
 /** The public site: brand intro, marketing header and footer. */
 function SiteLayout() {
@@ -67,6 +69,7 @@ export default function App({ initialSession = null }) {
           <Route path="/enquiry/:token" element={<EnquiryPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword/>}/>
           <Route path="/account" element={<Account />} />
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -82,6 +85,7 @@ export default function App({ initialSession = null }) {
           <Route path="media" element={<AdminMedia />} />
           <Route path="content" element={<AdminContent />} />
           <Route path="reviews" element={<AdminReviews />} />
+          <Route path="settings" element={<AdminSettings/>}></Route>
         </Route>
       </Routes>
     </AuthProvider>
