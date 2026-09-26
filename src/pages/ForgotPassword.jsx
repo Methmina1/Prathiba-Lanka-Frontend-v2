@@ -23,8 +23,9 @@ export default function ForgotPassword() {
     event.preventDefault()
     setRequestState({ status: 'sending', message: '' })
     try {
-      // The backend answers identically whether or not this address has an admin account behind it -
-      // that is the point, and the message it sends back is the one worth showing.
+      // The backend checks the address against the admin table and answers 401 when there is no
+      // account behind it. That is the one case worth naming - anything else is a failure of the
+      // send itself, and the backend's sentence is the one to show.
       const response = await api.forgotPassword(email)
       setRequestState({
         status: 'sent',
@@ -36,7 +37,11 @@ export default function ForgotPassword() {
     } catch (error) {
       setRequestState({
         status: 'error',
-        message: error.payload?.message ?? `Could not send the code${error.status ? ` (${error.status})` : ''}.`,        
+        message:
+          error.status === 401
+            ? 'That address is not an admin account. Check it, or ask another admin to reset it for you.'
+            : error.payload?.message ??
+              `Could not send the code${error.status ? ` (${error.status})` : ''}.`,
       })
     }
   }
@@ -165,6 +170,7 @@ export default function ForgotPassword() {
                   onClick={() => {
                     setStep('request')
                     setResetState({ status: 'idle', message: '' })
+                    setRequestState({ status: 'idle', message: '' })
                   }}
                 >
                   Send it again

@@ -13,18 +13,33 @@ export async function request(path, { timeoutMs = 6000, ...options } = {}) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
   try {
-    // FormData must set its own Content-Type, otherwise the multipart boundary is lost.
+    // FormData must set its own Content-Type, otherwise the multipart boundary is lost. A GET has
+    // no body for a Content-Type to describe, and setting it anyway turns a simple request into
+    // one that needs a preflight - so it is only sent when there is something to send.
     const isUpload = typeof FormData !== 'undefined' && options.body instanceof FormData
+    const hasBody = options.body != null
+
+    const headers = isUpload
+      ? { ...(options.headers ?? {}) }
+      : { ...(hasBody ? { 'Content-Type': 'application/json' } : {}), ...(options.headers ?? {}) }
+
     const response = await fetch(`${BASE_URL}${path}`, {
       ...options,
       signal: controller.signal,
-      headers: isUpload
-        ? { ...(options.headers ?? {}) }
-        : { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
+      headers,
     })
 
     const text = await response.text()
-    const payload = text ? JSON.parse(text) : null
+    // A proxy or load balancer answering with an HTML error page is not JSON, and a bare
+    // SyntaxError from here would reach the caller with no status and no payload.
+    let payload = null
+    if (text) {
+      try {
+        payload = JSON.parse(text)
+      } catch {
+        payload = { message: text.slice(0, 200) }
+      }
+    }
 
     if (!response.ok) {
       const error = new Error(payload?.message ?? `Request failed with status ${response.status}`)
@@ -91,13 +106,22 @@ export const api = {
   // customer actions (need a bearer token)
   login: (email, password) =>
     request('/api/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
-  forgotPassword: (email) => 
-    request('/api/auth/password/forgot', {method: 'POST', body: JSON.stringify({email})}),
-  resetPassword: ({email, code, newPassword}) =>
+
+  /**
+   * Admin only. Answers 401 when the address has no admin account behind it, so the caller can say
+   * so rather than leaving them waiting for a mail that was never sent - see the backend's
+   * AuthController for what that trade costs and why it is only tolerable while the path is rate
+   * limited. The leading slash matters: BASE_URL has its trailing slash stripped.
+   */
+  forgotPassword: (email) =>
+    request('/api/auth/password/forgot', { method: 'POST', body: JSON.stringify({ email }) }),
+
+  resetPassword: ({ email, code, newPassword }) =>
     request('/api/auth/password/reset', {
       method: 'POST',
-      body: JSON.stringify({email, code, newPassword}),
+      body: JSON.stringify({ email, code, newPassword }),
     }),
+
   register: (payload) => request('/api/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
   getMyBookings: (token) =>
     request('/api/customer/bookings', { headers: { Authorization: `Bearer ${token}` } }),
