@@ -6,8 +6,9 @@
   "description": "React frontend for the PrathibhaLanka travel agency",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/generate-route-html.mjs",
     "preview": "vite preview",
+    "sitemap": "node scripts/build-sitemap.mjs",
     "check:render": "vite build --ssr scripts/render-check.jsx --outDir .render-check --logLevel warn && node .render-check/render-check.js",
     "test:e2e": "playwright test --project=chromium",
     "test:roles": "node scripts/live-roles.mjs",

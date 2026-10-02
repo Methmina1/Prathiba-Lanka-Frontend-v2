@@ -7,3 +7,10 @@ Disallow: /admin
 Disallow: /account
 Disallow: /login
 Disallow: /register
+Disallow: /forgot-password
+Disallow: /enquiry/
+
+# The journey and journal pages are reachable by crawling, but a sitemap is how a new site gets them
+# found quickly rather than eventually. Regenerate it with scripts/build-sitemap.mjs after adding
+# journeys or posts.
+Sitemap: https://www.prathibalanka.com/sitemap.xml

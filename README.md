@@ -574,8 +574,68 @@ The rest of the config is the set of decisions that make the built site behave: 
 headers; `client_max_body_size 70m`, which has to stay at or above the backend's multipart limit or
 an upload is rejected with a 413; a one-year immutable cache for Vite's hashed `/assets/*`;
 `no-store` for `index.html`, so a deploy cannot leave a browser requesting the previous build's
-assets; a 30-day cache for `/media/*`, whose filenames are per-upload UUIDs; and the SPA fallback,
-so `/journeys` and `/admin/...` reach the app instead of 404ing.
+assets; a 30-day cache for `/media/*`, whose filenames are per-upload UUIDs; and the routing table described under
+[SEO](#seo) below, which serves a real file per public page and answers a mistyped path with a real
+404 rather than the app wearing a 200.
+
+## SEO
+
+Search engines read one `<title>`, one meta description and one canonical URL per page. The site sets
+them twice, on purpose, because two different audiences need them:
+
+| Layer | Where | Covers |
+|---|---|---|
+| Static, in the HTML | `scripts/generate-route-html.mjs`, run by `npm run build` | everything that does not run JavaScript: WhatsApp, Facebook, LinkedIn, Slack, Bing's preview fetcher |
+| Runtime | `src/seo/RouteSeo.jsx` and `useSeo.js` | navigation inside the app, and the dynamic routes a build cannot enumerate |
+
+Both read the same map, `src/seo/seo.js`, so a page cannot be described one way on disk and another in
+the browser. `src/data/seoKeywords.js` holds the keyword taxonomy the titles and copy are drawn from.
+
+**What the build writes.** `vite build` is followed by `node scripts/generate-route-html.mjs`, which
+copies `dist/index.html` once per public route and rewrites the head: `dist/about.html`, `dist/plan.html`
+and so on, plus `404.html` and `spa.html`. Files rather than directories, because nginx redirects
+`/about` to `/about/` for a directory and the canonical tag says `/about`.
+
+`spa.html` is the shell served for the routes no build can enumerate — `/journeys/:id`,
+`/journal/:id`, `/admin/**`. Its canonical and `og:url` are deliberately *removed* rather than left
+pointing at the homepage: telling a crawler that a journey page is the homepage is worse than saying
+nothing, and the app sets both correctly once it loads.
+
+**The canonical host is `https://www.prathibalanka.com`.** It is set in `vite.config.js` (`SITE_URL`,
+also substituted into `index.html` and handed to the bundle as `__SITE_URL__`). Change it in one place
+and rebuild. Whichever host is chosen, the other must redirect to it: a canonical naming a host that
+does not resolve is worse than no canonical at all.
+
+**Routing, as nginx now treats it:**
+
+| Request | Answer |
+|---|---|
+| `/about` | `dist/about.html`, with its own head tags |
+| `/about/` | 301 to `/about` |
+| `/journeys/7`, `/journal/12` | `spa.html`; the app fills it in |
+| `/admin/anything` | `spa.html` |
+| anything else | **404**, served from `dist/404.html` |
+
+The last row is the point of the table: answering a mistyped URL with the app and a 200 is a "soft
+404", and a site full of them is read as thin. `robots.txt` still disallows the private paths.
+
+**The homepage H1 is fixed** (`Hero.jsx`, `HERO_HEADING`). It used to be the rotating carousel caption,
+which meant the most important heading on the site said something different every seven seconds and
+never named the business. The rotation is still there, as `.hero__slogan`.
+
+**Sitemap.** `public/sitemap.xml` carries the static pages. The journeys and posts are added by
+
+```bash
+npm run sitemap -- --site https://www.prathibalanka.com
+```
+
+which reads the live catalogue and rewrites the file. Run it after adding journeys or posts, then
+rebuild and redeploy — it is a static asset, so it only ships with the image that contains it.
+
+**Known gap:** a journey link shared in WhatsApp still previews as the brand card rather than that
+journey's photograph, because the preview fetcher never runs JavaScript and no build can know the ids.
+Closing it needs the meta tags for a dynamic route to come from something that can read the database:
+a small endpoint plus a user-agent rule in nginx, or a prerender step with API access at build time.
 
 ## Continuous integration
 

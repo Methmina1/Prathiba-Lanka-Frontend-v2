@@ -7,6 +7,7 @@ import ScrollToTop from './components/ScrollToTop'
 import ScrollProgress from './components/ui/ScrollProgress'
 import AdminLayout from './components/admin/AdminLayout'
 import { AuthProvider } from './auth/AuthContext'
+import RouteSeo from './seo/RouteSeo'
 import Home from './pages/Home'
 import Journeys from './pages/Journeys'
 import JourneyDetail from './pages/JourneyDetail'
@@ -53,6 +54,8 @@ function SiteLayout() {
 export default function App({ initialSession = null }) {
   return (
     <AuthProvider initialSession={initialSession}>
+      {/* Per-page title, description and canonical for the routes that hold no data of their own. */}
+      <RouteSeo />
       <Routes>
         <Route element={<SiteLayout />}>
           <Route path="/" element={<Home />} />

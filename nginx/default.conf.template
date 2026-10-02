@@ -114,9 +114,46 @@ server {
     }
 
     # --- everything else -----------------------------------------------------------------------
-    # Client-side routing: /journeys, /admin/... and the rest exist only in the browser, so an
-    # unknown path is the app, not a missing file.
+    # "/about/" and "/about" are one page, not two. Redirecting rather than serving both keeps a
+    # duplicate URL out of the index, and it is what makes the canonical tag (which names the version
+    # without the slash) point at something that answers 200. Listed page by page on purpose: a
+    # blanket rule would also rewrite /api/... and turn a POST into a GET on the way.
+    rewrite ^/(about|contact|journeys|journal|gallery|reviews|plan|login|register|forgot-password|account)/$ /$1 permanent;
+
+    # A real file wins. Every public page has one - scripts/generate-route-html.mjs writes it during
+    # the build - so /about is served from disk with its own title, canonical and social card, rather
+    # than as the app shell still carrying the homepage's tags.
+    #
+    # $uri.html is in the list because those files are /about.html and not /about/index.html: serving
+    # a directory would make nginx redirect /about to /about/, and a canonical URL that redirects is
+    # a canonical pointing at an address search engines decline to index.
     location / {
-        try_files $uri $uri/ /index.html;
+        try_files $uri $uri.html $uri/ @spa;
+    }
+
+    # Routes that exist only in the browser. A journey or post id lives in the database, not in the
+    # repository, so no build can enumerate them; the console has no business being crawled but still
+    # has to open. Both get spa.html - the shell without the homepage's canonical in it - and the app
+    # sets the right title and canonical as soon as it loads.
+    location ~ ^/(journeys|journal|enquiry)/[^/]+/?$ {
+        try_files /spa.html =404;
+    }
+
+    location ~ ^/admin(/|$) {
+        try_files /spa.html =404;
+    }
+
+    # Anything else is not a page. Answering a mistyped URL with the app and a 200 is a "soft 404":
+    # the crawler is told a page exists when it does not, and a site full of them reads as thin.
+    location @spa {
+        return 404;
+    }
+
+    error_page 404 /404.html;
+
+    location = /404.html {
+        internal;
+        add_header Cache-Control "no-store";
+        include /etc/nginx/security-headers.conf;
     }
 }

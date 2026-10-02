@@ -11,7 +11,10 @@ test('home renders the hero carousel with its own photographs', async ({ page })
 
   const hero = page.locator('.hero')
   await expect(hero).toBeVisible()
-  await expect(hero.locator('h1')).toHaveText('Turquoise water, warm the whole year')
+  // The h1 is fixed: a heading that changes every seven seconds says nothing a search engine can
+  // use. The rotating statement keeps the display treatment and is asserted separately.
+  await expect(hero.locator('h1')).toHaveText('Private Sri Lanka tours, tailor-made by local specialists')
+  await expect(hero.locator('.hero__slogan')).toHaveText('Turquoise water, warm the whole year')
   await expect(hero.locator('.eyebrow')).toHaveText('The coast')
 
   // all four slides are in the DOM, one visible at a time
@@ -79,14 +82,17 @@ test('the hero carousel advances and the dots switch slides', async ({ page }) =
   const hero = page.locator('.hero')
 
   await hero.locator('.hero__dot').nth(1).click()
-  await expect(hero.locator('h1')).toHaveText('Leopards, herds and real wilderness')
+  await expect(hero.locator('.hero__slogan')).toHaveText('Leopards, herds and real wilderness')
   await expect(hero.locator('.hero__slide').nth(1)).toHaveClass(/is-active/)
 
   await hero.locator('.hero__dot').nth(2).click()
-  await expect(hero.locator('h1')).toHaveText('Two thousand years, still standing')
+  await expect(hero.locator('.hero__slogan')).toHaveText('Two thousand years, still standing')
 
   await hero.locator('.hero__dot').nth(3).click()
-  await expect(hero.locator('h1')).toHaveText('Evenings that end in gold')
+  await expect(hero.locator('.hero__slogan')).toHaveText('Evenings that end in gold')
+
+  // Whatever the carousel is showing, the heading itself never moves.
+  await expect(hero.locator('h1')).toHaveText('Private Sri Lanka tours, tailor-made by local specialists')
 })
 
 test('the header offers no sign-in link, and the footer carries the staff link', async ({ page }) => {
@@ -165,7 +171,10 @@ test('journeys, journal and gallery render their covers from the API', async ({ 
 test('a journey detail page opens from a card', async ({ page }) => {
   await page.goto('/journeys')
   await page.locator('.package-card h3 a').first().click()
-  await expect(page.locator('h1')).toHaveText('Classical Heritage')
+  // The heading carries the length and the theme, because that is what people search for; the
+  // journey's own name stays on the page in the breadcrumb.
+  await expect(page.locator('h1')).toHaveText('8-Day Cultural Triangle Tour of Sri Lanka')
+  await expect(page.locator('.breadcrumb')).toContainText('Classical Heritage')
   await expect(page.locator('.detail__main')).toContainText('About this journey')
 
   // The itinerary is one line per day and every day is a dropdown: three lines, three days.
@@ -346,7 +355,7 @@ test('the journal page draws Sri Lanka out of its nine provinces', async ({ page
   // …and it is a way into the catalogue, not decoration.
   await journey.click()
   await expect(page).toHaveURL(/\/journeys\/41$/)
-  await expect(page.locator('h1')).toHaveText('Classical Heritage')
+  await expect(page.locator('h1')).toHaveText('8-Day Cultural Triangle Tour of Sri Lanka')
 
   expect(errors, `uncaught errors: ${errors.join(' | ')}`).toEqual([])
 })
