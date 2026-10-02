@@ -9,6 +9,8 @@ import CoverImage from '../components/ui/CoverImage'
 import PHOTOS from '../data/photos'
 import { ArrowRight } from '../components/ui/Icons'
 import { formatDate, toParagraphs } from '../utils/format'
+import { useSeo } from '../seo/useSeo'
+import { articleJsonLd, articleSeo, breadcrumbJsonLd, seoGraph } from '../seo/seo'
 
 const SCENERY = ['coast', 'temple', 'tea', 'safari', 'train', 'hills']
 
@@ -24,6 +26,19 @@ export default function JournalDetail() {
   const others = fallbackJournal
     .filter((entry) => String(entry.journalId) !== String(id))
     .slice(0, 3)
+
+  // This article's head tags and structured data, before the early return below - hooks cannot be
+  // conditional, and a search result should carry the article's own title either way.
+  useSeo({
+    ...(post ? articleSeo(post) : {}),
+    jsonLd: seoGraph(
+      articleJsonLd(post),
+      breadcrumbJsonLd([
+        { label: 'Journal', to: '/journal' },
+        ...(post ? [{ label: post.title }] : []),
+      ]),
+    ),
+  })
 
   if (!post) {
     return (

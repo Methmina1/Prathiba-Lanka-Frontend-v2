@@ -5,8 +5,7 @@ import PHOTOS from '../../data/photos'
 import { useAuth } from '../../auth/AuthContext'
 
 /** Slide order matches the photographs in src/data/photos.js: coast, wildlife, culture, sunsets. */
-const SLIDES = [
-  {
+const SLIDES = [  {
     eyebrow: 'The coast',
     title: 'Turquoise water, warm the whole year',
     text: 'Shallow reef bays, fishing boats at first light, and sand that stays quiet even in season.',
@@ -31,6 +30,16 @@ const SLIDES = [
     cta: { label: 'See every journey', to: '/journeys' },
   },
 ].map((slide, index) => ({ ...slide, image: PHOTOS.hero[index] }))
+
+/**
+ * The homepage's H1, and the only heading on it that never changes.
+ *
+ * The rotating line used to be the h1, which meant the single most important heading on the site
+ * said something different every seven seconds and never said what the business actually does. A
+ * heading has to be one stable statement: this is the phrase the homepage is trying to rank for, and
+ * the rotation below it is now decoration that happens to be heading-shaped.
+ */
+const HERO_HEADING = 'Private Sri Lanka tours, tailor-made by local specialists'
 
 export default function Hero() {
   const [index, setIndex] = useState(0)
@@ -64,8 +73,10 @@ export default function Hero() {
 
       <div className="container hero__inner">
         <div className="hero__copy" key={slide.title}>
+          <h1 className="hero__heading">{HERO_HEADING}</h1>
           <span className="eyebrow eyebrow--onDark">{slide.eyebrow}</span>
-          <h1>{slide.title}</h1>
+          {/* Keeps the display treatment the h1 used to have - the hero is meant to move. */}
+          <p className="hero__slogan">{slide.title}</p>
           <p className="hero__text">{slide.text}</p>
           <div className="hero__actions">
             <Link className="btn btn--cta btn--sweep" to={slide.cta.to}>

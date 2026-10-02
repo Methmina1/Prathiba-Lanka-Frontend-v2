@@ -6,6 +6,8 @@ import { CONTACT_FALLBACK, whatsappFrom } from '../data/social'
 import { useAuth } from '../auth/AuthContext'
 import { usePageContent } from '../hooks/usePageContent'
 import { useResource } from '../hooks/useResource'
+import { useSeo } from '../seo/useSeo'
+import { journeyHeading, journeyJsonLd, journeySeo, breadcrumbJsonLd, seoGraph } from '../seo/seo'
 import PageHero from '../components/layout/PageHero'
 import Reveal from '../components/ui/Reveal'
 import Scenery from '../components/ui/Scenery'
@@ -58,6 +60,20 @@ export default function JourneyDetail() {
   const gallery = useRelatedList(status === 'ready', () => api.getGalleryByPackage(id), id)
   const reviews = useRelatedList(status === 'ready', () => api.getReviewsByPackage(id), id)
 
+  // This journey's own head tags, and its structured data. Called before the early return below,
+  // because a hook cannot be conditional - and the search engine needs a title for the page even
+  // while the page itself is still deciding what to show.
+  useSeo({
+    ...(pkg ? journeySeo(pkg) : {}),
+    jsonLd: seoGraph(
+      journeyJsonLd(pkg),
+      breadcrumbJsonLd([
+        { label: 'Journeys', to: '/journeys' },
+        ...(pkg ? [{ label: pkg.title }] : []),
+      ]),
+    ),
+  })
+
   // The quote card shows whichever contact detail the agency actually publishes.
   const { mayBook, session } = useAuth()
   const { content: contact } = usePageContent('contact')
@@ -96,12 +112,16 @@ export default function JourneyDetail() {
     <main className="page-enter">
       <PageHero
         eyebrow={pkg.destination ?? 'Journey'}
-        title={pkg.title}
+        // The heading carries the length and the theme, because that is what is searched for
+        // ("5-Day Cultural Triangle Tour of Sri Lanka"). The journey's own name stays on the page in
+        // the breadcrumb and in the title tag, which is what the agency's keyword doc recommends.
+        title={journeyHeading(pkg)}
         // The lede is the opening line; the whole description - hotels, accommodation tier and
         // inclusions included - follows under "About this journey".
         lede={firstSentence(pkg.description)}
         crumbs={[{ label: 'Journeys', to: '/journeys' }, { label: pkg.title }]}
         image={pkg.imageUrl ? api.mediaUrl(pkg.imageUrl) : undefined}
+        alt={pkg.title}
         scenery={scenery}
       />
 

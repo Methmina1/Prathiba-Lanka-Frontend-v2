@@ -14,7 +14,7 @@ import react from '@vitejs/plugin-react'
  * It has a default so a local build is never broken by a missing variable, and a trailing slash is
  * dropped so `%SITE_URL%/journeys` cannot come out as `//journeys`.
  */
-const SITE_URL = (process.env.SITE_URL ?? 'https://prathibalanka.com').replace(/\/+$/, '')
+const SITE_URL = (process.env.SITE_URL ?? 'https://www.prathibalanka.com').replace(/\/+$/, '')
 
 /** Replaces %SITE_URL% in index.html, and warns rather than shipping a literal placeholder. */
 function siteUrlPlugin() {
@@ -38,6 +38,9 @@ function siteUrlPlugin() {
 export default defineConfig({
   // VITE_BASE_PATH is only set by the Pages deployment job (app served from /<repo>/).
   base: process.env.VITE_BASE_PATH ?? '/',
+  // The same value the html uses, handed to the bundle so the canonical, og:url and JSON-LD tags a
+  // page writes at runtime name the deployed domain instead of a hard-coded guess.
+  define: { __SITE_URL__: JSON.stringify(SITE_URL) },
   plugins: [react(), siteUrlPlugin()],
   server: {
     port: 5173,

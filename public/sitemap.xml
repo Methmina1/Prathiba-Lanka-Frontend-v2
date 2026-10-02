@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The pages a crawler should find.
+
+  This file is generated: `node scripts/build-sitemap.mjs --site https://www.prathibalanka.com` fetches
+  the live catalogue and journal and writes it again with one entry per journey and per published
+  post, which are the pages that actually need discovering - nothing links to a 20-day itinerary from
+  anywhere a crawler reaches early.
+
+  The entries below are the static pages, which the script keeps.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://www.prathibalanka.com/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://www.prathibalanka.com/journeys</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.prathibalanka.com/plan</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.prathibalanka.com/journal</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.prathibalanka.com/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.prathibalanka.com/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.prathibalanka.com/gallery</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.prathibalanka.com/reviews</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+</urlset>
